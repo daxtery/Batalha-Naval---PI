@@ -8,11 +8,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -26,7 +22,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.AudioClip;
@@ -441,7 +436,7 @@ public class App extends Application {
         mGSelfBoard = new SelfGraphBoardFX(500, 500);
 
         mGSelfBoard.startTiles(
-                PlayerBoardTransformer.transformForOthers(PlayerBoard.getRandomPlayerBoard())
+                PlayerBoardTransformer.transform(PlayerBoard.getRandomPlayerBoard())
         );
 
         MGCanvasHolder.getChildren().add(mGSelfBoard);
@@ -646,16 +641,16 @@ public class App extends Application {
                     mGSelfBoard.setPlayerBoard(pb);
 
 
-                    String[][] message = PlayerBoardTransformer.transformForOthers(pb);
+                    String[][] message = PlayerBoardTransformer.transform(pb);
 
                     mGSelfBoard.startTiles(message);
                     mGSelfBoard.updateTiles(message);
 
                     APlayerboard p = new APlayerboard();
-                    p.board = PlayerBoardTransformer.transformForOthers(sSboard.pb);
+                    p.board = PlayerBoardTransformer.transform(sSboard.pb);
                     client.sendTCP(p);
                 } else {
-                    String[][] message = PlayerBoardTransformer.transformForOthers(pb);
+                    String[][] message = PlayerBoardTransformer.transform(pb);
                     selfvsAI.startTiles(message);
                     transitionTo(AIScene);
                 }
@@ -767,10 +762,10 @@ public class App extends Application {
         ene2.b = new GraphBoardFX();
 
         PlayerBoard board = PlayerBoard.getRandomPlayerBoard();
-        ene1.b.startTiles(PlayerBoardTransformer.transformForOthers(board));
+        ene1.b.startTiles(PlayerBoardTransformer.transform(board));
 
         board = PlayerBoard.getRandomPlayerBoard();
-        ene2.b.startTiles(PlayerBoardTransformer.transformForOthers(board));
+        ene2.b.startTiles(PlayerBoardTransformer.transform(board));
 
         ene1.b.startAnimating();
         ene2.b.startAnimating();
@@ -990,7 +985,7 @@ public class App extends Application {
         boolean destroyed = pb.lastShipDestroyed();
 
         ai.thinkAboutNext(pb.getAvailable(), hit, destroyed);
-        selfvsAI.updateTiles(PlayerBoardTransformer.transformForOthers(pb));
+        selfvsAI.updateTiles(PlayerBoardTransformer.transform(pb));
         selfvsAI.setLast(p);
         if (hit && !pb.isGameOver()) {
             Task<Void> wait = new Task<>() {
@@ -1042,7 +1037,7 @@ public class App extends Application {
             directionsToGo = new ArrayList<>();
             board = PlayerBoard.getRandomPlayerBoard();
             b = new GraphBoardFX();
-            b.startTiles(PlayerBoardTransformer.transformForOthers(board));
+            b.startTiles(PlayerBoardTransformer.transform(board));
         }
 
         //POINT WITH DIRECTION
@@ -1135,7 +1130,7 @@ public class App extends Application {
 
         public AttackResult attacked(Point p) {
             AttackResult result = board.getAttacked(p.x, p.y);
-            b.updateTiles(PlayerBoardTransformer.transformForOthers(board));
+            b.updateTiles(PlayerBoardTransformer.transform(board));
             return result;
         }
     }

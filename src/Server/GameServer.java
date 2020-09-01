@@ -5,7 +5,6 @@ import Common.Network;
 import Common.Network.*;
 import Common.PlayerBoard;
 import Common.PlayerBoardTransformer;
-import JavaFX.GraphBoardFX;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
@@ -175,7 +174,7 @@ public class GameServer {
 
                 var _board = game.getPlayerBoard(a.toAttackID);
 
-                String[][] attackedOne = PlayerBoardTransformer.transformForOthers(_board);
+                String[][] attackedOne = PlayerBoardTransformer.transform(_board);
 
                 System.out.println(Arrays.deepToString(attackedOne));
 
@@ -285,8 +284,8 @@ public class GameServer {
                     EnemiesBoardsToPaint enemiesBoardsToPaint = new EnemiesBoardsToPaint();
                     //int own = players[i].myID;
 
-                    enemiesBoardsToPaint.board1 = PlayerBoardTransformer.transformForOthers(game.getPlayerBoard((i + 1) % 3));
-                    enemiesBoardsToPaint.board2 = PlayerBoardTransformer.transformForOthers(game.getPlayerBoard((i + 2) % 3));
+                    enemiesBoardsToPaint.board1 = PlayerBoardTransformer.transform(game.getPlayerBoard((i + 1) % 3));
+                    enemiesBoardsToPaint.board2 = PlayerBoardTransformer.transform(game.getPlayerBoard((i + 2) % 3));
 
                     players[i].sendTCP(enemiesBoardsToPaint);
                 }

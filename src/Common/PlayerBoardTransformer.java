@@ -9,7 +9,7 @@ public class PlayerBoardTransformer {
     public static final String WATER_NOT_VISIBLE_STRING = "W";
     public static final String WATER_VISIBLE_STRING = "WV";
 
-    public static String[][] transformForOthers(PlayerBoard playerBoard) {
+    public static String[][] transform(PlayerBoard playerBoard) {
 
         String[][] message = new String[PlayerBoard.LINES][PlayerBoard.COLUMNS];
         BoardTile[][] boardTiles = playerBoard.boardTiles;
