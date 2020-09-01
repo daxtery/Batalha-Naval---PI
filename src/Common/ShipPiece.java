@@ -41,11 +41,4 @@ public class ShipPiece extends BoardTile {
         return "ShipPiece at " + this.point + ", status: " + status() + " dir: " + getShip().dir;
     }
 
-    String toSendString() {
-        if (ship.isDestroyed())
-            return PlayerBoardTransformer.PIECE_ATTACKED_SHIP_DESTROYED_STRING;
-        if (!canAttack())
-            return PlayerBoardTransformer.PIECE_ATTACKED_STRING;
-        return PlayerBoardTransformer.PIECE_NOT_ATTACKED_STRING;
-    }
 }

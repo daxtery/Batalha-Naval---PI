@@ -28,9 +28,6 @@ public class ShipTileFX extends TileFX {
     private int id;
     private int sSize;
 
-
-
-
     ShipTileFX(int _sSize, int _id, int _l, int _c, Direction _dir) {
         super(_l, _c, _dir);
         sSize = _sSize;
@@ -47,41 +44,23 @@ public class ShipTileFX extends TileFX {
                 break;
             case 2:
                 switch (id) {
-                    case 0:
-                        imageToSelf = giveImageBasedOnDirection(ONE_TWO);
-                        break;
-                    case 1:
-                        imageToSelf = giveImageBasedOnDirection(TWO_TWO);
-                        break;
+                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_TWO);
+                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_TWO);
                 }
                 break;
             case 3:
                 switch (id) {
-                    case 0:
-                        imageToSelf = giveImageBasedOnDirection(ONE_THREE);
-                        break;
-                    case 1:
-                        imageToSelf = giveImageBasedOnDirection(TWO_THREE);
-                        break;
-                    case 2:
-                        imageToSelf = giveImageBasedOnDirection(THREE_THREE);
-                        break;
+                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_THREE);
+                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_THREE);
+                    case 2 -> imageToSelf = giveImageBasedOnDirection(THREE_THREE);
                 }
                 break;
             case 4:
                 switch (id) {
-                    case 0:
-                        imageToSelf = giveImageBasedOnDirection(ONE_FOUR);
-                        break;
-                    case 1:
-                        imageToSelf = giveImageBasedOnDirection(TWO_FOUR);
-                        break;
-                    case 2:
-                        imageToSelf = giveImageBasedOnDirection(THREE_FOUR);
-                        break;
-                    case 3:
-                        imageToSelf = giveImageBasedOnDirection(FOUR_FOUR);
-                        break;
+                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_FOUR);
+                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_FOUR);
+                    case 2 -> imageToSelf = giveImageBasedOnDirection(THREE_FOUR);
+                    case 3 -> imageToSelf = giveImageBasedOnDirection(FOUR_FOUR);
                 }
         }
         setImageToDraw(imageToSelf);

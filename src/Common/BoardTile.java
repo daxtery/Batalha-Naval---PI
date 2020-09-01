@@ -7,7 +7,7 @@ import java.io.Serializable;
 public abstract class BoardTile implements Serializable {
 
     public TileType tileType;
-    boolean visible;
+    public boolean visible;
     public Point point;
 
     protected BoardTile(Point point, TileType tileType) {
@@ -24,10 +24,6 @@ public abstract class BoardTile implements Serializable {
         return !visible;
     }
 
-    public Point getPointCoordinates(){
-        return point;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null)
@@ -37,7 +33,5 @@ public abstract class BoardTile implements Serializable {
         BoardTile other = (BoardTile) obj;
         return other.point.equals(this.point);
     }
-
-    abstract String toSendString();
 
 }

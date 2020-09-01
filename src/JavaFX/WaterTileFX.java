@@ -16,10 +16,6 @@ class WaterTileFX extends TileFX {
         forNormalBoard(true);
     }
 
-
-
-
-
     @Override
     void draw(GraphicsContext gc) {
         if(attacked)
@@ -27,9 +23,6 @@ class WaterTileFX extends TileFX {
         else
             super.draw(gc);
     }
-
-
-
 
     @Override
     public String toString() {

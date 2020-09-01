@@ -191,21 +191,17 @@ public class GameServer {
                 attacked.board = attackedOne;
 
 
+                //TO THE GUY THAT ATTACKED
+                //TO THE GUY NOT ATTACKED
+                //TO THE ATTACKED
                 switch (state) {
-                    case playing:
-                        //TO THE GUY THAT ATTACKED
+                    case playing -> {
                         connection.sendTCP(response);
-
-                        //TO THE GUY NOT ATTACKED
-
                         EnemyBoardToPaint eb = new EnemyBoardToPaint();
                         eb.newAttackedBoard = attackedOne;
                         eb.id = a.toAttackID;
                         players[a.otherID].sendTCP(eb);
-
-                        //TO THE ATTACKED
                         players[a.toAttackID].sendTCP(attacked);
-
                         if (!canGoAgain) {
                             currentPlayer = (currentPlayer + 1) % 3;
                             WhoseTurn whoseTurn = new WhoseTurn();
@@ -223,15 +219,10 @@ public class GameServer {
                                 sendToAllExcept(a.toAttackID, playerDied);
                             }
                         }
-
-
-                        break;
-                    case playing2left:
-
+                    }
+                    case playing2left -> {
                         connection.sendTCP(response);
-
                         players[a.toAttackID].sendTCP(attacked);
-
                         if (!canGoAgain) {
                             currentPlayer = a.toAttackID;
                             WhoseTurn whoseTurn = new WhoseTurn();
@@ -247,8 +238,7 @@ public class GameServer {
                                 state = GameState.waitingForPlayers;
                             }
                         }
-
-                        break;
+                    }
                 }
 
 
@@ -280,13 +270,11 @@ public class GameServer {
                     count = 0;
                 }
                 switch (state) {
-                    case waitingForPlayers:
+                    case waitingForPlayers -> {
                         sendConnections();
                         nextID = connection.myID;
-                        break;
-                    case waitingForShips:
-                        handleLeavingWhileShips();
-                        break;
+                    }
+                    case waitingForShips -> handleLeavingWhileShips();
                 }
                 System.out.println("Count : " + count);
                 printConnections();

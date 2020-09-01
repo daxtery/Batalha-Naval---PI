@@ -24,8 +24,8 @@ class EmptyGraphBoardFX extends Canvas {
             long lastNano = System.nanoTime();
             final double perSec = 1;
 
-            int x_max = COLUMNS * TileFX.TILE_SIZE;
-            int y_max = LINES * TileFX.TILE_SIZE;
+            final int x_max = COLUMNS * TileFX.TILE_SIZE;
+            final int y_max = LINES * TileFX.TILE_SIZE;
 
             public void handle(long currentNanoTime)
             {

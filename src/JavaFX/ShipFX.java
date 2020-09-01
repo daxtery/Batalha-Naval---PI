@@ -32,18 +32,10 @@ class ShipFX extends SpriteTileFX {
 
     void selectImage(){
         switch (shipSize) {
-            case 1:
-                setImageToDraw(ONE);
-                break;
-            case 2:
-                setImageToDraw(TWO);
-                break;
-            case 3:
-                setImageToDraw(THREE);
-                break;
-            case 4:
-                setImageToDraw(FOUR);
-                break;
+            case 1 -> setImageToDraw(ONE);
+            case 2 -> setImageToDraw(TWO);
+            case 3 -> setImageToDraw(THREE);
+            case 4 -> setImageToDraw(FOUR);
         }
         setImageToDraw(giveImageBasedOnDirection(getImageToDraw()));
     }

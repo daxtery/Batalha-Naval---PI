@@ -25,9 +25,6 @@ public class PlayerBoardTransformer {
         return message;
     }
 
-    public static void transformForSelf(PlayerBoard playerBoard) {
-    }
-
     private static String getStringToSend(BoardTile boardTile) {
         return switch (boardTile.tileType) {
 

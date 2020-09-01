@@ -18,11 +18,4 @@ public class WaterTile extends BoardTile {
     public WaterTileStatus status() {
         return visible ? WaterTileStatus.Visible : WaterTileStatus.NotVisible;
     }
-
-    @Override
-    String toSendString() {
-        if(canAttack())
-            return PlayerBoardTransformer.WATER_NOT_VISIBLE_STRING;
-        return PlayerBoardTransformer.WATER_VISIBLE_STRING;
-    }
 }

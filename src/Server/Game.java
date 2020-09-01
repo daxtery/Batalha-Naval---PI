@@ -30,9 +30,6 @@ public class Game {
 
     }
 
-
-
-
     boolean gameIsOver() {
         int i = 0;
         for (PlayerBoard pb: playerBoards ){
@@ -52,12 +49,15 @@ public class Game {
 
     @Override
     public String toString() {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for (int i = 0; i < playerBoards.length; i++){
-            s += "Player " + (i + 1) + ": \n";
-            s += playerBoards[i].toString();
+            s.append("Player ")
+                    .append(i + 1)
+                    .append(": \n");
+
+            s.append(playerBoards[i].toString());
         }
-        return s;
+        return s.toString();
     }
 
     void setPlayerBoard(PlayerBoard playerBoard, int i) {

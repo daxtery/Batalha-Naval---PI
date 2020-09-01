@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Ship implements Serializable{
+public class Ship implements Serializable {
 
     private static final Random r = new Random();
     ShipType _shipType;
@@ -17,7 +17,7 @@ public class Ship implements Serializable{
     boolean alreadyCalculated;
     ShipPiece[] pieces;
 
-    public Ship(int x, int y, Direction _dir, ShipType st){
+    public Ship(int x, int y, Direction _dir, ShipType st) {
         _shipType = st;
         setPoint(new util.Point(x, y));
         pieces = new ShipPiece[st.value];
@@ -26,35 +26,20 @@ public class Ship implements Serializable{
     }
 
 
-
-
-
     //region SPECIAL
     Ship() {
     }
     //endregion
 
-    public util.Point getLandC(){
-        return new util.Point(startL, startC);
-    }
-
-    public void oppositeDirection(){
-        dir = dir.getOpposite();
-    }
-
-    public Direction getDirection() {
-        return dir;
-    }
-
-    private static Ship getOneRandomShip(PlayerBoard pb, ShipType size, Direction[] directions){
-        Ship tempShip = new Ship(0,0,Direction.VERTICAL, ShipType.One);
+    private static Ship getOneRandomShip(PlayerBoard pb, ShipType size, Direction[] directions) {
+        Ship tempShip = new Ship(0, 0, Direction.VERTICAL, ShipType.One);
         boolean didIt = false;
-        while(!didIt) {
+        while (!didIt) {
             int x = r.nextInt(PlayerBoard.LINES);
             int y = r.nextInt(PlayerBoard.COLUMNS);
 
             Direction direction = Direction.VERTICAL;
-            if(r.nextInt(10) > 5)
+            if (r.nextInt(10) > 5)
                 direction = Direction.HORIZONTAL;
 
             tempShip = new Ship(x, y, direction, size);
@@ -69,26 +54,26 @@ public class Ship implements Serializable{
         return tempShip;
     }
 
-    public static Ship[] getFreshShips(){
+    public static Ship[] getFreshShips() {
         return new Ship[]{
-                new Ship(0,0,Direction.VERTICAL,ShipType.Four),
-                new Ship(0,0,Direction.VERTICAL,ShipType.Three),
-                new Ship(0,0,Direction.VERTICAL,ShipType.Three),
-                new Ship(0,0,Direction.VERTICAL,ShipType.Two),
-                new Ship(0,0,Direction.VERTICAL,ShipType.Two),
-                new Ship(0,0,Direction.VERTICAL,ShipType.Two),
-                new Ship(0,0,Direction.VERTICAL,ShipType.One),
-                new Ship(0,0,Direction.VERTICAL,ShipType.One),
-                new Ship(0,0,Direction.VERTICAL,ShipType.One),
-                new Ship(0,0,Direction.VERTICAL,ShipType.One)
+                new Ship(0, 0, Direction.VERTICAL, ShipType.Four),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.Three),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.Three),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.Two),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.Two),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.Two),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.One),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.One),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.One),
+                new Ship(0, 0, Direction.VERTICAL, ShipType.One)
         };
     }
 
-    static Ship[] getRandomShips(){
+    static Ship[] getRandomShips() {
         ShipType[] types = new ShipType[]{
                 ShipType.Four, ShipType.Three, ShipType.Three,
                 ShipType.Two, ShipType.Two, ShipType.Two,
-                ShipType.One,ShipType.One,ShipType.One,ShipType.One
+                ShipType.One, ShipType.One, ShipType.One, ShipType.One
         };
         Ship[] temp = new Ship[PlayerBoard.NUMBER_OF_BOATS];
         // 4
@@ -98,45 +83,54 @@ public class Ship implements Serializable{
         PlayerBoard tempBoard = new PlayerBoard();
         Direction[] directions = Direction.values();
         int i = 0;
-        while(true){
+        //System.out.println("I is: " +  i);
+        //tempBoard.lightItUp();
+        //System.out.println(tempBoard);
+        //System.out.println(Arrays.toString(temp));
+        do {
             temp[i] = getOneRandomShip(tempBoard, types[i], directions);
             i++;
-            if(i == types.length){
-                //System.out.println("I is: " +  i);
-                //tempBoard.lightItUp();
-                //System.out.println(tempBoard);
-                //System.out.println(Arrays.toString(temp));
-                break;
-            }
-        }
+        } while (i != types.length);
 
         return temp;
     }
 
-    public void setPoint(Point point){
+    public util.Point getLandC() {
+        return new util.Point(startL, startC);
+    }
+
+    public void oppositeDirection() {
+        dir = dir.getOpposite();
+    }
+
+    public Direction getDirection() {
+        return dir;
+    }
+
+    public void setPoint(Point point) {
         startL = point.x;
         startC = point.y;
     }
 
-    public void changeDirection(){
+    public void changeDirection() {
         dir = dir.getRotated();
     }
 
-    public ShipPiece[] getPieces(){
-        if(alreadyCalculated) {
+    public ShipPiece[] getPieces() {
+        if (alreadyCalculated) {
             return pieces;
         }
         computePieces();
         return pieces;
     }
 
-    private void computePieces(){
+    private void computePieces() {
         alreadyCalculated = true;
-        int[] vector = new int[]{0,0};
-        if(dir != null){
+        int[] vector = new int[]{0, 0};
+        if (dir != null) {
             vector = dir.getDirectionVector();
         }
-        for (int i = 0; i < getSize(); i++){
+        for (int i = 0; i < getSize(); i++) {
             pieces[i] = new ShipPiece(
                     this,
                     i,
@@ -146,7 +140,7 @@ public class Ship implements Serializable{
         }
     }
 
-    public int getSize(){
+    public int getSize() {
         return _shipType.value;
     }
 
@@ -161,13 +155,25 @@ public class Ship implements Serializable{
 
     @Override
     public String toString() {
-        String s = "[";
-        s += "Ship at " + startL + "+" + startC + " dir: " + dir +
-                ", shipType: " + _shipType + "\n";
+        StringBuilder s = new StringBuilder();
+
+        s.append("Ship at ")
+                .append(startL)
+                .append(":")
+                .append(startC)
+                .append(" dir: ")
+                .append(dir)
+                .append(", shipType: ")
+                .append(_shipType)
+                .append("\n");
+
         for (ShipPiece sp : pieces) {
-            s += "+ " + sp.details() + "\n";
+            s.append(" | ")
+                    .append(sp.details())
+                    .append("\n");
         }
-        return s;
+
+        return s.toString();
     }
 
     public enum ShipType {
@@ -186,9 +192,9 @@ public class Ship implements Serializable{
 
         private int value;
 
-        public static ShipType getShipType(int value){
-            for(ShipType shipType : ShipType.values()){
-                if(shipType.value == value){
+        public static ShipType getShipType(int value) {
+            for (ShipType shipType : ShipType.values()) {
+                if (shipType.value == value) {
                     return shipType;
                 }
             }
@@ -197,8 +203,6 @@ public class Ship implements Serializable{
 
     }
 
-
-
 }
 
 //SPECIAL CASE
@@ -206,28 +210,24 @@ class ConstructorShip extends Ship {
 
     private ArrayList<ShipPiece> temp;
 
-    ConstructorShip(int _l, int _c){
+    ConstructorShip(int _l, int _c) {
         super();
         startL = _l;
         startC = _c;
         temp = new ArrayList<>();
     }
 
-
-
-
-
-    void addPiece(ShipPiece sp){
+    void addPiece(ShipPiece sp) {
         temp.add(sp);
     }
 
-    Ship getShip(){
+    Ship getShip() {
         _shipType = Ship.ShipType.getShipType(temp.size());
         //System.out.println(temp.size());
         pieces = new ShipPiece[temp.size()];
         Ship s = new Ship(startL, startC, dir, _shipType);
         int i = 0;
-        for (ShipPiece shipPiece:temp) {
+        for (ShipPiece shipPiece : temp) {
             shipPiece.ship = s;
             pieces[i] = shipPiece;
             i++;
@@ -237,7 +237,7 @@ class ConstructorShip extends Ship {
         return s;
     }
 
-    void setDirection(Direction _dir){
+    void setDirection(Direction _dir) {
         dir = _dir;
     }
 }

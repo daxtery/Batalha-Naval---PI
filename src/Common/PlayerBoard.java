@@ -12,7 +12,6 @@ public class PlayerBoard implements Serializable {
     public static final int COLUMNS = 10;
     public final static int NUMBER_OF_BOATS = 10;
     public BoardTile[][] boardTiles;
-    private String[][] toPaint;
     private List<Ship> ships;
     private ArrayList<ShipPiece> pieces;
     private boolean lastShipDestroyed;
@@ -22,7 +21,6 @@ public class PlayerBoard implements Serializable {
     public PlayerBoard() {
         boardTiles = new BoardTile[LINES][COLUMNS];
         pieces = new ArrayList<>();
-        toPaint = new String[LINES][COLUMNS];
         ships = new ArrayList<>();
         fillWithWater();
     }
@@ -43,16 +41,6 @@ public class PlayerBoard implements Serializable {
         pb.placeShips(Ship.getRandomShips());
         //pb.allPieces();
         return pb;
-    }
-
-    public static void printDoubleArray(String[][] array) {
-        StringBuilder s = new StringBuilder();
-        for (String[] arry : array) {
-            s.append("\n");
-            for (String e : arry)
-                s.append(",").append(e);
-        }
-        System.out.println(s);
     }
 
     //region TransformBack!
@@ -157,7 +145,6 @@ public class PlayerBoard implements Serializable {
         for (int l = 0; l < LINES; l++) {
             for (int c = 0; c < COLUMNS; c++) {
                 boardTiles[l][c] = new WaterTile(l, c);
-                toPaint[l][c] = PlayerBoardTransformer.WATER_NOT_VISIBLE_STRING;
             }
         }
     }
@@ -180,10 +167,10 @@ public class PlayerBoard implements Serializable {
             }
 
             case ShipPiece -> {
+                ShipPiece shipPiece = (ShipPiece) boardTile;
                 shipHit = true;
-                toPaint[x][y] = PlayerBoardTransformer.PIECE_ATTACKED_STRING;
-                pieces.remove((ShipPiece) boardTile);
-                Ship ship = ((ShipPiece) boardTile).ship;
+                pieces.remove(shipPiece);
+                Ship ship = shipPiece.ship;
                 lastShipDestroyed = false;
                 if (ship.isDestroyed()) {
                     lastShipDestroyed = true;
@@ -215,26 +202,21 @@ public class PlayerBoard implements Serializable {
             for (Point point : points) {
                 if (inBounds(point.x, point.y)) {
                     getTileAt(point.x, point.y).visible = true;
-                    toPaint[point.x][point.y] = PlayerBoardTransformer.WATER_VISIBLE_STRING;
                 }
             }
-        }
-
-        for (ShipPiece piece : s.getPieces()) {
-            toPaint[piece.point.x][piece.point.y] = PlayerBoardTransformer.PIECE_ATTACKED_SHIP_DESTROYED_STRING;
         }
     }
 
     @Override
     public String toString() {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for (int i = 0; i < LINES; i++) {
             for (int c = 0; c < COLUMNS; c++) {
-                s += boardTiles[i][c] + "\n";
+                s.append(boardTiles[i][c]).append("\n");
             }
-            s += "\n";
+            s.append("\n");
         }
-        return s;
+        return s.toString();
     }
 
     void placeShips(Ship[] toAdd) {
@@ -255,7 +237,6 @@ public class PlayerBoard implements Serializable {
                 //System.out.println("PLACING " + piece.getClass().getSimpleName() + " AT: " + piece.x + " " + piece.y);
                 boardTiles[piece.point.x][piece.point.y] = piece;
                 pieces.add(piece);
-                toPaint[piece.point.x][piece.point.y] = piece.toSendString();
             }
             return true;
         }
@@ -308,10 +289,6 @@ public class PlayerBoard implements Serializable {
             }
         }
         return true;
-    }
-
-    private boolean checkSurroundings(int x, int y) {
-        return checkSurroundings(new Point(x, y));
     }
 
     //endregion

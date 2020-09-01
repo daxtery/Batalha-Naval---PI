@@ -852,12 +852,7 @@ public class App extends Application {
     private void setChatScreen() {
 
         Button n = new Button("BACK");
-        n.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                transitionTo(mainGame);
-            }
-        });
+        n.setOnMouseClicked(event -> transitionTo(mainGame));
 
         cWl1 = new Label();
         cWl1.setFont(new Font(30));

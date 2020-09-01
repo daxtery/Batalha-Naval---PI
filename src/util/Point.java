@@ -38,6 +38,19 @@ public class Point {
         return this;
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
+    public Point flip() {
+        int temp = this.y;
+        this.y = this.x;
+        this.x = temp;
+        return this;
+    }
+
+    @SuppressWarnings("SuspiciousNameCombination")
+    public Point flipped() {
+        return new Point(this.y, this.x);
+    }
+
     public boolean isConstrainedBy(Point lower, Point higher) {
         return (this.x > lower.x && this.x < higher.x)
                 &&

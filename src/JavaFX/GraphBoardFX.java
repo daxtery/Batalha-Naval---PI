@@ -28,8 +28,8 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
 
         anim = new AnimationTimer() {
             final double perSec = 1;
-            int x_max = COLUMNS * TileFX.TILE_SIZE;
-            int y_max = LINES * TileFX.TILE_SIZE;
+            final int x_max = COLUMNS * TileFX.TILE_SIZE;
+            final int y_max = LINES * TileFX.TILE_SIZE;
             long lastNano = System.nanoTime();
 
             public void handle(long currentNanoTime) {
@@ -60,8 +60,6 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
      * @param event
      * @return a point with coordenates (L, C) -> L - Line; C -> Column
      */
-
-
     Point pointCoordinates(MouseEvent event) {
         //BECAUSE ON SCREEN IS THE OTHER WAY AROUND
         int l = (int) event.getY() / TileFX.TILE_SIZE;

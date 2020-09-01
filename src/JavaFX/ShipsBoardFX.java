@@ -30,17 +30,13 @@ public class ShipsBoardFX extends GraphBoardFX {
         toRotate = false;
         doShips();
 
-
-
-
-
         anim = new AnimationTimer()
         {
             long lastNano = System.nanoTime();
             final double perSec = 0;
 
-            int x_max = COLUMNS * TileFX.TILE_SIZE;
-            int y_max = LINES * TileFX.TILE_SIZE;
+            final int x_max = COLUMNS * TileFX.TILE_SIZE;
+            final int y_max = LINES * TileFX.TILE_SIZE;
 
             public void handle(long currentNanoTime)
             {
@@ -82,22 +78,15 @@ public class ShipsBoardFX extends GraphBoardFX {
         }
     }
 
-
-
-
     void doShips(PlayerBoard _pb){
         pb = _pb;
         List<Ship> ships = pb.getShips();
         for(int i = 0; i < ships.size(); i++) {
             Ship s = ships.get(i);
             //System.out.println(s);
-            switch(s.getDirection()){
-                case VERTICAL:
-                    doShipVertical(i, s);
-                    break;
-                case HORIZONTAL:
-                    doShipHorizontal(i, s);
-                    break;
+            switch (s.getDirection()) {
+                case VERTICAL -> doShipVertical(i, s);
+                case HORIZONTAL -> doShipHorizontal(i, s);
             }
         }
     }
@@ -119,10 +108,6 @@ public class ShipsBoardFX extends GraphBoardFX {
         s.setPosition(startX, i * TileFX.TILE_SIZE);
     }
 
-    boolean fullOfShips(){
-        return pb.fullOfShips();
-    }
-
     void seeIfShipFXCanBePlaced(double x, double y) {
         tilesToDraw.clear();
 
@@ -139,12 +124,8 @@ public class ShipsBoardFX extends GraphBoardFX {
                 Ship temp = new Ship(l, c, direction, Ship.ShipType.getShipType(selected.shipSize));
                 canPlace = pb.canShipBeHere(temp);
                 for (ShipPiece sp : temp.getPieces())
-                    tilesToDraw.add(switchCoords(sp.getPointCoordinates()));
+                    tilesToDraw.add(sp.point.flipped());
             }
-    }
-
-    Point switchCoords(Point p){
-        return new Point(p.y, p.x);
     }
 
     boolean canPlace(double x, double y){
