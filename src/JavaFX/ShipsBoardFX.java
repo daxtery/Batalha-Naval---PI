@@ -1,21 +1,17 @@
 package JavaFX;
 
-import Common.Direction;
-import Common.PlayerBoard;
-import Common.Ship;
-import Common.ShipPiece;
+import Common.*;
 import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import util.Point;
 
-import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
 import static Common.PlayerBoard.COLUMNS;
 import static Common.PlayerBoard.LINES;
-import static Common.PlayerBoard.inBounds;
 
 public class ShipsBoardFX extends GraphBoardFX {
 
@@ -91,7 +87,7 @@ public class ShipsBoardFX extends GraphBoardFX {
 
     void doShips(PlayerBoard _pb){
         pb = _pb;
-        ArrayList<Ship> ships = pb.getShips();
+        List<Ship> ships = pb.getShips();
         for(int i = 0; i < ships.size(); i++) {
             Ship s = ships.get(i);
             //System.out.println(s);

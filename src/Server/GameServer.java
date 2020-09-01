@@ -4,31 +4,24 @@ import Common.Conversations;
 import Common.Network;
 import Common.Network.*;
 import Common.PlayerBoard;
+import Common.PlayerBoardTransformer;
 import JavaFX.GraphBoardFX;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class GameServer {
 
-    private enum GameState{
-        waitingForPlayers,
-        waitingForShips,
-        playing,
-        playing2left
-    }
-
-    private final static long TIME_TO_WAIT = 1000 * 60 ;
+    private final static long TIME_TO_WAIT = 1000 * 60;
     private long currentWaitedTime;
-
     private GameState state;
     private Conversations conversations;
     private Game game;
     private Server server;
     private int currentPlayer;
-
     //WILL SAVE WHAT CONNECTIONS THE GAME STARTED WITH
     //SO IT'S POSSIBLE TO KNOW IF SOMEBODY WHO DROPPED IS RECONNECTING
     private BConnection[] players;
@@ -46,7 +39,7 @@ public class GameServer {
         players = new BConnection[3];
 
         server = new Server() {
-            protected Connection newConnection () {
+            protected Connection newConnection() {
                 return new BConnection();
             }
         };
@@ -55,9 +48,9 @@ public class GameServer {
 
         server.addListener(new Listener() {
 
-            private boolean isANewPlayer(String address){
-                for (BConnection c: players) {
-                    if(c.address.equalsIgnoreCase(address)){
+            private boolean isANewPlayer(String address) {
+                for (BConnection c : players) {
+                    if (c.address.equalsIgnoreCase(address)) {
                         idOfReturned = c.myID;
                         return true;
                     }
@@ -65,36 +58,34 @@ public class GameServer {
                 return false;
             }
 
-            private void handleRegister(BConnection connection, Register r){
+            private void handleRegister(BConnection connection, Register r) {
 
                 connection.name = r.name;
                 connection.address = r.address;
                 connection.myID = nextID;
 
-                switch (state){
+                switch (state) {
                     case waitingForPlayers:
                         players[nextID] = connection;
                         count++;
                         nextID++;
-                        if(count == 3){
+                        if (count == 3) {
                             sendReadyForShips();
-                        }else{
+                        } else {
                             sendConnections();
                         }
                         break;
                     case waitingForShips:
                         // see if it's a new player
                         // or somebody that dropped
-                        if(disconnectedWhenWaitingForShips){
-                            if(!isANewPlayer(r.address)) {
+                        if (disconnectedWhenWaitingForShips) {
+                            if (!isANewPlayer(r.address)) {
                                 connection.sendTCP(new IsFull());
-                            }
-                            else{
+                            } else {
                                 players[idOfReturned] = connection;
                                 count++;
                             }
-                        }
-                        else{
+                        } else {
                             connection.sendTCP(new IsFull());
                         }
                         break;
@@ -115,17 +106,14 @@ public class GameServer {
             }
 
 
+            public void received(Connection c, Object object) {
 
+                BConnection connection = (BConnection) c;
 
-
-            public void received (Connection c, Object object) {
-
-                BConnection connection = (BConnection)c;
-
-                if(object instanceof Register){
+                if (object instanceof Register) {
                     handleRegister(connection, (Register) object);
                 }
-                if(object instanceof APlayerboard){
+                if (object instanceof APlayerboard) {
                     PlayerBoard pb = new PlayerBoard(((APlayerboard) object).board);
                     //ADD TO GAME
                     //System.out.println("ADDING TO: " + connection.myID +
@@ -133,7 +121,7 @@ public class GameServer {
 
                     game.setPlayerBoard(pb, connection.myID);
                     //IF WE'VE RECEIVED ALL, WE CAN START
-                    if(game.canStart()){
+                    if (game.canStart()) {
 
                         sendOthersDetails();
                         sendOthersBoards();
@@ -149,21 +137,18 @@ public class GameServer {
                     }
                 }
 
-                if (object instanceof  AnAttackAttempt){
+                if (object instanceof AnAttackAttempt) {
                     processAttack(connection, (AnAttackAttempt) object);
                 }
 
-                if (object instanceof ChatMessageFromClient){
+                if (object instanceof ChatMessageFromClient) {
                     ChatMessageFromClient m = (ChatMessageFromClient) object;
                     newChatMessage(connection.myID, m.to, m.text);
                 }
             }
 
 
-
-
-
-            private void newChatMessage(int from, int to, String message){
+            private void newChatMessage(int from, int to, String message) {
                 int c = conversations.getConversationIDWithIDs(from, to);
                 conversations.appendToConversation(from, c, message);
                 Conversations.Line line = conversations.getLastLineFromConversation(c);
@@ -174,7 +159,7 @@ public class GameServer {
                 players[to].sendTCP(chats);
             }
 
-            private void processAttack(BConnection connection, AnAttackAttempt a){
+            private void processAttack(BConnection connection, AnAttackAttempt a) {
 
                 System.out.println(connection.name + " IS ATTACKING " +
                         players[a.toAttackID].name);
@@ -188,7 +173,11 @@ public class GameServer {
                 boolean ship = game.lastAttackShip();
                 boolean actualNewHit = game.lastActualHit();
 
-                String[][] attackedOne = game.getPlayerBoard(a.toAttackID).getToPaint();
+                var _board = game.getPlayerBoard(a.toAttackID);
+
+                String[][] attackedOne = PlayerBoardTransformer.transformForOthers(_board);
+
+                System.out.println(Arrays.deepToString(attackedOne));
 
                 AnAttackResponse response = new AnAttackResponse();
                 response.again = canGoAgain;
@@ -202,7 +191,7 @@ public class GameServer {
                 attacked.board = attackedOne;
 
 
-                switch (state){
+                switch (state) {
                     case playing:
                         //TO THE GUY THAT ATTACKED
                         connection.sendTCP(response);
@@ -217,16 +206,15 @@ public class GameServer {
                         //TO THE ATTACKED
                         players[a.toAttackID].sendTCP(attacked);
 
-                        if(!canGoAgain){
+                        if (!canGoAgain) {
                             currentPlayer = (currentPlayer + 1) % 3;
                             WhoseTurn whoseTurn = new WhoseTurn();
                             whoseTurn.name = players[currentPlayer].name;
                             sendToAllExcept(currentPlayer, whoseTurn);
                             players[currentPlayer].sendTCP(new YourTurn());
-                        }
-                        else{
+                        } else {
                             System.out.println("HIT");
-                            if(game.isGameOverFor(a.toAttackID)){
+                            if (game.isGameOverFor(a.toAttackID)) {
                                 System.out.println("MAN DOWN!");
                                 state = GameState.playing2left;
                                 players[a.toAttackID].sendTCP(new YouDead());
@@ -244,16 +232,15 @@ public class GameServer {
 
                         players[a.toAttackID].sendTCP(attacked);
 
-                        if(!canGoAgain){
+                        if (!canGoAgain) {
                             currentPlayer = a.toAttackID;
                             WhoseTurn whoseTurn = new WhoseTurn();
                             whoseTurn.name = players[currentPlayer].name;
                             sendToAllExcept(currentPlayer, whoseTurn);
                             players[currentPlayer].sendTCP(new YourTurn());
-                        }
-                        else{
+                        } else {
                             System.out.println("HIT");
-                            if(game.isGameOverFor(a.toAttackID)){
+                            if (game.isGameOverFor(a.toAttackID)) {
                                 //GAME IS OVER
                                 players[a.toAttackID].sendTCP(new YouDead());
                                 players[currentPlayer].sendTCP(new YouWon());
@@ -268,7 +255,7 @@ public class GameServer {
             }
 
             private void sendOthersDetails() {
-                for(int i = 0; i < players.length; i++){
+                for (int i = 0; i < players.length; i++) {
                     OthersSpecs send = new OthersSpecs();
                     send.ene1 = (i + 1) % 3;
                     send.ene2 = (i + 2) % 3;
@@ -280,19 +267,19 @@ public class GameServer {
                 }
             }
 
-            private void sendToAllExcept(int i, Object object){
+            private void sendToAllExcept(int i, Object object) {
                 players[(i + 4) % 3].sendTCP(object);
                 players[(i + 5) % 3].sendTCP(object);
             }
 
-            public void disconnected (Connection c) {
+            public void disconnected(Connection c) {
                 BConnection connection = (BConnection) c;
                 System.out.println("Disconnected " + connection.name);
                 count--;
-                if(count < 0){
+                if (count < 0) {
                     count = 0;
                 }
-                switch (state){
+                switch (state) {
                     case waitingForPlayers:
                         sendConnections();
                         nextID = connection.myID;
@@ -305,35 +292,37 @@ public class GameServer {
                 printConnections();
             }
 
-            private void sendOthersBoards(){
-                for(int i = 0; i < players.length; i++){
+            private void sendOthersBoards() {
+                for (int i = 0; i < players.length; i++) {
                     EnemiesBoardsToPaint enemiesBoardsToPaint = new EnemiesBoardsToPaint();
                     //int own = players[i].myID;
-                    enemiesBoardsToPaint.board1 = game.getPlayerBoard((i + 1) % 3).getToPaint();
-                    enemiesBoardsToPaint.board2 = game.getPlayerBoard((i + 2) % 3).getToPaint();
+
+                    enemiesBoardsToPaint.board1 = PlayerBoardTransformer.transformForOthers(game.getPlayerBoard((i + 1) % 3));
+                    enemiesBoardsToPaint.board2 = PlayerBoardTransformer.transformForOthers(game.getPlayerBoard((i + 2) % 3));
+
                     players[i].sendTCP(enemiesBoardsToPaint);
                 }
             }
 
-            private void printConnections(){
+            private void printConnections() {
                 for (BConnection connection : players) {
-                    if(connection != null) {
+                    if (connection != null) {
                         System.out.println(connection.name + " has ID:" + connection.myID +
                                 " and address:" + connection.address);
                     }
                 }
             }
 
-            private void sendConnections(){
+            private void sendConnections() {
                 ConnectedPlayers connectedPlayers = new ConnectedPlayers();
                 connectedPlayers.names = getConnectedNames();
-                if(connectedPlayers.names != null) {
+                if (connectedPlayers.names != null) {
                     server.sendToAllTCP(connectedPlayers);
                 }
             }
 
-            private String[] getConnectedNames(){
-                if(count > 0) {
+            private String[] getConnectedNames() {
+                if (count > 0) {
                     String[] string = new String[count];
                     for (int i = 0; i < count; i++) {
                         string[i] = players[i].name;
@@ -352,7 +341,11 @@ public class GameServer {
 
     }
 
-    private void handleLeavingWhileShips(){
+    public static void main(String[] args) throws IOException {
+        new GameServer();
+    }
+
+    private void handleLeavingWhileShips() {
         disconnectedWhenWaitingForShips = true;
     }
 
@@ -369,19 +362,22 @@ public class GameServer {
         state = GameState.waitingForShips;
     }
 
+    private enum GameState {
+        waitingForPlayers,
+        waitingForShips,
+        playing,
+        playing2left
+    }
+
     static class BConnection extends Connection {
 
         String name;
         int myID;
         String address;
 
-        BConnection(){
+        BConnection() {
             myID = -1;
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        new GameServer();
     }
 
 

@@ -1,6 +1,7 @@
 package Common;
 
-import java.awt.*;
+import util.Point;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
@@ -18,7 +19,7 @@ public class Ship implements Serializable{
 
     public Ship(int x, int y, Direction _dir, ShipType st){
         _shipType = st;
-        setPoint(new Point(x, y));
+        setPoint(new util.Point(x, y));
         pieces = new ShipPiece[st.value];
         dir = _dir;
         alreadyCalculated = false;
@@ -33,8 +34,8 @@ public class Ship implements Serializable{
     }
     //endregion
 
-    public Point getLandC(){
-        return new Point(startL, startC);
+    public util.Point getLandC(){
+        return new util.Point(startL, startC);
     }
 
     public void oppositeDirection(){

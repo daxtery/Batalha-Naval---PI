@@ -6,10 +6,6 @@ import com.esotericsoftware.kryonet.EndPoint;
 // This class is a convenient place to keep things common to both the client and server.
 public class Network {
 
-
-
-
-
 	public static final int port = 5656;
 
 	// This registers objects that are going to be sent over the network.
@@ -44,11 +40,7 @@ public class Network {
         kryo.register(YouWon.class);
         kryo.register(PlayerBoard.class);
         kryo.register(APlayerboard.class);
-
     }
-
-
-
 
 	public static class OthersSpecs {
 	    public int ene1;
@@ -58,16 +50,9 @@ public class Network {
         public String ene2n;
     }
 
+    public static class YouWon { }
 
-
-
-
-    public static class YouWon{
-
-    }
-
-	public static class YouDead{
-    }
+	public static class YouDead{ }
 
     public static class PlayerDied{
 	    public int who;

@@ -14,7 +14,6 @@ public enum Direction {
     private Direction opposite;
 
     static {
-
         HORIZONTAL.rotated = VERTICAL;
         HORIZONTAL.directionVector = new int[]{0,1};
 
@@ -39,10 +38,6 @@ public enum Direction {
         UP.opposite = DOWN;
 
     }
-
-
-
-
 
     public Direction getOpposite(){
         return opposite;

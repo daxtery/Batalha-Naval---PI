@@ -1,36 +1,28 @@
 package Common;
 
+import util.Point;
 
-import java.awt.*;
+enum WaterTileStatus { Visible, NotVisible }
 
 public class WaterTile extends BoardTile {
 
-    public static final String NOT_VISIBLE_STRING = "W";
-    public static final String VISIBLE_STRING = "WV";
-
     WaterTile(int _x, int _y){
-        x = _x;
-        y = _y;
+        super(new Point(_x, _y), TileType.Water);
     }
 
     @Override
     public String toString() {
-        return "Water at " + this.x + "+" + this.y + " and is attacked " + attacked;
+        return "Water at " + this.point + ", is visible " + visible;
     }
 
-    @Override
-    public boolean isPiece() {
-        return false;
+    public WaterTileStatus status() {
+        return visible ? WaterTileStatus.Visible : WaterTileStatus.NotVisible;
     }
-
-
-
-
 
     @Override
     String toSendString() {
         if(canAttack())
-            return NOT_VISIBLE_STRING;
-        return VISIBLE_STRING;
+            return PlayerBoardTransformer.WATER_NOT_VISIBLE_STRING;
+        return PlayerBoardTransformer.WATER_VISIBLE_STRING;
     }
 }

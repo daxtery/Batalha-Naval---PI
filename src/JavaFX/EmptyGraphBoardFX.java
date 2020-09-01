@@ -15,9 +15,6 @@ class EmptyGraphBoardFX extends Canvas {
 
     AnimationTimer anim;
 
-
-
-
     EmptyGraphBoardFX(int _w, int _h) {
         super(_w, _h);
         gc = getGraphicsContext2D();

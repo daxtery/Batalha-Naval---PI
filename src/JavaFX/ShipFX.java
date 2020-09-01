@@ -26,9 +26,6 @@ class ShipFX extends SpriteTileFX {
         selectImage();
     }
 
-
-
-
     ShipFX(int _ShipSize){
         this(_ShipSize, 0,0, Direction.HORIZONTAL, false);
     }

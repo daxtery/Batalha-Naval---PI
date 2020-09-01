@@ -1,32 +1,31 @@
 package Common;
 
-import java.awt.*;
+import util.Point;
+
 import java.io.Serializable;
 
 public abstract class BoardTile implements Serializable {
 
-    int x, y;
+    public TileType tileType;
     boolean visible;
-    boolean attacked;
+    public Point point;
 
-    BoardTile(){
-        attacked = false;
-        visible = false;
+    protected BoardTile(Point point, TileType tileType) {
+        this(point, tileType, false);
     }
 
-
-
-
-
-
-    public abstract boolean isPiece();
+    protected BoardTile(Point point, TileType tileType, boolean visible) {
+        this.point = point;
+        this.tileType = tileType;
+        this.visible = visible;
+    }
 
     public boolean canAttack(){
-        return !attacked;
+        return !visible;
     }
 
     public Point getPointCoordinates(){
-        return new Point(x, y);
+        return point;
     }
 
     @Override
@@ -36,11 +35,7 @@ public abstract class BoardTile implements Serializable {
         if (!(obj instanceof BoardTile))
             return false;
         BoardTile other = (BoardTile) obj;
-        return x == other.x && y == other.y;
-    }
-
-    void setAttacked(boolean val){
-        attacked = val;
+        return other.point.equals(this.point);
     }
 
     abstract String toSendString();

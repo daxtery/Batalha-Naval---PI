@@ -24,7 +24,7 @@ class  PlayerBoardTest {
         assert (!returned);
 
         for (ShipPiece shipPiece : toAdd.getPieces()) {
-            assert (pb.freeAt(shipPiece.x, shipPiece.y));
+            assert (pb.freeAt(shipPiece.point.x, shipPiece.point.y));
         }
 
         toAdd = new Ship(6, 6, Direction.RIGHT, Ship.ShipType.Three);
@@ -65,7 +65,7 @@ class  PlayerBoardTest {
             int i = 0;
             for (int l = 0; l < LINES; l++) {
                 for (int c = 0; c < COLUMNS; c++) {
-                    if (pb.getTileAt(l, c).isPiece()) {
+                    if (pb.getTileAt(l, c).tileType == TileType.ShipPiece) {
                         i++;
                     }
                 }
@@ -118,8 +118,6 @@ class  PlayerBoardTest {
         pb.getAttacked(5,2);
 
         //System.out.println(pb);
-
-        pb = new PlayerBoard(pb.getToPaint());
 
         //System.out.println("---------------------------------");
         //System.out.println("---------------------------------");

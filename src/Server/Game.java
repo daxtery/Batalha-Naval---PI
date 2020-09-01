@@ -1,5 +1,6 @@
 package Server;
 
+import Common.AttackResult;
 import Common.PlayerBoard;
 
 public class Game {
@@ -22,7 +23,7 @@ public class Game {
 
     boolean attack(int id, int x, int y){
         idLastAttacked = id;
-        return playerBoards[id].getAttacked(x, y);
+        return playerBoards[id].getAttacked(x, y) == AttackResult.HitShipPiece;
     }
 
     void removePlayer(int id){

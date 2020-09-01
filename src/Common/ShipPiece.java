@@ -1,27 +1,34 @@
 package Common;
 
+import util.Point;
+
+enum ShipPieceStatus {NotAttacked, Attacked, AttackedShipDestroyed}
+
 public class ShipPiece extends BoardTile {
 
-    public static final String NOT_ATTACKED_STRING = "P";
-    public static final String ATTACKED_STRING = "PA";
-    public static final String ATTACKED_SHIP_DESTROYED_STRING = "PD";
-
-    Ship ship;
     //WHAT PART OF THE SHIP
     private final int sId;
+    Ship ship;
 
     ShipPiece(Ship _ship, int i, int _x, int _y) {
-        this.x = _x;
-        this.y = _y;
+        super(new Point(_x, _y), TileType.ShipPiece);
         ship = _ship;
         sId = i;
+    }
+
+    ShipPieceStatus status() {
+        return visible ?
+                ship.isDestroyed() ?
+                        ShipPieceStatus.AttackedShipDestroyed
+                        : ShipPieceStatus.Attacked
+                : ShipPieceStatus.NotAttacked;
     }
 
     public int getIdInsideShip() {
         return sId;
     }
 
-    public Ship getShip(){
+    public Ship getShip() {
         return ship;
     }
 
@@ -30,20 +37,15 @@ public class ShipPiece extends BoardTile {
         return details();
     }
 
-    @Override
-    public boolean isPiece() {
-        return true;
+    String details() {
+        return "ShipPiece at " + this.point + ", status: " + status() + " dir: " + getShip().dir;
     }
 
-    String details(){
-        return "ShipPiece at " + this.x + "+" + this.y + " and is attacked: " + attacked + " dir: " + getShip().dir;
-    }
-
-    String toSendString(){
-        if(ship.isDestroyed())
-            return ATTACKED_SHIP_DESTROYED_STRING;
-        if(!canAttack())
-            return ATTACKED_STRING;
-        return NOT_ATTACKED_STRING;
+    String toSendString() {
+        if (ship.isDestroyed())
+            return PlayerBoardTransformer.PIECE_ATTACKED_SHIP_DESTROYED_STRING;
+        if (!canAttack())
+            return PlayerBoardTransformer.PIECE_ATTACKED_STRING;
+        return PlayerBoardTransformer.PIECE_NOT_ATTACKED_STRING;
     }
 }

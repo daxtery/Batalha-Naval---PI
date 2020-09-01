@@ -1,8 +1,8 @@
 package JavaFX;
 
-import Common.Direction;
-import Common.Network;
-import Common.PlayerBoard;
+import Common.*;
+import util.Point;
+
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -19,6 +19,10 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -38,7 +42,6 @@ import javafx.stage.StageStyle;
 
 import Common.Network.*;
 
-import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -48,23 +51,7 @@ import java.util.*;
 
 public class App extends Application {
 
-    //FOR OFFLINE
-    private MyAI ai;
-    private boolean vsAI;
-    private SelfGraphBoardFX selfvsAI;
-
-    //FOR ONLINE
-    private Client client;
-    private String myName;
-    private static final String ADDRESS = "82.154.150.115";
-    private PlayerBoard pb;
-
-    private String soundFile = "assets/sound/play.mp3";
-    private AudioClip soundPlayer = new AudioClip(new File(soundFile).toURI().toString());
-
-    //region MAIN MENU STUFF
-
-    private BorderPane mMRoot;
+    private static final String ADDRESS = "localhost";
     private final static String MM_IMAGE_BACKGROUND_PATH = "images/BattleShipBigger.png";
     private final static Image MM_IMAGE_BACKGROUND = new Image(MM_IMAGE_BACKGROUND_PATH);
     private final static BackgroundImage MM_BACKGROUND = new BackgroundImage(MM_IMAGE_BACKGROUND,
@@ -74,63 +61,61 @@ public class App extends Application {
             new BackgroundSize(MM_IMAGE_BACKGROUND.getWidth(), MM_IMAGE_BACKGROUND.getHeight(),
                     false, false, true, true)
     );
+    private final static Rectangle2D SCREEN_RECTANGLE = Screen.getPrimary().getVisualBounds();
+    //FOR OFFLINE
+    private MyAI ai;
+    private boolean vsAI;
+    private SelfGraphBoardFX selfvsAI;
+    //FOR ONLINE
+    private Client client;
 
+    //region MAIN MENU STUFF
+    private String myName;
+    private PlayerBoard pb;
+    private String soundFile = "assets/sound/play.mp3";
+    private AudioClip soundPlayer = new AudioClip(new File(soundFile).toURI().toString());
+    private BorderPane mMRoot;
     private Image mMPlayButtonImage = new Image("images/Botao_Start.png");
     private Button mMPlayButton;
-
     private Image mMAloneButtonImage = new Image("images/Botao_Solo_Play.png");
     private Button mMAloneButton;
-
     private Image mMExitButtonImage = new Image("images/Botao_Exit.png");
     private Button mMExit;
-
     private TextField mMnameInput;
     private Label mMServerText;
-
-    private GridPane mMMiddle;
 
     //endregion
 
     //region SET SHIPS STUFF
-
+    private GridPane mMMiddle;
     private HBox sSRoot;
-
     private ShipsBoardFX sSboard;
-
     private VBox sSRightStuff;
-
     private HBox sSPlaceIntructions;
     private VBox sSTips;
-
     private HBox sSReadyBox;
     private Button sSRandomButton;
     private Button sSReadyButton;
-
     private VBox sSInstructionsGame;
     private Text sSPlayer1Ready;
-    private Text sSPlayer2Ready;
 
     //endregion
 
     //region MAIN GAME STUFF
-
+    private Text sSPlayer2Ready;
     private BorderPane MGRoot;
-
     private Group MGCanvasHolder;
     private SelfGraphBoardFX mGSelfBoard;
-
     private StackPane MGTop;
     private Label mGcurrentPlayerText;
-
     private VBox MGRight;
     private Circle MGShips;
     private Button MGAttackButton;
-    private Button MGChatButton;
 
     //endregion
 
     //region ATTACK WINDOW STUFF
-
+    private Button MGChatButton;
     private boolean iCanAttack;
     private EnemyLocal lastAttacked;
     private EnemyLocal ene1;
@@ -138,26 +123,18 @@ public class App extends Application {
     private HBox aWRoot;
     private VBox aWvBox = new VBox(50);
     private VBox aWvBox2 = new VBox(50);
-
     private String aWshipSoundFile = "assets/sound/ship.mp3";
     private String aWwaterSoundFile = "assets/sound/water.mp3";
-
     private MediaPlayer aWShipSound = new MediaPlayer(new Media(new File(aWshipSoundFile).toURI().toString()));
-    private MediaPlayer aWWaterSound = new MediaPlayer(new Media(new File(aWwaterSoundFile).toURI().toString()));
 
     //endregion
-
+    private MediaPlayer aWWaterSound = new MediaPlayer(new Media(new File(aWwaterSoundFile).toURI().toString()));
     private TextArea textArea;
-
     private Label cWl1;
     private Label cWl2;
-
     private ArrayList<EmptyGraphBoardFX> toAnimate = new ArrayList<>();
 
-    private final static Rectangle2D SCREEN_RECTANGLE = Screen.getPrimary().getVisualBounds();
-
     //SCENES
-
     private Scene mainMenu;
     private Scene mainGame;
     private Scene setShips;
@@ -346,7 +323,7 @@ public class App extends Application {
 
     }
 
-    private void reset(){
+    private void reset() {
         setShipsScene();
     }
 
@@ -462,7 +439,10 @@ public class App extends Application {
         MGCanvasHolder = new Group();
 
         mGSelfBoard = new SelfGraphBoardFX(500, 500);
-        mGSelfBoard.startTiles(PlayerBoard.getRandomPlayerBoard().getToPaint());
+
+        mGSelfBoard.startTiles(
+                PlayerBoardTransformer.transformForOthers(PlayerBoard.getRandomPlayerBoard())
+        );
 
         MGCanvasHolder.getChildren().add(mGSelfBoard);
 
@@ -499,70 +479,67 @@ public class App extends Application {
         mMPlayButton = new Button();
         mMPlayButton.setGraphic(new ImageView(mMPlayButtonImage));
 
-        mMPlayButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                myName = mMnameInput.getText();
-                if (myName.equals("")) {
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Ups!");
-                    alert.setHeaderText("Name was null!");
-                    alert.setContentText("Name can't be null, we need to know who you are :(");
-                    alert.showAndWait();
-                    return;
-                }
-                theStage.setTitle(myName);
-                Task<Boolean> connect = new Task<>() {
-                    @Override
-                    protected Boolean call() throws Exception {
-                        Boolean connected = true;
-                        try {
-                            client.connect(5000, ADDRESS, Network.port);
-                        } catch (IOException e) {
-                            connected = false;
-                        }
-                        return connected;
-                    }
-                };
-                connect.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                    @Override
-                    public void handle(WorkerStateEvent event) {
-                        if (connect.getValue()) {
-                            Register r = new Register();
-                            r.name = myName;
-                            try {
-                                r.address = getMeIPV4().toString();
-                            } catch (UnknownHostException e1) {
-                                e1.printStackTrace();
-                                r.address = "100:00";
-                            }
+        mMPlayButton.setOnAction(event -> {
 
-                            BorderPane root = new BorderPane();
-                            textArea = new TextArea();
-                            textArea.setEditable(false);
-
-                            root.setCenter(textArea);
-
-                            waitingScreen = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
-                            transitionTo(waitingScreen);
-                            client.sendTCP(r);
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("YEE");
-                            alert.setHeaderText("WE GOT IN");
-                            alert.setContentText("TEMP MESSAGE TO SAY WE GOT IN; WAIT NOW! DON'T PRESS ANY MORE SHIT");
-                            alert.showAndWait();
-                        } else {
-                            Alert alert = new Alert(Alert.AlertType.ERROR);
-                            alert.setTitle("Noo!");
-                            alert.setHeaderText("Can't play when you can't connect to server :(");
-                            alert.setContentText("Maybe...Go play alone? \nOr you could try again (:");
-                            alert.showAndWait();
-                        }
-                    }
-                });
-
-                new Thread(connect).start();
+            myName = mMnameInput.getText();
+            if (myName.equals("")) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Ups!");
+                alert.setHeaderText("Name was null!");
+                alert.setContentText("Name can't be null, we need to know who you are :(");
+                alert.showAndWait();
+                return;
             }
+            theStage.setTitle(myName);
+            Task<Boolean> connect = new Task<>() {
+                @Override
+                protected Boolean call() {
+                    boolean connected = true;
+                    try {
+                        client.connect(5000, ADDRESS, Network.port);
+                    } catch (IOException e) {
+                        connected = false;
+                    }
+                    return connected;
+                }
+            };
+
+            connect.setOnSucceeded(event1 -> {
+
+                if (connect.getValue()) {
+                    Register r = new Register();
+                    r.name = myName;
+                    try {
+                        r.address = getMeIPV4().toString();
+                    } catch (UnknownHostException e1) {
+                        e1.printStackTrace();
+                        r.address = "100:00";
+                    }
+
+                    BorderPane root = new BorderPane();
+                    textArea = new TextArea();
+                    textArea.setEditable(false);
+
+                    root.setCenter(textArea);
+
+                    waitingScreen = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
+                    transitionTo(waitingScreen);
+                    client.sendTCP(r);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("YEE");
+                    alert.setHeaderText("WE GOT IN");
+                    alert.setContentText("TEMP MESSAGE TO SAY WE GOT IN; WAIT NOW! DON'T PRESS ANY MORE SHIT");
+                    alert.showAndWait();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Noo!");
+                    alert.setHeaderText("Can't play when you can't connect to server :(");
+                    alert.setContentText("Maybe...Go play alone? \nOr you could try again (:");
+                    alert.showAndWait();
+                }
+            });
+
+            new Thread(connect).start();
         });
         mMPlayButton.setStyle("-fx-background-color: transparent;");
 
@@ -583,16 +560,12 @@ public class App extends Application {
         mMExit.setStyle("-fx-background-color: transparent;");
 
         mMnameInput = new TextField("Name!");
-        mMnameInput.textProperty().addListener(new ChangeListener<>() {
-
+        mMnameInput.textProperty().addListener((observable, oldValue, newValue) -> {
             final int maxLength = 10;
 
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if (mMnameInput.getText().length() > maxLength) {
-                    String s = mMnameInput.getText().substring(0, maxLength);
-                    mMnameInput.setText(s);
-                }
+            if (mMnameInput.getText().length() > maxLength) {
+                String s = mMnameInput.getText().substring(0, maxLength);
+                mMnameInput.setText(s);
             }
         });
 
@@ -650,41 +623,41 @@ public class App extends Application {
 
         sSRandomButton = new Button("Random");
         sSRandomButton.setFont(new Font(50));
-        sSRandomButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                pb = PlayerBoard.getRandomPlayerBoard();
-                sSboard.doShips(pb);
-                sSboard.setSelected(null);
-                //System.out.println(pb);
-            }
+        sSRandomButton.setOnMouseClicked(event -> {
+            pb = PlayerBoard.getRandomPlayerBoard();
+            sSboard.doShips(pb);
+            sSboard.setSelected(null);
+            //System.out.println(pb);
         });
 
         sSReadyButton = new Button("Ready");
         sSReadyButton.setFont(new Font(50));
 
-        sSReadyButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (sSboard.pb.fullOfShips()) {
+        sSReadyButton.setOnMouseClicked(event -> {
+            if (sSboard.pb.fullOfShips()) {
 
-                    sSReadyButton.setDisable(true);
-                    sSRandomButton.setDisable(true);
-                    sSboard.finished = true;
+                sSReadyButton.setDisable(true);
+                sSRandomButton.setDisable(true);
+                sSboard.finished = true;
 
-                    pb = sSboard.pb;
+                pb = sSboard.pb;
 
-                    if (!vsAI) {
-                        mGSelfBoard.setPlayerBoard(pb);
-                        mGSelfBoard.startTiles(pb.getToPaint());
-                        mGSelfBoard.updateTiles(pb.getToPaint());
-                        APlayerboard p = new APlayerboard();
-                        p.board = sSboard.pb.getToPaint();
-                        client.sendTCP(p);
-                    } else {
-                        selfvsAI.startTiles(pb.getToPaint());
-                        transitionTo(AIScene);
-                    }
+                if (!vsAI) {
+                    mGSelfBoard.setPlayerBoard(pb);
+
+
+                    String[][] message = PlayerBoardTransformer.transformForOthers(pb);
+
+                    mGSelfBoard.startTiles(message);
+                    mGSelfBoard.updateTiles(message);
+
+                    APlayerboard p = new APlayerboard();
+                    p.board = PlayerBoardTransformer.transformForOthers(sSboard.pb);
+                    client.sendTCP(p);
+                } else {
+                    String[][] message = PlayerBoardTransformer.transformForOthers(pb);
+                    selfvsAI.startTiles(message);
+                    transitionTo(AIScene);
                 }
             }
         });
@@ -706,20 +679,14 @@ public class App extends Application {
         sSRoot.setPadding(new Insets(25));
         sSRoot.setSpacing(10);
 
-        sSRoot.setOnKeyPressed(new EventHandler<>() {
-            @Override
-            public void handle(KeyEvent event) {
-                if (sSboard.selected != null && event.getCode() == KeyCode.R) {
-                    sSboard.toRotate = !sSboard.toRotate;
-                }
+        sSRoot.setOnKeyPressed(event -> {
+            if (sSboard.selected != null && event.getCode() == KeyCode.R) {
+                sSboard.toRotate = !sSboard.toRotate;
             }
         });
-        sSboard.setOnMouseMoved(new EventHandler<>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (!sSboard.finished) {
-                    sSboard.seeIfShipFXCanBePlaced(event.getX(), event.getY());
-                }
+        sSboard.setOnMouseMoved(event -> {
+            if (!sSboard.finished) {
+                sSboard.seeIfShipFXCanBePlaced(event.getX(), event.getY());
             }
         });
         sSboard.setOnMouseClicked(new EventHandler<>() {
@@ -785,9 +752,6 @@ public class App extends Application {
         });
 
 
-
-
-
         setShips = new Scene(sSRoot, SCREEN_RECTANGLE.getWidth(),
                 SCREEN_RECTANGLE.getHeight());
     }
@@ -801,8 +765,13 @@ public class App extends Application {
 
         ene1.b = new GraphBoardFX();
         ene2.b = new GraphBoardFX();
-        ene1.b.startTiles(PlayerBoard.getRandomPlayerBoard().getToPaint());
-        ene2.b.startTiles(PlayerBoard.getRandomPlayerBoard().getToPaint());
+
+        PlayerBoard board = PlayerBoard.getRandomPlayerBoard();
+        ene1.b.startTiles(PlayerBoardTransformer.transformForOthers(board));
+
+        board = PlayerBoard.getRandomPlayerBoard();
+        ene2.b.startTiles(PlayerBoardTransformer.transformForOthers(board));
+
         ene1.b.startAnimating();
         ene2.b.startAnimating();
 
@@ -828,45 +797,40 @@ public class App extends Application {
 
         aWRoot.getChildren().addAll(aWvBox, aWvBox2, back);
 
-        ene1.b.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        ene1.b.setOnMouseClicked(event -> {
+            lastAttacked = ene1;
+            if (iCanAttack) {
+                iCanAttack = false;
 
-            @Override
-            public void handle(MouseEvent event) {
-                lastAttacked = ene1;
-                if (iCanAttack) {
-                    iCanAttack = false;
+                Point p = ene1.b.pointCoordinates(event);
 
-                    Point p = ene1.b.pointCoordinates(event);
+                AnAttackAttempt anAttackAttempt = new AnAttackAttempt();
 
-                    AnAttackAttempt anAttackAttempt = new AnAttackAttempt();
-                    anAttackAttempt.l = p.x;
-                    anAttackAttempt.c = p.y;
-                    anAttackAttempt.toAttackID = ene1.serverID;
-                    anAttackAttempt.otherID = ene2.serverID;
+                anAttackAttempt.l = p.x;
+                anAttackAttempt.c = p.y;
 
-                    client.sendTCP(anAttackAttempt);
-                }
+                anAttackAttempt.toAttackID = ene1.serverID;
+                anAttackAttempt.otherID = ene2.serverID;
+
+                client.sendTCP(anAttackAttempt);
             }
         });
 
 
-        ene2.b.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                lastAttacked = ene2;
-                if (iCanAttack) {
-                    iCanAttack = false;
+        ene2.b.setOnMouseClicked(event -> {
+            lastAttacked = ene2;
+            if (iCanAttack) {
+                iCanAttack = false;
 
-                    Point p = ene2.b.pointCoordinates(event);
+                Point p = ene2.b.pointCoordinates(event);
 
-                    AnAttackAttempt anAttackAttempt = new AnAttackAttempt();
-                    anAttackAttempt.l = p.x;
-                    anAttackAttempt.c = p.y;
-                    anAttackAttempt.toAttackID = ene2.serverID;
-                    anAttackAttempt.otherID = ene1.serverID;
+                AnAttackAttempt anAttackAttempt = new AnAttackAttempt();
+                anAttackAttempt.l = p.x;
+                anAttackAttempt.c = p.y;
+                anAttackAttempt.toAttackID = ene2.serverID;
+                anAttackAttempt.otherID = ene1.serverID;
 
-                    client.sendTCP(anAttackAttempt);
-                }
+                client.sendTCP(anAttackAttempt);
             }
         });
 
@@ -958,7 +922,7 @@ public class App extends Application {
 
     private void setAIScene() {
 
-        selfvsAI = new SelfGraphBoardFX(500,500);
+        selfvsAI = new SelfGraphBoardFX(500, 500);
         ai = new MyAI();
         iCanAttack = true;
 
@@ -977,7 +941,10 @@ public class App extends Application {
         forAI.getChildren().addAll(ai.b, ene);
 
         Button back = new Button("BACK/FORFEIT");
-        back.setOnMouseClicked(event -> { reset(); transitionTo(mainMenu); });
+        back.setOnMouseClicked(event -> {
+            reset();
+            transitionTo(mainMenu);
+        });
 
         HBox root = new HBox(50);
         root.setStyle("-fx-fill: true; -fx-alignment:center");
@@ -985,20 +952,18 @@ public class App extends Application {
 
         root.getChildren().addAll(forYou, forAI, back);
 
-        ai.b.setOnMouseClicked(new EventHandler<>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (iCanAttack) {
-                    Point p = ai.b.pointCoordinates(event);
-                    iCanAttack = ai.attacked(p);
-                    doSounds(ai.board);
-                    if(ai.board.isGameOver()) {
-                        won();
-                        return;
-                    }
-                    if (!iCanAttack)
-                        aiTurn();
+        ai.b.setOnMouseClicked(event -> {
+            if (iCanAttack) {
+                Point p = ai.b.pointCoordinates(event);
+                AttackResult result = ai.attacked(p);
+                iCanAttack = result == AttackResult.HitShipPiece || result == AttackResult.AlreadyVisible;
+                doSounds(ai.board);
+                if (ai.board.isGameOver()) {
+                    won();
+                    return;
                 }
+                if (!iCanAttack)
+                    aiTurn();
             }
         });
 
@@ -1006,7 +971,7 @@ public class App extends Application {
 
     }
 
-    private void doSounds(PlayerBoard pb){
+    private void doSounds(PlayerBoard pb) {
         doSounds(pb.actualNewHit(), pb.isShipHit());
     }
 
@@ -1014,8 +979,8 @@ public class App extends Application {
     private void doSounds(boolean actualHit, boolean shipHit) {
         aWShipSound.stop();
         aWWaterSound.stop();
-        if(actualHit){
-            if(shipHit)
+        if (actualHit) {
+            if (shipHit)
                 aWShipSound.play();
             else
                 aWWaterSound.play();
@@ -1025,34 +990,28 @@ public class App extends Application {
     private void aiTurn() {
         Point p = ai.chooseAttack(pb.getAvailable());
         System.out.println("CHOSE " + p);
-        boolean hit = false;
-        boolean destroyed = false;
-        if (pb.getAttacked(p.x, p.y)) {
-            //ACTUAL HIT AND NOT AN ALREADY ATTACKED POSITION
-            hit = pb.actualNewHit();
-            destroyed = pb.lastShipDestroyed();
-        }
+        AttackResult result = pb.getAttacked(p.x, p.y);
+        boolean hit = result == AttackResult.HitShipPiece;
+        boolean destroyed = pb.lastShipDestroyed();
+
         ai.thinkAboutNext(pb.getAvailable(), hit, destroyed);
-        selfvsAI.updateTiles(pb.getToPaint());
+        selfvsAI.updateTiles(PlayerBoardTransformer.transformForOthers(pb));
         selfvsAI.setLast(p);
-        if(hit && !pb.isGameOver()) {
-            Task<Void> wait = new Task<> () {
+        if (hit && !pb.isGameOver()) {
+            Task<Void> wait = new Task<>() {
                 @Override
                 protected Void call() throws Exception {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
+                    Thread.sleep(1000);
                     return null;
                 }
             };
             wait.setOnSucceeded(event -> aiTurn());
             new Thread(wait).start();
-        }
-        else if(hit &&pb.isGameOver())
+        } else if (hit && pb.isGameOver())
             lost("YOU LOST TO AI LOL!");
-        else
+        else {
             iCanAttack = true;
+        }
     }
 
     private static class EnemyLocal {
@@ -1061,7 +1020,8 @@ public class App extends Application {
         private String name;
         private Label labeln;
         private TextArea conversation;
-        private EnemyLocal(){
+
+        private EnemyLocal() {
             serverID = 0;
         }
     }
@@ -1079,24 +1039,23 @@ public class App extends Application {
         private ArrayList<Direction> directionsToGo;
         private Direction directionLooking;
 
-        MyAI(){
+        MyAI() {
             searching = false;
             betweenTwo = false;
-            justBefore = new Point(0,0);
-            firstHit = new Point(0,0);
+            justBefore = new Point(0, 0);
+            firstHit = new Point(0, 0);
             directionsToGo = new ArrayList<>();
             board = PlayerBoard.getRandomPlayerBoard();
             b = new GraphBoardFX();
-            b.startTiles(board.getToPaint());
-            //gb = new GraphBoardFX(getToPaint());
+            b.startTiles(PlayerBoardTransformer.transformForOthers(board));
         }
 
         //POINT WITH DIRECTION
-        private Point pWD(Point p, Direction dir){
+        private Point pWD(Point p, Direction dir) {
             return new Point(p.x + dir.getDirectionVector()[0], p.y + dir.getDirectionVector()[1]);
         }
 
-        private boolean inBounds(Point p){
+        private boolean inBounds(Point p) {
             return PlayerBoard.inBounds(p.x, p.y);
         }
 
@@ -1108,7 +1067,7 @@ public class App extends Application {
             if (!searching && hit) {
                 betweenTwo = false;
                 System.out.println("WAS A NEW TARGET");
-                if(!destroyedIt) {
+                if (!destroyedIt) {
                     int[] d = Direction.DOWN.getDirectionVector();
                     Point n = new Point(justBefore.x + d[0], justBefore.y + d[1]);
                     if (inBounds(n) && pos.contains(n))
@@ -1131,46 +1090,42 @@ public class App extends Application {
 
                     directionLooking = directionsToGo.get(directionsToGo.size() - 1);
                 }
-            }
-            else if (searching) {
+            } else if (searching) {
                 //FILTER OUT ALREADY ATTACKED
 
                 System.out.println("WAS AN OLD TARGET");
 
                 //FAILED
-                if(!hit) {
+                if (!hit) {
                     justBefore = firstHit;
                     int size = directionsToGo.size();
 
-                    for(int i = size - 1; i >= 0; i--){
+                    for (int i = size - 1; i >= 0; i--) {
                         Point n = new Point(justBefore.x + directionsToGo.get(i).getDirectionVector()[0],
                                 justBefore.y + directionsToGo.get(i).getDirectionVector()[1]);
-                        if(!pos.contains(n))
+                        if (!pos.contains(n))
                             directionsToGo.remove(i);
                     }
                     directionLooking = directionsToGo.get(0);
+                } else if (!pos.contains(pWD(justBefore, directionLooking))) {
+                    justBefore = firstHit;
+                    directionLooking = directionLooking.getOpposite();
                 }
-                else
-                    if(!pos.contains(pWD(justBefore, directionLooking))) {
-                        justBefore = firstHit;
-                        directionLooking = directionLooking.getOpposite();
-                    }
 
             }
-            if(hit) {
+            if (hit) {
                 searching = !destroyedIt;
             }
         }
 
-        private Point chooseAttack(ArrayList<Point> pos){
+        private Point chooseAttack(ArrayList<Point> pos) {
             Point p;
-            if(!searching){
+            if (!searching) {
                 //GET A POINT NOT TRIED YET
                 int r = new Random().nextInt(pos.size());
                 p = pos.get(r);
                 firstHit = p;
-            }
-            else{
+            } else {
 
                 System.out.println(directionLooking);
 
@@ -1183,10 +1138,10 @@ public class App extends Application {
             return p;
         }
 
-        public boolean attacked(Point p) {
-            boolean res = board.getAttacked(p.x, p.y);
-            b.updateTiles(board.getToPaint());
-            return res;
+        public AttackResult attacked(Point p) {
+            AttackResult result = board.getAttacked(p.x, p.y);
+            b.updateTiles(PlayerBoardTransformer.transformForOthers(board));
+            return result;
         }
     }
 
