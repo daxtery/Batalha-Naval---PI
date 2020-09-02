@@ -1,42 +1,42 @@
 package Common;
 
+import util.Point;
+
 public enum Direction {
 
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-    HORIZONTAL,
-    VERTICAL;
+    Left,
+    Right,
+    Up,
+    Down;
+//    HORIZONTAL,
+//    VERTICAL;
 
-    private Direction rotated;
-    private int[] directionVector;
-    private Direction opposite;
+    public Direction rotated;
+    public Point vector;
+    public Direction opposite;
 
     static {
-        HORIZONTAL.rotated = VERTICAL;
-        HORIZONTAL.directionVector = new int[]{0,1};
+//        HORIZONTAL.rotated = VERTICAL;
+//        HORIZONTAL.vector = new Point(0,1);
+//
+//        VERTICAL.rotated = HORIZONTAL;
+//        VERTICAL.vector = new Point(1,0);
 
-        VERTICAL.rotated = HORIZONTAL;
-        VERTICAL.directionVector = new int[]{1,0};
+        Left.vector = new Point(0,-1);
+        Left.rotated = Up;
+        Left.opposite = Right;
 
+        Right.vector = new Point(0,1);
+        Right.rotated = Down;
+        Right.opposite = Left;
 
-        LEFT.directionVector = new int[]{0,-1};
-        LEFT.rotated = DOWN;
-        LEFT.opposite = RIGHT;
+        Down.vector = new Point(1,0);
+        Down.rotated = Left;
+        Down.opposite = Up;
 
-        RIGHT.directionVector = new int[]{0,1};
-        RIGHT.rotated = DOWN;
-        RIGHT.opposite = LEFT;
-
-        DOWN.directionVector = new int[]{1,0};
-        DOWN.rotated = RIGHT;
-        DOWN.opposite = UP;
-
-        UP.directionVector = new  int[]{-1,0};
-        UP.rotated = RIGHT;
-        UP.opposite = DOWN;
-
+        Up.vector = new Point(-1,0);
+        Up.rotated = Left;
+        Up.opposite = Down;
     }
 
     public Direction getOpposite(){
@@ -45,10 +45,6 @@ public enum Direction {
 
     public Direction getRotated(){
         return rotated;
-    }
-
-    public int[] getDirectionVector(){
-        return directionVector;
     }
 
 }

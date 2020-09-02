@@ -18,10 +18,30 @@ public class Point {
         this(0, 0);
     }
 
+    public Point scaled(int scalar) {
+        return new Point(this.x * scalar, this.y * scalar);
+    }
+
+    public Point scale(int scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
+        return this;
+    }
+
     public Point set(Point other) {
         this.x = other.x;
         this.y = other.y;
         return this;
+    }
+
+    public Point negate() {
+        this.x = -this.x;
+        this.y = -this.y;
+        return this;
+    }
+
+    public Point negated() {
+        return new Point(-this.x, -this.y);
     }
 
     public Point moved(Point by) {

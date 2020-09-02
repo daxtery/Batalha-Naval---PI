@@ -10,9 +10,8 @@ public class ShipPiece extends BoardTile {
     private final int sId;
     Ship ship;
 
-    ShipPiece(Ship _ship, int i, int _x, int _y) {
-        super(new Point(_x, _y), TileType.ShipPiece);
-        ship = _ship;
+    ShipPiece(int i, Point point, boolean visible) {
+        super(point, TileType.ShipPiece, visible);
         sId = i;
     }
 
@@ -38,7 +37,7 @@ public class ShipPiece extends BoardTile {
     }
 
     String details() {
-        return "ShipPiece at " + this.point + ", status: " + status() + " dir: " + getShip().dir;
+        return "ShipPiece at " + this.point + ", status: " + status() + " dir: " + (ship != null ? getShip().direction : "-");
     }
 
 }

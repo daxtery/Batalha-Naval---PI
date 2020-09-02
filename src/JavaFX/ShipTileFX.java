@@ -116,6 +116,6 @@ public class ShipTileFX extends TileFX {
 
     @Override
     public String toString() {
-        return "ST at" + l + ":" + c + "; attacked: " + attacked;
+        return "ST at" + l + ":" + c + "; getAttacked: " + attacked;
     }
 }

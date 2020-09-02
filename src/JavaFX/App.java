@@ -1,5 +1,7 @@
 package JavaFX;
 
+import AI.AiMove;
+import AI.MyAI;
 import Common.*;
 import util.Point;
 
@@ -58,7 +60,7 @@ public class App extends Application {
     );
     private final static Rectangle2D SCREEN_RECTANGLE = Screen.getPrimary().getVisualBounds();
     //FOR OFFLINE
-    private MyAI ai;
+    private AIPlayer ai;
     private boolean vsAI;
     private SelfGraphBoardFX selfvsAI;
     //FOR ONLINE
@@ -290,9 +292,7 @@ public class App extends Application {
                 }
 
                 if (object instanceof PlayerDied) {
-                    Platform.runLater(() -> {
-                        removeEnemy(((PlayerDied) object).who);
-                    });
+                    Platform.runLater(() -> removeEnemy(((PlayerDied) object).who));
                 }
 
                 if (object instanceof YouWon) {
@@ -362,7 +362,7 @@ public class App extends Application {
     //endregion
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
 
         serverConfigurations();
 
@@ -436,7 +436,7 @@ public class App extends Application {
         mGSelfBoard = new SelfGraphBoardFX(500, 500);
 
         mGSelfBoard.startTiles(
-                PlayerBoardTransformer.transform(PlayerBoard.getRandomPlayerBoard())
+                PlayerBoardTransformer.transform(PlayerBoardFactory.getRandomPlayerBoard())
         );
 
         MGCanvasHolder.getChildren().add(mGSelfBoard);
@@ -619,8 +619,8 @@ public class App extends Application {
         sSRandomButton = new Button("Random");
         sSRandomButton.setFont(new Font(50));
         sSRandomButton.setOnMouseClicked(event -> {
-            pb = PlayerBoard.getRandomPlayerBoard();
-            sSboard.doShips(pb);
+            pb = PlayerBoardFactory.getRandomPlayerBoard();
+            sSboard.initShips(pb);
             sSboard.setSelected(null);
             //System.out.println(pb);
         });
@@ -761,10 +761,10 @@ public class App extends Application {
         ene1.b = new GraphBoardFX();
         ene2.b = new GraphBoardFX();
 
-        PlayerBoard board = PlayerBoard.getRandomPlayerBoard();
+        PlayerBoard board = PlayerBoardFactory.getRandomPlayerBoard();
         ene1.b.startTiles(PlayerBoardTransformer.transform(board));
 
-        board = PlayerBoard.getRandomPlayerBoard();
+        board = PlayerBoardFactory.getRandomPlayerBoard();
         ene2.b.startTiles(PlayerBoardTransformer.transform(board));
 
         ene1.b.startAnimating();
@@ -913,7 +913,7 @@ public class App extends Application {
     private void setAIScene() {
 
         selfvsAI = new SelfGraphBoardFX(500, 500);
-        ai = new MyAI();
+        ai = new AIPlayer();
         iCanAttack = true;
 
         Label label = new Label("YOU!");
@@ -945,9 +945,9 @@ public class App extends Application {
         ai.b.setOnMouseClicked(event -> {
             if (iCanAttack) {
                 Point p = ai.b.pointCoordinates(event);
-                AttackResult result = ai.attacked(p);
-                iCanAttack = result == AttackResult.HitShipPiece || result == AttackResult.AlreadyVisible;
-                doSounds(ai.board);
+                AttackResult result = ai.getAttacked(p);
+                iCanAttack = result.shouldPlayAgain();
+                doSounds(result);
                 if (ai.board.isGameOver()) {
                     won();
                     return;
@@ -961,8 +961,8 @@ public class App extends Application {
 
     }
 
-    private void doSounds(PlayerBoard pb) {
-        doSounds(pb.actualNewHit(), pb.isShipHit());
+    private void doSounds(AttackResult result) {
+        doSounds(result.valid(), result.status == AttackResultStatus.HitShipPiece);
     }
 
 
@@ -978,15 +978,17 @@ public class App extends Application {
     }
 
     private void aiTurn() {
-        Point p = ai.chooseAttack(pb.getAvailable());
-        System.out.println("CHOSE " + p);
-        AttackResult result = pb.getAttacked(p.x, p.y);
-        boolean hit = result == AttackResult.HitShipPiece;
-        boolean destroyed = pb.lastShipDestroyed();
+        AiMove move = ai.brain.nextMove(pb);
+        System.out.println("CHOSE " + move);
 
-        ai.thinkAboutNext(pb.getAvailable(), hit, destroyed);
+        AttackResult result = pb.getAttacked(move.point);
+        boolean hit = result.status == AttackResultStatus.HitShipPiece;
+
         selfvsAI.updateTiles(PlayerBoardTransformer.transform(pb));
-        selfvsAI.setLast(p);
+        selfvsAI.setLast(move.point);
+
+        ai.brain.react(pb, move, result);
+
         if (hit && !pb.isGameOver()) {
             Task<Void> wait = new Task<>() {
                 @Override
@@ -1016,120 +1018,21 @@ public class App extends Application {
         }
     }
 
-    private static class MyAI {
+    private static class AIPlayer {
 
         GraphBoardFX b;
         PlayerBoard board;
+        MyAI brain;
 
-        private boolean searching;
-        private boolean betweenTwo;
-
-        private Point firstHit;
-        private Point justBefore;
-        private ArrayList<Direction> directionsToGo;
-        private Direction directionLooking;
-
-        MyAI() {
-            searching = false;
-            betweenTwo = false;
-            justBefore = new Point(0, 0);
-            firstHit = new Point(0, 0);
-            directionsToGo = new ArrayList<>();
-            board = PlayerBoard.getRandomPlayerBoard();
+        AIPlayer() {
+            brain = new MyAI();
+            board = PlayerBoardFactory.getRandomPlayerBoard();
             b = new GraphBoardFX();
             b.startTiles(PlayerBoardTransformer.transform(board));
         }
 
-        //POINT WITH DIRECTION
-        private Point pWD(Point p, Direction dir) {
-            return new Point(p.x + dir.getDirectionVector()[0], p.y + dir.getDirectionVector()[1]);
-        }
-
-        private boolean inBounds(Point p) {
-            return PlayerBoard.inBounds(p.x, p.y);
-        }
-
-        private void thinkAboutNext(ArrayList<Point> pos, boolean hit, boolean destroyedIt) {
-
-            //WASN'T SEARCHING BEFORE
-            //SEE IF HIT
-            //IF HIT, PREPARE THE NEXT ATTACKS ALREADY
-            if (!searching && hit) {
-                betweenTwo = false;
-                System.out.println("WAS A NEW TARGET");
-                if (!destroyedIt) {
-                    int[] d = Direction.DOWN.getDirectionVector();
-                    Point n = new Point(justBefore.x + d[0], justBefore.y + d[1]);
-                    if (inBounds(n) && pos.contains(n))
-                        directionsToGo.add(Direction.DOWN);
-
-                    d = Direction.UP.getDirectionVector();
-                    n = new Point(justBefore.x + d[0], justBefore.y + d[1]);
-                    if (inBounds(n) && pos.contains(n))
-                        directionsToGo.add(Direction.UP);
-
-                    d = Direction.LEFT.getDirectionVector();
-                    n = new Point(justBefore.x + d[0], justBefore.y + d[1]);
-                    if (inBounds(n) && pos.contains(n))
-                        directionsToGo.add(Direction.LEFT);
-
-                    d = Direction.RIGHT.getDirectionVector();
-                    n = new Point(justBefore.x + d[0], justBefore.y + d[1]);
-                    if (inBounds(n) && pos.contains(n))
-                        directionsToGo.add(Direction.RIGHT);
-
-                    directionLooking = directionsToGo.get(directionsToGo.size() - 1);
-                }
-            } else if (searching) {
-                //FILTER OUT ALREADY ATTACKED
-
-                System.out.println("WAS AN OLD TARGET");
-
-                //FAILED
-                if (!hit) {
-                    justBefore = firstHit;
-                    int size = directionsToGo.size();
-
-                    for (int i = size - 1; i >= 0; i--) {
-                        Point n = new Point(justBefore.x + directionsToGo.get(i).getDirectionVector()[0],
-                                justBefore.y + directionsToGo.get(i).getDirectionVector()[1]);
-                        if (!pos.contains(n))
-                            directionsToGo.remove(i);
-                    }
-                    directionLooking = directionsToGo.get(0);
-                } else if (!pos.contains(pWD(justBefore, directionLooking))) {
-                    justBefore = firstHit;
-                    directionLooking = directionLooking.getOpposite();
-                }
-
-            }
-            if (hit) {
-                searching = !destroyedIt;
-            }
-        }
-
-        private Point chooseAttack(ArrayList<Point> pos) {
-            Point p;
-            if (!searching) {
-                //GET A POINT NOT TRIED YET
-                int r = new Random().nextInt(pos.size());
-                p = pos.get(r);
-                firstHit = p;
-            } else {
-
-                System.out.println(directionLooking);
-
-                p = new Point(justBefore.x + directionLooking.getDirectionVector()[0],
-                        justBefore.y + directionLooking.getDirectionVector()[1]);
-
-
-            }
-            justBefore = p;
-            return p;
-        }
-
-        public AttackResult attacked(Point p) {
-            AttackResult result = board.getAttacked(p.x, p.y);
+        public AttackResult getAttacked(Point p) {
+            AttackResult result = board.getAttacked(p);
             b.updateTiles(PlayerBoardTransformer.transform(board));
             return result;
         }

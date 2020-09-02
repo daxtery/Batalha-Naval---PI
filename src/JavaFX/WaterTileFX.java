@@ -26,7 +26,7 @@ class WaterTileFX extends TileFX {
 
     @Override
     public String toString() {
-        return "WT at" + l + ":" + c + "; attacked: " + attacked;
+        return "WT at" + l + ":" + c + "; getAttacked: " + attacked;
     }
 
     public void attack() {

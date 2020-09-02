@@ -1,9 +1,6 @@
 package JavaFX;
 
-import Common.BoardTile;
-import Common.Direction;
-import Common.PlayerBoard;
-import Common.ShipPiece;
+import Common.*;
 
 import static Common.PlayerBoard.COLUMNS;
 import static Common.PlayerBoard.LINES;
@@ -17,7 +14,7 @@ public class SelfGraphBoardFX extends GraphBoardFX {
 
     @Override
     void startTiles(String[][] sent) {
-        pb = new PlayerBoard(sent);
+        pb = PlayerBoardTransformer.parse(sent);
         for (int l = 0; l < LINES; l++) {
             for (int c = 0; c < COLUMNS; c++) {
                 BoardTile boardTile = pb.getTileAt(l, c);
@@ -25,10 +22,10 @@ public class SelfGraphBoardFX extends GraphBoardFX {
                 switch (boardTile.tileType) {
                     case ShipPiece -> {
                         ShipPiece sp = (ShipPiece) pb.getTileAt(l, c);
-                        tiles[l][c] = new ShipTileFX(sp.getShip().getSize(), sp.getIdInsideShip(), l, c, sp.getShip().getDirection());
+                        tiles[l][c] = new ShipTileFX(sp.getShip().size(), sp.getIdInsideShip(), l, c, sp.getShip().direction);
                     }
 
-                    case Water -> tiles[l][c] = new WaterTileFX(l, c, Direction.VERTICAL);
+                    case Water -> tiles[l][c] = new WaterTileFX(l, c, Direction.Left);
                 }
 
                 tiles[l][c].forNormalBoard(false);

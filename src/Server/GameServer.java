@@ -1,10 +1,7 @@
 package Server;
 
-import Common.Conversations;
-import Common.Network;
+import Common.*;
 import Common.Network.*;
-import Common.PlayerBoard;
-import Common.PlayerBoardTransformer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
@@ -113,7 +110,7 @@ public class GameServer {
                     handleRegister(connection, (Register) object);
                 }
                 if (object instanceof APlayerboard) {
-                    PlayerBoard pb = new PlayerBoard(((APlayerboard) object).board);
+                    PlayerBoard pb = PlayerBoardTransformer.parse(((APlayerboard) object).board);
                     //ADD TO GAME
                     //System.out.println("ADDING TO: " + connection.myID +
                     //        " WHICH IS " + connection.name);
@@ -163,14 +160,15 @@ public class GameServer {
                 System.out.println(connection.name + " IS ATTACKING " +
                         players[a.toAttackID].name);
 
-                boolean canGoAgain = game.attack(
+                AttackResult result = game.attack(
                         a.toAttackID,
                         a.l,
                         a.c
                 );
 
-                boolean ship = game.lastAttackShip();
-                boolean actualNewHit = game.lastActualHit();
+                boolean hitShip = result.status == AttackResultStatus.HitShipPiece;
+                boolean shouldGoAgain = result.shouldPlayAgain();
+                boolean hitSomething = result.valid();
 
                 var _board = game.getPlayerBoard(a.toAttackID);
 
@@ -179,10 +177,10 @@ public class GameServer {
                 System.out.println(Arrays.deepToString(attackedOne));
 
                 AnAttackResponse response = new AnAttackResponse();
-                response.again = canGoAgain;
+                response.again = shouldGoAgain;
                 response.newAttackedBoard = attackedOne;
-                response.actualHit = actualNewHit;
-                response.shipHit = ship;
+                response.actualHit = hitSomething;
+                response.shipHit = hitShip;
 
                 // TO THE ATTACKED GUY
 
@@ -201,7 +199,7 @@ public class GameServer {
                         eb.id = a.toAttackID;
                         players[a.otherID].sendTCP(eb);
                         players[a.toAttackID].sendTCP(attacked);
-                        if (!canGoAgain) {
+                        if (!shouldGoAgain) {
                             currentPlayer = (currentPlayer + 1) % 3;
                             WhoseTurn whoseTurn = new WhoseTurn();
                             whoseTurn.name = players[currentPlayer].name;
@@ -222,7 +220,7 @@ public class GameServer {
                     case playing2left -> {
                         connection.sendTCP(response);
                         players[a.toAttackID].sendTCP(attacked);
-                        if (!canGoAgain) {
+                        if (!shouldGoAgain) {
                             currentPlayer = a.toAttackID;
                             WhoseTurn whoseTurn = new WhoseTurn();
                             whoseTurn.name = players[currentPlayer].name;

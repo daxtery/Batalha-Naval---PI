@@ -7,10 +7,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Rotate;
-import javafx.scene.*;
+import util.Point;
 
-import java.awt.*;
 
 abstract class SpriteTileFX {
 
@@ -54,10 +52,6 @@ abstract class SpriteTileFX {
         gc.drawImage(imageToDraw, x, y);
     }
 
-    void setPosition(Point p){
-        setPosition(p.x, p.y);
-    }
-
     void setPosition(int _x, int _y){
         x = _x;
         y = _y;
@@ -79,25 +73,12 @@ abstract class SpriteTileFX {
     }
 
     static Image giveImageBasedOnDirection(Image i, Direction dir){
-        switch (dir){
-            case HORIZONTAL:
-                return rotateImage(0,i);
-        }
-        return rotateImage(90,i);
-    }
-
-    void rotate90(){
-        setImageToDraw(rotateImage(90, getImageToDraw()));
-    }
-
-    void drawRotated(Image image, int angles, GraphicsContext gc){
-        gc.save(); // saves the current state on stack, including the current transform
-
-        Rotate r = new Rotate(angles, x + width/2 ,  y + height/2);
-        gc.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
-        gc.drawImage(image, x, y);
-
-        gc.restore(); // back to original state (before rotation)
+        return switch (dir) {
+            case Right -> rotateImage(0, i);
+            case Down -> rotateImage(90, i);
+            case Left -> rotateImage(180, i);
+            case Up -> rotateImage(270, i);
+        };
     }
 
     static Image rotateImage(int angle, Image image){

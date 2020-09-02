@@ -1,5 +1,11 @@
 package Common;
 
+import util.Point;
+
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+
 public class PlayerBoardTransformer {
 
     public static final String PIECE_NOT_ATTACKED_STRING = "P";
@@ -47,7 +53,84 @@ public class PlayerBoardTransformer {
         };
     }
 
-//    private PlayerBoard fromEncoded(String[][] message) {
-//    }
+    private static boolean theresAPieceAt(String[][] message, Point point) {
+        return isAPiece(message[point.x][point.y]);
+    }
+
+    private static boolean isAPiece(String encoded) {
+        return encoded.equalsIgnoreCase(PIECE_ATTACKED_STRING) ||
+                encoded.equalsIgnoreCase(PIECE_NOT_ATTACKED_STRING) ||
+                encoded.equalsIgnoreCase(PIECE_ATTACKED_SHIP_DESTROYED_STRING);
+    }
+
+    public static PlayerBoard parse(String[][] message) {
+        HashSet<Point> toSkip = new HashSet<>();
+        PlayerBoard board = new PlayerBoard();
+        BoardTile[][] boardTiles = new BoardTile[PlayerBoard.LINES][PlayerBoard.COLUMNS];
+
+        for (int l = 0; l < boardTiles.length; l++) {
+            for (int c = 0; c < boardTiles[l].length; c++) {
+
+                if (toSkip.contains(new Point(l, c))) {
+                    //already found it
+                    continue;
+                }
+
+                String encoded = message[l][c];
+
+                if (isAPiece(encoded)) {
+                    Ship ship = findAllPiecesAndBuildShip(toSkip, message, l, c);
+                    board.placeShip(ship);
+                } else {
+                    boardTiles[l][c] = new WaterTile(l, c);
+                    if (encoded.equalsIgnoreCase(WATER_VISIBLE_STRING)) {
+                        boardTiles[l][c].visible = true;
+                    }
+                }
+            }
+        }
+
+        return board;
+    }
+
+    private static boolean isWithinBounds(Point point) {
+        Point lowerBound = new Point(-1, -1);
+        Point higherBound = new Point(PlayerBoard.LINES, PlayerBoard.COLUMNS);
+
+        return point.isConstrainedBy(lowerBound, higherBound);
+    }
+
+    private static Ship findAllPiecesAndBuildShip(HashSet<Point> toSkip, String[][] message, int l, int c) {
+        Point origin = new Point(l, c);
+        Direction finalDirection = Direction.Up;
+
+        for (Direction direction : Direction.values()) {
+            Point directionVector = direction.vector;
+            Point next = origin.moved(directionVector);
+
+            if (isWithinBounds(next) && theresAPieceAt(message, next)) {
+                finalDirection = direction;
+                break;
+            }
+        }
+
+        List<ShipPiece> pieces = new LinkedList<>();
+        Point next = origin;
+        Point directionVector = finalDirection.vector;
+
+        for (int i = 0; isWithinBounds(next) && theresAPieceAt(message, next); next = next.moved(directionVector), i++) {
+            boolean visible = !message[next.x][next.y].equalsIgnoreCase(PIECE_NOT_ATTACKED_STRING);
+            pieces.add(new ShipPiece(i, next, visible));
+
+            if (i > 0) toSkip.add(next);
+        }
+
+        ShipPiece[] piecesArray = pieces.toArray(new ShipPiece[0]);
+
+        Ship ship = new Ship(piecesArray, finalDirection, Ship.ShipType.getShipType(pieces.size()));
+
+        pieces.forEach(p -> p.ship = ship);
+        return ship;
+    }
 
 }

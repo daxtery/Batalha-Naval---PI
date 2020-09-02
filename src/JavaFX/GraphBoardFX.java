@@ -79,7 +79,7 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
 
     void startTiles(String[][] sent) {
 
-        pb = new PlayerBoard(sent);
+        pb = PlayerBoardTransformer.parse(sent);
 
         for (int l = 0; l < LINES; l++) {
             for (int c = 0; c < COLUMNS; c++) {
@@ -97,11 +97,11 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
     }
 
     void addShipTileFX(int l, int c, ShipPiece sp) {
-        tiles[l][c] = new ShipTileFX(sp.getShip().getSize(), sp.getIdInsideShip(), l, c, sp.getShip().getDirection());
+        tiles[l][c] = new ShipTileFX(sp.getShip().size(), sp.getIdInsideShip(), l, c, sp.getShip().direction);
     }
 
     void addWaterTileFX(int l, int c, WaterTile wt) {
-        tiles[l][c] = new WaterTileFX(l, c, Direction.VERTICAL);
+        tiles[l][c] = new WaterTileFX(l, c, Direction.Right);
     }
 
     void updateTiles(String[][] sent) {

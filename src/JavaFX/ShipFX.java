@@ -2,8 +2,10 @@ package JavaFX;
 
 
 import Common.Direction;
+import Common.Ship;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import util.Point;
 
 class ShipFX extends SpriteTileFX {
 
@@ -19,18 +21,33 @@ class ShipFX extends SpriteTileFX {
 
     int shipSize;
     boolean placed;
+    Ship ship;
 
-    ShipFX(int _ShipSize, int _x, int _y, Direction _dir, boolean boardCoord){
-        super(_x, _y, boardCoord, _dir);
+    ShipFX(int _ShipSize, Point point, Direction _dir, boolean boardCoord) {
+        super(point.x, point.y, boardCoord, _dir);
         shipSize = _ShipSize;
         selectImage();
     }
 
-    ShipFX(int _ShipSize){
-        this(_ShipSize, 0,0, Direction.HORIZONTAL, false);
+    ShipFX(int _ShipSize) {
+        this(_ShipSize, new Point(), Direction.Right, false);
     }
 
-    void selectImage(){
+    void setShip(Ship ship) {
+        this.ship = ship;
+        this.placed = true;
+
+        Point position = ship.origin();
+
+        if (ship.direction == Direction.Up || ship.direction == Direction.Left) {
+            position = ship.tail();
+        }
+
+        setPositionBoard(position);
+        selectImage();
+    }
+
+    void selectImage() {
         switch (shipSize) {
             case 1 -> setImageToDraw(ONE);
             case 2 -> setImageToDraw(TWO);

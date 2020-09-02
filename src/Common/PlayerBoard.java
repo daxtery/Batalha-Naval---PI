@@ -12,35 +12,14 @@ public class PlayerBoard implements Serializable {
     public static final int COLUMNS = 10;
     public final static int NUMBER_OF_BOATS = 10;
     public BoardTile[][] boardTiles;
-    private List<Ship> ships;
-    private ArrayList<ShipPiece> pieces;
-    private boolean lastShipDestroyed;
-    private boolean actualHit;
-    private boolean shipHit;
+    private final List<Ship> ships;
+    private final List<ShipPiece> pieces;
 
     public PlayerBoard() {
         boardTiles = new BoardTile[LINES][COLUMNS];
         pieces = new ArrayList<>();
         ships = new ArrayList<>();
         fillWithWater();
-    }
-
-    public PlayerBoard(String[][] sent) {
-        this();
-        transformBack(sent);
-    }
-
-    public static boolean aPieceInTheArray(String[][] sent, int l, int c) {
-        return sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.PIECE_ATTACKED_STRING) ||
-                sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.PIECE_NOT_ATTACKED_STRING) ||
-                sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.PIECE_ATTACKED_SHIP_DESTROYED_STRING);
-    }
-
-    public static PlayerBoard getRandomPlayerBoard() {
-        PlayerBoard pb = new PlayerBoard();
-        pb.placeShips(Ship.getRandomShips());
-        //pb.allPieces();
-        return pb;
     }
 
     //region TransformBack!
@@ -60,87 +39,6 @@ public class PlayerBoard implements Serializable {
         return ships;
     }
 
-    void seeAllShips() {
-        Ship old = null;
-        for (ShipPiece piece : pieces) {
-            if (!piece.ship.equals(old)) {
-                System.out.println(piece.ship);
-                old = piece.ship;
-            }
-        }
-    }
-
-
-    //FROM String[][] go get the ship
-    private Ship constructShip(ArrayList<Point> toSkip, String[][] sent, int l, int c) {
-        return initializeShipConstruction(toSkip, sent, l, c).getShip();
-    }
-
-    private ConstructorShip initializeShipConstruction(ArrayList<Point> toSkip, String[][] sent, int l, int c) {
-
-        ConstructorShip ship = new ConstructorShip(l, c);
-
-        int[] vec = Direction.HORIZONTAL.getDirectionVector();
-        //HORIZONTAL
-        if (inBounds(l + vec[0], c + vec[1]) && aPieceInTheArray(sent, l + vec[0], c + vec[1])) {
-            ship.setDirection(Direction.HORIZONTAL);
-            return buildIt(toSkip, sent, l, c, ship, Direction.HORIZONTAL, 0);
-        }
-        //VERTICAL OR JUST 1 PIECE-SHIP
-        ship.setDirection(Direction.VERTICAL);
-        return buildIt(toSkip, sent, l, c, ship, Direction.VERTICAL, 0);
-    }
-
-    //endregion
-
-    private ConstructorShip buildIt(ArrayList<Point> toSkip, String[][] sent, int l, int c, ConstructorShip ship, Direction _dir, int i) {
-
-        ShipPiece sp = new ShipPiece(null, i, l, c);
-        if (sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.PIECE_NOT_ATTACKED_STRING)) {
-            sp = new ShipPiece(null, i, l, c);
-        } else {
-            sp.visible = true;
-        }
-        toSkip.add(new Point(l, c));
-        ship.addPiece(sp);
-
-        int[] vec = _dir.getDirectionVector();
-        Point newP = new Point(l + vec[0], c + vec[1]);
-
-        if (inBounds(newP) && aPieceInTheArray(sent, newP.x, newP.y)) {
-            i++;
-            ship = buildIt(toSkip, sent, newP.x, newP.y, ship, _dir, i);
-        }
-        return ship;
-    }
-
-    //region attacked
-
-    private void transformBack(String[][] sent) {
-
-        ArrayList<Point> toSkip = new ArrayList<>();
-
-        for (int l = 0; l < LINES; l++)
-            for (int c = 0; c < COLUMNS; c++) {
-                if (toSkip.contains(new Point(l, c))) {
-                    //already found it
-                    continue;
-                }
-                if (aPieceInTheArray(sent, l, c)) {
-                    Ship s = constructShip(toSkip, sent, l, c);
-                    placeShip(s);
-                } else {
-                    //WATER
-                    boardTiles[l][c] = new WaterTile(l, c);
-                    if (sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.WATER_VISIBLE_STRING)) {
-                        boardTiles[l][c].visible = true;
-                    }
-                }
-            }
-    }
-
-    //endregion
-
     private void fillWithWater() {
         for (int l = 0; l < LINES; l++) {
             for (int c = 0; c < COLUMNS; c++) {
@@ -149,39 +47,36 @@ public class PlayerBoard implements Serializable {
         }
     }
 
-    public AttackResult getAttacked(int x, int y) {
-        if (!inBounds(new Point(x, y))) return AttackResult.OutsideBounds;
+    public AttackResult getAttacked(Point point) {
+        if (!inBounds(point)) return AttackResult.OutsideBounds();
 
-        BoardTile boardTile = getTileAt(x, y);
-        actualHit = false;
+        BoardTile boardTile = getTileAt(point);
 
-        if (boardTile.visible) return AttackResult.AlreadyVisible;
+        if (boardTile.visible) return AttackResult.AlreadyVisible();
 
-        actualHit = true;
         boardTile.visible = true;
 
         return switch (boardTile.tileType) {
-            case Water -> {
-                shipHit = false;
-                yield AttackResult.HitWater;
-            }
+            case Water -> AttackResult.HitWater();
 
             case ShipPiece -> {
                 ShipPiece shipPiece = (ShipPiece) boardTile;
-                shipHit = true;
                 pieces.remove(shipPiece);
                 Ship ship = shipPiece.ship;
-                lastShipDestroyed = false;
                 if (ship.isDestroyed()) {
-                    lastShipDestroyed = true;
                     shipDestroyed(ship);
+                    yield AttackResult.HitShipPiece(true);
                 }
-                yield AttackResult.HitShipPiece;
+                yield AttackResult.HitShipPiece(false);
             }
         };
     }
 
-    public ArrayList<Point> getAvailable() {
+    public AttackResult getAttacked(int x, int y) {
+        return getAttacked(new Point(x, y));
+    }
+
+    public List<Point> getAvailable() {
         ArrayList<Point> points = new ArrayList<>();
         for (int l = 0; l < LINES; l++) {
             for (int c = 0; c < COLUMNS; c++) {
@@ -197,7 +92,7 @@ public class PlayerBoard implements Serializable {
     }
 
     private void shipDestroyed(Ship s) {
-        for (ShipPiece piece : s.getPieces()) {
+        for (ShipPiece piece : s.pieces) {
             Point[] points = getSurroundingPoints(piece.point);
             for (Point point : points) {
                 if (inBounds(point.x, point.y)) {
@@ -230,17 +125,13 @@ public class PlayerBoard implements Serializable {
 
     //region CanPlaceShip
 
-    public boolean placeShip(Ship toAdd) {
-        if (canShipBeHere(toAdd)) {
-            ships.add(toAdd);
-            for (ShipPiece piece : toAdd.getPieces()) {
-                //System.out.println("PLACING " + piece.getClass().getSimpleName() + " AT: " + piece.x + " " + piece.y);
-                boardTiles[piece.point.x][piece.point.y] = piece;
-                pieces.add(piece);
-            }
-            return true;
+    public void placeShip(Ship toAdd) {
+        ships.add(toAdd);
+        for (ShipPiece piece : toAdd.pieces) {
+            //System.out.println("PLACING " + piece.getClass().getSimpleName() + " AT: " + piece.x + " " + piece.y);
+            boardTiles[piece.point.x][piece.point.y] = piece;
+            pieces.add(piece);
         }
-        return false;
     }
 
     private Point[] getSurroundingPoints(Point point) {
@@ -259,7 +150,7 @@ public class PlayerBoard implements Serializable {
     }
 
     public boolean canShipBeHere(Ship toAdd) {
-        for (ShipPiece piece : toAdd.getPieces()) {
+        for (ShipPiece piece : toAdd.pieces) {
             //System.out.println(piece.getPointCoordinates());
             boolean isInBounds = inBounds(piece.point);
             if (!isInBounds) {
@@ -317,27 +208,16 @@ public class PlayerBoard implements Serializable {
 
     public void removeShip(Ship ship) {
         ships.remove(ship);
-        for (ShipPiece piece : ship.getPieces()) {
+        for (ShipPiece piece : ship.pieces) {
             //System.out.println("REMOVING " + piece.getClass().getSimpleName() + " AT: " + piece.x + " " + piece.y);
             boardTiles[piece.point.x][piece.point.y] = new WaterTile(piece.point.x, piece.point.y);
             pieces.remove(piece);
         }
     }
 
-    public boolean lastShipDestroyed() {
-        return lastShipDestroyed;
-    }
-
-    public boolean actualNewHit() {
-        return actualHit;
-    }
-
     public boolean fullOfShips() {
-        System.out.println(pieces.size());
+        //System.out.println(pieces.size());
         return pieces.size() == 20;
     }
 
-    public boolean isShipHit() {
-        return shipHit;
-    }
 }

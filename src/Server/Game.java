@@ -5,8 +5,7 @@ import Common.PlayerBoard;
 
 public class Game {
 
-    private PlayerBoard[] playerBoards;
-    private int idLastAttacked = 0;
+    private final PlayerBoard[] playerBoards;
 
     Game(){
         playerBoards = new PlayerBoard[3];
@@ -21,9 +20,8 @@ public class Game {
         return true;
     }
 
-    boolean attack(int id, int x, int y){
-        idLastAttacked = id;
-        return playerBoards[id].getAttacked(x, y) == AttackResult.HitShipPiece;
+    AttackResult attack(int id, int x, int y){
+        return playerBoards[id].getAttacked(x, y);
     }
 
     void removePlayer(int id){
@@ -68,11 +66,4 @@ public class Game {
         return playerBoards[i];
     }
 
-    public boolean lastAttackShip() {
-        return playerBoards[idLastAttacked].isShipHit();
-    }
-
-    public boolean lastActualHit(){
-        return playerBoards[idLastAttacked].actualNewHit();
-    }
 }

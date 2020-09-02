@@ -34,6 +34,6 @@ public abstract class TileFX extends SpriteTileFX {
 
     @Override
     public String toString() {
-        return "T at" + l + ":" + c + "; attacked: " + attacked;
+        return "T at" + l + ":" + c + "; getAttacked: " + attacked;
     }
 }
