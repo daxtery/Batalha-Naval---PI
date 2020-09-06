@@ -14,11 +14,6 @@ class ShipFX extends SpriteTileFX {
     private final static Image THREE = new Image("images/3.png");
     private final static Image FOUR = new Image("images/4.png");
 
-    private final static Image ONE_V = new Image("images/1_v.png");
-    private final static Image TWO_V = new Image("images/2_v.png");
-    private final static Image THREE_V = new Image("images/3_v.png");
-    private final static Image FOUR_V = new Image("images/4_v.png");
-
     int shipSize;
     boolean placed;
     Ship ship;
@@ -42,6 +37,8 @@ class ShipFX extends SpriteTileFX {
         if (ship.direction == Direction.Up || ship.direction == Direction.Left) {
             position = ship.tail();
         }
+
+        dir = ship.direction;
 
         setPositionBoard(position);
         selectImage();

@@ -5,33 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="37b56e5f-9663-4c59-9fe2-fcdf19ec8eed" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/AI/AiMove.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AI/MyAI.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Common/AttackResultStatus.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Common/PlayerBoardFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Common/ShipFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Common/ShipSchematics.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tests/Common/PlayerBoardTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/Tests/Common/PlayerBoardTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/AttackResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/AttackResult.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Common/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Direction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/Orientation.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoardTransformer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoardTransformer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Common/Ship.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Ship.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/ShipPiece.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/ShipPiece.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/JavaFX/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/GraphBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/GraphBoardFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/SelfGraphBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/SelfGraphBoardFX.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/JavaFX/ShipFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/ShipFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/ShipTileFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/ShipTileFX.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/SpriteTileFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/SpriteTileFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/TileFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/TileFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/WaterTileFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/WaterTileFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server/GameServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/GameServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/Point.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Point.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,6 +71,19 @@
     </key>
   </component>
   <component name="RunManager" selected="Application.Unnamed">
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="CompoundRunConfigurationType">
       <toRun name="Unnamed" type="Application" />
       <toRun name="GameServer" type="Application" />
@@ -158,6 +151,12 @@
       <workItem from="1599047327078" duration="425000" />
       <workItem from="1599052739214" duration="8255000" />
       <workItem from="1599065969308" duration="1540000" />
+      <workItem from="1599071809927" duration="3387000" />
+      <workItem from="1599084906010" duration="3555000" />
+      <workItem from="1599131156107" duration="3045000" />
+      <workItem from="1599137174654" duration="622000" />
+      <workItem from="1599419627187" duration="1140000" />
+      <workItem from="1599422708897" duration="2271000" />
     </task>
     <servers />
   </component>
@@ -217,38 +216,38 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="687" y="332" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1598974619931" />
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1599067510271">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1599424907187">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510271" />
-    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1599067510271">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907187" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1599424907187">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510271" />
-    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1599067510271">
+    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907187" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1599424907186">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510271" />
-    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1599067510271">
+    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907186" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1599424907187">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510271" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1599067510272">
+    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907187" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1599424915220">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510272" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1599067510272">
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1599424915220">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510272" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1599067510271">
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1599424915220">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510271" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1599067510272">
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1599424915220">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599067510272" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
     <state x="636" y="222" key="RollbackChangesDialog" timestamp="1598973841965">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -261,6 +260,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="498" height="537" key="SwitcherDM/0.0.1920.1040@0.0.1920.1040" timestamp="1599059164366" />
+    <state x="512" y="249" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1599424985661">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="512" y="249" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1920.1040@0.0.1920.1040" timestamp="1599424985661" />
+    <state x="690" y="284" key="extract.method.dialog" timestamp="1599073452219">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="690" y="284" key="extract.method.dialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599073452219" />
     <state x="667" y="119" width="585" height="801" key="find.popup" timestamp="1598984649079">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -282,8 +289,8 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/JavaFX/ShipTileFX.java</url>
-          <line>46</line>
+          <url>file://$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java</url>
+          <line>254</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>

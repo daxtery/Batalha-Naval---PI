@@ -621,7 +621,7 @@ public class App extends Application {
         sSRandomButton.setOnMouseClicked(event -> {
             pb = PlayerBoardFactory.getRandomPlayerBoard();
             sSboard.initShips(pb);
-            sSboard.setSelected(null);
+            sSboard.selected = null;
             //System.out.println(pb);
         });
 
@@ -675,77 +675,12 @@ public class App extends Application {
         sSRoot.setSpacing(10);
 
         sSRoot.setOnKeyPressed(event -> {
-            if (sSboard.selected != null && event.getCode() == KeyCode.R) {
-                sSboard.toRotate = !sSboard.toRotate;
+            if (event.getCode() == KeyCode.R) {
+                sSboard.OnRotateKeyPressed(event);
             }
         });
-        sSboard.setOnMouseMoved(event -> {
-            if (!sSboard.finished) {
-                sSboard.seeIfShipFXCanBePlaced(event.getX(), event.getY());
-            }
-        });
-        sSboard.setOnMouseClicked(new EventHandler<>() {
-
-            ShipFX current = null;
-            boolean haveAShip = false;
-            boolean toRemove = false;
-
-            @Override
-            public void handle(MouseEvent event) {
-
-                if (!sSboard.finished) {
-
-                    ShipFX result = sSboard.checkAShip(event.getX(), event.getY());
-
-                    if (haveAShip && result == current) {
-                        if (toRemove) {
-                            sSboard.placeShipFX(event.getX(), event.getY());
-                            toRemove = false;
-                        }
-                        haveAShip = false;
-                        current = null;
-                        sSboard.setSelected(null);
-                        return;
-                    }
-
-                    //ALREADY HAVE 1, HIT WATER AND ALREADY PLACED
-                    if (haveAShip && result == null && current.placed) {
-                        if (sSboard.canPlace(event.getX(), event.getY())) {
-                            sSboard.placeShipFX(event.getX(), event.getY());
-                            haveAShip = false;
-                            current = null;
-                        }
-                        return;
-                    }
-
-                    //ALREADY HAVE 1, HIT WATER AND NOT PLACED
-                    if (haveAShip && result == null) {
-                        if (sSboard.canPlace(event.getX(), event.getY())) {
-                            sSboard.placeShipFX(event.getX(), event.getY());
-                            haveAShip = false;
-                            current = null;
-                        }
-                        return;
-                    }
-
-                    if (result != null && !haveAShip && result.placed) {
-                        toRemove = true;
-                        sSboard.removeShipFX(result);
-                        sSboard.setSelected(result);
-                        current = result;
-                        haveAShip = true;
-                        return;
-                    }
-
-                    if (result != null && !haveAShip) {
-                        sSboard.setSelected(result);
-                        current = result;
-                        haveAShip = true;
-                    }
-                }
-            }
-        });
-
+        sSboard.setOnMouseMoved(event -> sSboard.OnMouseMoved(event));
+        sSboard.setOnMouseClicked(event -> sSboard.OnMouseClicked(event));
 
         setShips = new Scene(sSRoot, SCREEN_RECTANGLE.getWidth(),
                 SCREEN_RECTANGLE.getHeight());

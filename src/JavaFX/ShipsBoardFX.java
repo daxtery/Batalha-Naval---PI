@@ -3,12 +3,12 @@ package JavaFX;
 import Common.*;
 import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import util.Point;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static Common.PlayerBoard.COLUMNS;
@@ -18,18 +18,17 @@ import static Common.PlayerBoardFactory.DEFAULT_SIZES;
 public class ShipsBoardFX extends GraphBoardFX {
 
     ShipFX[] shipsFX;
+
     ShipFX selected;
-    List<Point> tilesToDraw;
+    ShipFX preview;
+
     boolean canPlace;
-    boolean toRotate;
     boolean finished;
 
     ShipsBoardFX(int _w, int _h) {
         super(_w, _h);
         shipsFX = new ShipFX[10];
-        tilesToDraw = new ArrayList<>();
         canPlace = false;
-        toRotate = false;
         initShips();
 
         anim = new AnimationTimer() {
@@ -41,27 +40,54 @@ public class ShipsBoardFX extends GraphBoardFX {
             public void handle(long currentNanoTime) {
 
                 if (((currentNanoTime - lastNano) / 1000000000.0) > perSec) {
+
                     Paint fill = gc.getFill();
                     Paint stroke = gc.getStroke();
+
                     gc.clearRect(0, 0, getWidth(), getHeight());
                     gc.drawImage(new Image("images/agua_bg.png"), 0, 0);
-                    for (int l = 0; l < LINES; l++)
-                        gc.strokeLine(0, l * TileFX.TILE_SIZE, x_max, l * TileFX.TILE_SIZE);
-                    for (int c = 0; c < COLUMNS; c++)
-                        gc.strokeLine(c * TileFX.TILE_SIZE, 0, c * TileFX.TILE_SIZE, y_max);
 
-                    for (ShipFX s : shipsFX)
-                        s.draw(gc);
-                    gc.setStroke(Color.BLUE);
-                    if (selected != null)
-                        gc.strokeRect(selected.x, selected.y, selected.width, selected.height);
-                    gc.setFill(Color.rgb(3, 200, 100, 0.5));
-                    if (!canPlace)
-                        gc.setFill(Color.rgb(233, 0, 3, 0.5));
-                    if (tilesToDraw.size() > 0) {
-                        for (Point p : tilesToDraw) {
-                            gc.fillRect(p.x * TileFX.TILE_SIZE, p.y * TileFX.TILE_SIZE, TileFX.TILE_SIZE, TileFX.TILE_SIZE);
+                    for (int l = 0; l < LINES; l++) {
+                        gc.strokeLine(0, l * TileFX.TILE_SIZE, x_max, l * TileFX.TILE_SIZE);
+                    }
+
+                    for (int c = 0; c < COLUMNS; c++) {
+                        gc.strokeLine(c * TileFX.TILE_SIZE, 0, c * TileFX.TILE_SIZE, y_max);
+                    }
+
+                    for (ShipFX s : shipsFX) {
+
+                        if (s == selected && selected.ship != null) {
+                            gc.setGlobalAlpha(0.5);
+                            s.draw(gc);
+                            gc.setGlobalAlpha(1);
+                            continue;
                         }
+
+                        s.draw(gc);
+
+                    }
+
+                    if (selected != null) {
+                        gc.setStroke(Color.BLUE);
+                        gc.strokeRect(selected.x, selected.y, selected.width, selected.height);
+                    }
+
+                    gc.setStroke(stroke);
+
+                    if (preview != null && preview.ship != null) {
+
+                        final Color ok = Color.rgb(3, 200, 100, 0.5);
+                        final Color forbidden = Color.rgb(233, 0, 3, 0.5);
+
+                        gc.setFill(canPlace ? ok : forbidden);
+
+                        preview.draw(gc);
+
+                        for (ShipPiece piece : preview.ship.pieces) {
+                            gc.fillRect(piece.point.y * TileFX.TILE_SIZE, piece.point.x * TileFX.TILE_SIZE, TileFX.TILE_SIZE, TileFX.TILE_SIZE);
+                        }
+
                     }
 
                     gc.setFill(Color.WHITE);
@@ -74,6 +100,7 @@ public class ShipsBoardFX extends GraphBoardFX {
 
                     gc.setFill(fill);
                     gc.setStroke(stroke);
+
                     lastNano = currentNanoTime;
                 }
             }
@@ -98,74 +125,136 @@ public class ShipsBoardFX extends GraphBoardFX {
             shipsFX[i].setShip(s);
         }
 
-        for (int i = 0; i < ships.size(); i++) {
-            System.out.println(shipsFX[i].ship);
-        }
-
-    }
-
-    private Ship buildSelectedStartingAt(int l, int c) {
-        ShipSchematics schematics = new ShipSchematics(new Point(l, c), selected.dir, Ship.ShipType.getShipType(selected.shipSize));
-        return ShipFactory.build(schematics);
-    }
-
-    void seeIfShipFXCanBePlaced(double x, double y) {
-        tilesToDraw.clear();
-
-        if (!(x < 0 || x > LINES * TileFX.TILE_SIZE || y < 0 || y > COLUMNS * TileFX.TILE_SIZE))
-            if (selected != null) {
-
-                int l = (int) y / TileFX.TILE_SIZE;
-                int c = (int) x / TileFX.TILE_SIZE;
-
-                Ship temp = buildSelectedStartingAt(l, c);
-
-                canPlace = pb.canShipBeHere(temp);
-                for (ShipPiece sp : temp.pieces)
-                    tilesToDraw.add(sp.point.flipped());
-            }
-    }
-
-    boolean canPlace(double x, double y) {
-        seeIfShipFXCanBePlaced(x, y);
-        return canPlace;
-    }
-
-    void placeShipFX(double x, double y) {
-
-        int l = (int) y / TileFX.TILE_SIZE;
-        int c = (int) x / TileFX.TILE_SIZE;
-
-        if (l > 9 || l < 0 || c > 9 || c < 0)
-            return;
-
-        if (canPlace && selected != null) {
-            Ship temp = buildSelectedStartingAt(l, c);
-            pb.placeShip(temp);
-            selected.setShip(temp);
-            selected = null;
-        }
-    }
-
-
-    public ShipFX checkAShip(double x, double y) {
-        for (ShipFX s : shipsFX)
-            if (s.contains(x, y))
-                return s;
-        return null;
-    }
-
-    void setSelected(ShipFX _selected) {
-        selected = _selected;
-    }
-
-    public void removeShipFX(ShipFX s) {
-        pb.removeShip(s.ship);
     }
 
     @Override
     public void setPlayerBoard(PlayerBoard playerBoard) {
         pb = playerBoard;
         initShips(pb);
+    }
+
+    public ShipFX raycastForShip(double x, double y) {
+        for (ShipFX s : shipsFX)
+            if (s.contains(x, y))
+                return s;
+        return null;
+    }
+
+    boolean insideBoard(double x, double y) {
+        return !(x < 0 || x > LINES * TileFX.TILE_SIZE || y < 0 || y > COLUMNS * TileFX.TILE_SIZE);
+    }
+
+    private Point boardPointFromScreenCoords(double x, double y) {
+        int line = (int) (y / TileFX.TILE_SIZE);
+        int column = (int) (x / TileFX.TILE_SIZE);
+        return new Point(line, column);
+    }
+
+    private void recalculatePreview(Point point) {
+        ShipSchematics schematics = new ShipSchematics(point, preview.dir, Ship.ShipType.getShipType(preview.shipSize));
+        Ship ship = ShipFactory.build(schematics);
+        preview.setShip(ship);
+    }
+
+    public void OnMouseMoved(MouseEvent event) {
+        double x = event.getX();
+        double y = event.getY();
+
+        if (!insideBoard(x, y)) {
+            return;
+        }
+
+        if (preview == null) {
+            return;
+        }
+
+        Point point = boardPointFromScreenCoords(x, y);
+        recalculatePreview(point);
+        computeCanPlacePreview();
+    }
+
+    public void computeCanPlacePreview() {
+        if (selected != null && selected.ship != null) {
+            Ship old = selected.ship;
+            pb.removeShip(old);
+            canPlace = pb.canShipBeHere(preview.ship);
+            pb.placeShip(old);
+            return;
+        }
+
+        canPlace = pb.canShipBeHere(preview.ship);
+    }
+
+    public void select(ShipFX shipFX) {
+        selected = shipFX;
+        preview = new ShipFX(selected.shipSize);
+        preview.dir = selected.dir;
+
+        if (selected.ship != null) {
+            preview.setShip(selected.ship);
+        }
+    }
+
+    public void deselectSelected() {
+        preview = null;
+        selected = null;
+    }
+
+    public void OnMouseClicked(MouseEvent event) {
+        if (finished)
+            return;
+
+        double x = event.getX();
+        double y = event.getY();
+
+        ShipFX result = raycastForShip(x, y);
+
+        switch (event.getButton()) {
+            case PRIMARY -> {
+                if (preview == null || selected == null) {
+                    return;
+                }
+
+                computeCanPlacePreview();
+
+                if (!canPlace) {
+                    return;
+                }
+
+                ShipSchematics schematics = new ShipSchematics(preview.ship.origin(), preview.dir, Ship.ShipType.getShipType(preview.shipSize));
+                Ship ship = ShipFactory.build(schematics);
+
+                if (selected.ship != null) {
+                    Ship old = selected.ship;
+                    pb.removeShip(old);
+                }
+
+                selected.setShip(ship);
+                pb.placeShip(ship);
+                deselectSelected();
+            }
+            case SECONDARY -> {
+                if (result == null) {
+                    return;
+                }
+
+                if (selected == result) {
+                    deselectSelected();
+                    return;
+                }
+
+                select(result);
+            }
+            case NONE, MIDDLE -> {
+            }
+        }
+    }
+
+    void OnRotateKeyPressed(KeyEvent event) {
+        if (preview == null) return;
+
+        preview.dir = preview.dir.rotated;
+        recalculatePreview(preview.ship.origin());
+        computeCanPlacePreview();
     }
 }

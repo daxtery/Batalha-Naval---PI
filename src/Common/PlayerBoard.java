@@ -12,8 +12,8 @@ public class PlayerBoard implements Serializable {
     public static final int COLUMNS = 10;
     public final static int NUMBER_OF_BOATS = 10;
     public BoardTile[][] boardTiles;
-    private final List<Ship> ships;
-    private final List<ShipPiece> pieces;
+    protected final List<Ship> ships;
+    protected final List<ShipPiece> pieces;
 
     public PlayerBoard() {
         boardTiles = new BoardTile[LINES][COLUMNS];
@@ -21,8 +21,6 @@ public class PlayerBoard implements Serializable {
         ships = new ArrayList<>();
         fillWithWater();
     }
-
-    //region TransformBack!
 
     public static boolean inBounds(int x, int y) {
         return inBounds(new Point(x, y));
@@ -39,7 +37,7 @@ public class PlayerBoard implements Serializable {
         return ships;
     }
 
-    private void fillWithWater() {
+    protected void fillWithWater() {
         for (int l = 0; l < LINES; l++) {
             for (int c = 0; c < COLUMNS; c++) {
                 boardTiles[l][c] = new WaterTile(l, c);
@@ -114,7 +112,7 @@ public class PlayerBoard implements Serializable {
         return s.toString();
     }
 
-    void placeShips(Ship[] toAdd) {
+    protected void placeShips(Ship[] toAdd) {
         //int i = 0;
         for (Ship ship : toAdd) {
             //ships[i] = ship;
@@ -128,13 +126,12 @@ public class PlayerBoard implements Serializable {
     public void placeShip(Ship toAdd) {
         ships.add(toAdd);
         for (ShipPiece piece : toAdd.pieces) {
-            //System.out.println("PLACING " + piece.getClass().getSimpleName() + " AT: " + piece.x + " " + piece.y);
             boardTiles[piece.point.x][piece.point.y] = piece;
             pieces.add(piece);
         }
     }
 
-    private Point[] getSurroundingPoints(Point point) {
+    protected Point[] getSurroundingPoints(Point point) {
         return new Point[]{
                 point.moved(1, 0),
                 point.moved(1, 1),
@@ -166,11 +163,11 @@ public class PlayerBoard implements Serializable {
         return true;
     }
 
-    private boolean checkSurroundings(BoardTile tile) {
+    protected boolean checkSurroundings(BoardTile tile) {
         return checkSurroundings(tile.point);
     }
 
-    private boolean checkSurroundings(Point _point) {
+    protected boolean checkSurroundings(Point _point) {
         Point[] points = getSurroundingPoints(_point);
         for (Point point : points) {
             if (inBounds(point.x, point.y)) {
@@ -184,14 +181,14 @@ public class PlayerBoard implements Serializable {
 
     //endregion
 
-    boolean freeAt(Point point) {
+    protected boolean freeAt(Point point) {
         if (inBounds(point)) {
             return getTileAt(point).tileType == TileType.Water;
         }
         return true;
     }
 
-    boolean freeAt(int x, int y) {
+    protected boolean freeAt(int x, int y) {
         return freeAt(new Point(x, y));
     }
 
