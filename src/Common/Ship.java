@@ -20,14 +20,6 @@ public class Ship implements Serializable {
         return shipType.value;
     }
 
-    public Ship moveTo(Point newOrigin) {
-        Point offset = newOrigin.moved(origin().negated());
-        for (ShipPiece piece : this.pieces) {
-            piece.point.moved(offset);
-        }
-        return this;
-    }
-
     public Point origin() {
         return pieces[0].point;
     }
