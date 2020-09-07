@@ -5,9 +5,7 @@ import AI.MyAI;
 import Common.*;
 import util.Point;
 
-import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -39,9 +37,6 @@ import Common.Network.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.util.*;
 
 import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;
@@ -66,7 +61,7 @@ public class App extends Application {
     private boolean vsAI;
     private SelfGraphBoardFX selfvsAI;
     //FOR ONLINE
-    private Client client;
+    private GameClient client;
 
     //region MAIN MENU STUFF
     private String myName;
@@ -149,175 +144,38 @@ public class App extends Application {
         launch(args);
     }
 
-    //region IPV4FIND
+    @Override
+    public void start(Stage primaryStage) {
 
-    private static InetAddress getMeIPV4() throws UnknownHostException {
-        try {
-            InetAddress closestOneFound = null;
-            // GET AND ITERATE ALL NETWORK CARDS
-            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-            while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface networkInterface = networkInterfaces.nextElement();
-                // GO THROUGH ALL IP ADDRESSES OF THIS CARD...
-                Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-                while (inetAddresses.hasMoreElements()) {
-                    InetAddress inetAddress = inetAddresses.nextElement();
-                    if (!inetAddress.isLoopbackAddress()) {
-                        if (inetAddress.isSiteLocalAddress())
-                            //YEAH BOY, FOUND IT
-                            return inetAddress;
-                        else if (closestOneFound == null)
-                            //FOUND ONE, MIGHT NOT BE WHAT WE WANT
-                            //BUT LET'S STORE IT IN CASE WE DON'T FIND EXACTLY WHAT WE WANT
-                            closestOneFound = inetAddress;
-                    }
-                }
-            }
-            if (closestOneFound != null)
-                // NOT IPV4, but will have to do
-                return closestOneFound;
-            //FOUND NOTHING
-            //WILL TRY THE JDK ONE
-            InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
-            if (jdkSuppliedAddress == null)
-                throw new UnknownHostException("The JDK INetAddress.getLocalHost() method unexpectedly returned null.");
-            return jdkSuppliedAddress;
-        } catch (Exception e) {
-            UnknownHostException unknownHostException = new UnknownHostException("Failed to determine LAN ADDRESS: " + e);
-            unknownHostException.initCause(e);
-            throw unknownHostException;
-        }
+        client = new GameClient(this);
+        client.start();
+        Network.register(client.getNative());
+
+        vsAI = false;
+
+        theStage = primaryStage;
+        setAllScenes();
+
+        theStage.initStyle(StageStyle.UNDECORATED);
+        theStage.setTitle("BS");
+        theStage.setResizable(false);
+        theStage.setMaximized(true);
+        theStage.setScene(mainMenu);
+        theStage.show();
+
+        soundPlayer.setVolume(.2);
+        soundPlayer.setCycleCount(AudioClip.INDEFINITE);
+        soundPlayer.play();
+
+        aWShipSound.setVolume(1);
+        aWWaterSound.setVolume(.1);
     }
 
-    //endregion
-
-    //region SERVER/CLIENT STUFF
-
-    private void serverConfigurations() {
-
-        client = new Client();
-        client.start();
-
-        Network.register(client);
-
-        client.addListener(new Listener() {
-            public void connected(Connection connection) {
-            }
-
-            public void received(Connection connection, Object object) {
-                if (object instanceof IsFull)
-                    transitionTo(mainMenu);
-                if (object instanceof Abort) {
-                    //
-                }
-
-                if (object instanceof CanStart)
-                    Platform.runLater(() -> transitionTo(mainGame));
-
-                if (object instanceof WhoseTurn) {
-                    WhoseTurn whoseTurn = (WhoseTurn) object;
-                    Platform.runLater(() -> setTurnLabel(whoseTurn.name));
-                }
-                if (object instanceof ConnectedPlayers) {
-                    System.out.println("CONNECTED PLAYERS");
-                    ConnectedPlayers players = (ConnectedPlayers) object;
-                    Platform.runLater(() -> {
-                                textArea.clear();
-                                for (String name : players.names)
-                                    textArea.appendText(name + "\n");
-                            }
-                    );
-                }
-
-                if (object instanceof ReadyForShips)
-                    Platform.runLater(() -> transitionTo(setShips));
-
-                if (object instanceof OthersSpecs) {
-                    OthersSpecs othersSpecs = (OthersSpecs) object;
-
-                    Platform.runLater(() -> {
-
-                        ene1.serverID = othersSpecs.ene1;
-                        ene1.name = othersSpecs.ene1n;
-                        ene1.labeln.setText(ene1.name);
-                        cWl1.setText(ene1.name);
-
-                        ene2.serverID = othersSpecs.ene2;
-                        ene2.name = othersSpecs.ene2n;
-                        ene2.labeln.setText(ene2.name);
-                        cWl2.setText(ene2.name);
-
-                    });
-
-                }
-
-                if (object instanceof YourBoardToPaint)
-                    //System.out.println("MY BOARD TO PAINT");
-                    Platform.runLater(() -> mGSelfBoard.updateTiles(((YourBoardToPaint) object).board));
-
-                if (object instanceof EnemiesBoardsToPaint) {
-                    //System.out.println("ENEMIES BOARDS TO PAINT");
-                    Platform.runLater(() -> {
-                        ene1.b.startTiles(((EnemiesBoardsToPaint) object).board1);
-                        ene2.b.startTiles(((EnemiesBoardsToPaint) object).board2);
-                    });
-                }
-
-                if (object instanceof EnemyBoardToPaint) {
-                    Platform.runLater(() -> {
-                        EnemyBoardToPaint ebp = (EnemyBoardToPaint) object;
-                        updateEnemyBoard(ebp.id, ebp.newAttackedBoard);
-                        System.out.println("ENEMY BOARD TO PAINT WITH INDEX " + ebp.id);
-                    });
-                }
-
-                if (object instanceof AnAttackResponse) {
-                    Platform.runLater(() -> {
-                        lastAttacked.b.updateTiles(((AnAttackResponse) object).newAttackedBoard);
-                        iCanAttack = ((AnAttackResponse) object).again;
-                        doSounds(((AnAttackResponse) object).actualHit, ((AnAttackResponse) object).shipHit);
-                    });
-                }
-
-                if (object instanceof YourTurn) {
-                    Platform.runLater(() -> {
-                        iCanAttack = true;
-                        setTurnLabel("My TURN!!");
-                    });
-                }
-
-                if (object instanceof YouDead) {
-                    Platform.runLater(() -> {
-                        lost("You died a horrible death. RIP you");
-                        transitionTo(mainMenu);
-                    });
-                }
-
-                if (object instanceof PlayerDied) {
-                    Platform.runLater(() -> removeEnemy(((PlayerDied) object).who));
-                }
-
-                if (object instanceof YouWon) {
-                    Platform.runLater(() -> {
-                        Alert lost = new Alert(Alert.AlertType.CONFIRMATION);
-                        lost.setContentText("YOU BEAT THEM ALL");
-                        lost.showAndWait();
-                        won();
-                    });
-                }
-
-                if (object instanceof ChatMessage) {
-                    Platform.runLater(() -> {
-                        EnemyLocal toUpdate = ene1;
-                        if (((ChatMessage) object).saidIt == ene2.serverID) {
-                            toUpdate = ene2;
-                        }
-                        toUpdate.conversation.setText(toUpdate.conversation.getText() + ((ChatMessage) object).message);
-                    });
-                }
-            }
-        });
-
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        client.stop();
+        System.exit(0);
     }
 
     private void reset() {
@@ -330,7 +188,6 @@ public class App extends Application {
         lost.showAndWait();
         reset();
     }
-
 
     private void won() {
         reset();
@@ -354,41 +211,6 @@ public class App extends Application {
         toUpdate.b.updateTiles(newAttackedBoard);
     }
 
-    @Override
-    public void stop() throws Exception {
-        super.stop();
-        client.stop();
-        System.exit(0);
-    }
-
-    //endregion
-
-    @Override
-    public void start(Stage primaryStage) {
-
-        serverConfigurations();
-
-        vsAI = false;
-
-        theStage = primaryStage;
-        setAllScenes();
-
-        theStage.initStyle(StageStyle.UNDECORATED);
-        theStage.setTitle("BS");
-        theStage.setResizable(false);
-        theStage.setMaximized(true);
-        theStage.setScene(mainMenu);
-        theStage.show();
-
-        soundPlayer.setVolume(.2);
-        soundPlayer.setCycleCount(AudioClip.INDEFINITE);
-        soundPlayer.play();
-
-        aWShipSound.setVolume(1);
-        aWWaterSound.setVolume(.1);
-
-    }
-
     private void setAllScenes() {
         setMainMenu();
         setMainGame();
@@ -399,11 +221,6 @@ public class App extends Application {
         setAIScene();
     }
 
-    /**
-     * CALL BEFORE OTHER STUFF
-     *
-     * @param scene
-     */
     private void transitionTo(Scene scene) {
         for (EmptyGraphBoardFX g : toAnimate)
             g.stopAnimating();
@@ -479,6 +296,7 @@ public class App extends Application {
         mMPlayButton.setOnAction(event -> {
 
             myName = mMnameInput.getText();
+
             if (myName.equals("")) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Ups!");
@@ -487,57 +305,44 @@ public class App extends Application {
                 alert.showAndWait();
                 return;
             }
+
             theStage.setTitle(myName);
-            Task<Boolean> connect = new Task<>() {
+
+            Task<Register> tryConnectTask = new Task<>() {
                 @Override
-                protected Boolean call() {
-                    boolean connected = true;
-                    try {
-                        client.connect(5000, ADDRESS, Network.port);
-                    } catch (IOException e) {
-                        connected = false;
-                    }
-                    return connected;
+                protected Register call() throws IOException {
+                    return client.tryConnect(myName, ADDRESS, Network.port);
                 }
             };
 
-            connect.setOnSucceeded(event1 -> {
+            tryConnectTask.setOnSucceeded(t -> {
+                BorderPane root = new BorderPane();
+                textArea = new TextArea();
+                textArea.setEditable(false);
 
-                if (connect.getValue()) {
-                    Register r = new Register();
-                    r.name = myName;
-                    try {
-                        r.address = getMeIPV4().toString();
-                    } catch (UnknownHostException e1) {
-                        e1.printStackTrace();
-                        r.address = "100:00";
-                    }
+                root.setCenter(textArea);
 
-                    BorderPane root = new BorderPane();
-                    textArea = new TextArea();
-                    textArea.setEditable(false);
+                waitingScreen = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
+                App.this.transitionTo(waitingScreen);
 
-                    root.setCenter(textArea);
-
-                    waitingScreen = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
-                    transitionTo(waitingScreen);
-                    client.sendTCP(r);
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("YEE");
-                    alert.setHeaderText("WE GOT IN");
-                    alert.setContentText("TEMP MESSAGE TO SAY WE GOT IN; WAIT NOW! DON'T PRESS ANY MORE SHIT");
-                    alert.showAndWait();
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Noo!");
-                    alert.setHeaderText("Can't play when you can't connect to server :(");
-                    alert.setContentText("Maybe...Go play alone? \nOr you could try again (:");
-                    alert.showAndWait();
-                }
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("YEE");
+                alert.setHeaderText("WE GOT IN");
+                alert.setContentText("TEMP MESSAGE TO SAY WE GOT IN; WAIT NOW! DON'T PRESS ANY MORE SHIT");
+                alert.showAndWait();
             });
 
-            new Thread(connect).start();
+            tryConnectTask.setOnFailed(t -> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Noo!");
+                alert.setHeaderText("Can't play when you can't connect to server :(");
+                alert.setContentText("Maybe...Go play alone? \nOr you could try again (:");
+                alert.showAndWait();
+            });
+
+            new Thread(tryConnectTask).start();
         });
+
         mMPlayButton.setStyle("-fx-background-color: transparent;");
 
         mMAloneButton = new Button();
@@ -547,6 +352,7 @@ public class App extends Application {
                     theStage.setScene(setShips);
                 }
         );
+
         mMAloneButton.setStyle("-fx-background-color: transparent;");
 
         mMExit = new Button();
@@ -554,6 +360,7 @@ public class App extends Application {
         mMExit.setOnAction(event ->
                 Platform.exit()
         );
+
         mMExit.setStyle("-fx-background-color: transparent;");
 
         mMnameInput = new TextField("Name!");
@@ -641,7 +448,6 @@ public class App extends Application {
 
                 if (!vsAI) {
                     mGSelfBoard.setPlayerBoard(pb);
-
 
                     String[][] message = PlayerBoardTransformer.transform(pb);
 
@@ -941,6 +747,116 @@ public class App extends Application {
         else {
             iCanAttack = true;
         }
+    }
+
+    public void OnIsFull() {
+    }
+
+    public void OnAbort() {
+    }
+
+    public void OnCanStart() {
+        Platform.runLater(() -> transitionTo(mainGame));
+    }
+
+    public void OnWhoseTurn(WhoseTurn whoseTurn) {
+        Platform.runLater(() -> setTurnLabel(whoseTurn.name));
+    }
+
+    public void OnConnectedPlayers(ConnectedPlayers players) {
+        Platform.runLater(() -> {
+                    textArea.clear();
+                    for (String name : players.names)
+                        textArea.appendText(name + "\n");
+                }
+        );
+    }
+
+    public void OnReadyForShips() {
+        Platform.runLater(() -> transitionTo(setShips));
+    }
+
+    public void OnOtherSpecs(OthersSpecs othersSpecs) {
+        Platform.runLater(() -> {
+
+            ene1.serverID = othersSpecs.ene1;
+            ene1.name = othersSpecs.ene1n;
+            ene1.labeln.setText(ene1.name);
+            cWl1.setText(ene1.name);
+
+            ene2.serverID = othersSpecs.ene2;
+            ene2.name = othersSpecs.ene2n;
+            ene2.labeln.setText(ene2.name);
+            cWl2.setText(ene2.name);
+
+        });
+    }
+
+    public void OnYourBoardToPaint(YourBoardToPaint toPaint) {
+        Platform.runLater(() -> mGSelfBoard.updateTiles((toPaint).board));
+    }
+
+    public void OnEnemiesBoardsToPaint(EnemiesBoardsToPaint boards) {
+        Platform.runLater(() -> {
+            ene1.b.startTiles(boards.board1);
+            ene2.b.startTiles(boards.board2);
+        });
+    }
+
+    public void OnEnemyBoardToPaint(EnemyBoardToPaint board) {
+        Platform.runLater(() -> {
+            updateEnemyBoard(board.id, board.newAttackedBoard);
+            System.out.println("ENEMY BOARD TO PAINT WITH INDEX " + board.id);
+        });
+    }
+
+    public void OnAnAttackResponse(AnAttackResponse attackResponse) {
+        Platform.runLater(() -> {
+            lastAttacked.b.updateTiles(attackResponse.newAttackedBoard);
+            iCanAttack = attackResponse.again;
+            doSounds(attackResponse.actualHit, attackResponse.shipHit);
+        });
+    }
+
+    public void OnYourTurn() {
+        Platform.runLater(() -> {
+            iCanAttack = true;
+            setTurnLabel("My TURN!!");
+        });
+    }
+
+    public void OnYouDead() {
+        Platform.runLater(() -> {
+            lost("You died a horrible death. RIP you");
+            transitionTo(mainMenu);
+        });
+    }
+
+    public void OnPlayerDied(PlayerDied playerDied) {
+        Platform.runLater(() -> removeEnemy(playerDied.who));
+    }
+
+    public void OnYouWon() {
+        Platform.runLater(() -> {
+            Alert lost = new Alert(Alert.AlertType.CONFIRMATION);
+            lost.setContentText("YOU BEAT THEM ALL");
+            lost.showAndWait();
+            won();
+        });
+    }
+
+    public void OnChatMessage(ChatMessage chatMessage) {
+        Platform.runLater(() -> {
+            App.EnemyLocal toUpdate = ene1;
+            if (chatMessage.saidIt == ene2.serverID) {
+                toUpdate = ene2;
+            }
+            toUpdate.conversation.setText(toUpdate.conversation.getText() + chatMessage.message);
+        });
+    }
+
+    public void OnConnected(Connection connection) {
+
     }
 
     private static class EnemyLocal {
