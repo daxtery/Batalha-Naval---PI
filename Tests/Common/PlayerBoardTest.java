@@ -3,12 +3,12 @@ package Common;
 import org.junit.jupiter.api.Test;
 import util.Point;
 
-import static Common.PlayerBoard.COLUMNS;
-import static Common.PlayerBoard.LINES;
+import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;
+import static Common.PlayerBoardConstants.DEFAULT_LINES;
 
 class PlayerBoardTest {
 
-    PlayerBoard pb = new PlayerBoard();
+    PlayerBoard pb = new PlayerBoard(DEFAULT_LINES, DEFAULT_COLUMNS);
 
     @Test
     void testAssert() {
@@ -87,10 +87,12 @@ class PlayerBoardTest {
         for (int w = 0; w < 1000; w++) {
 
             pb = PlayerBoardFactory.getRandomPlayerBoard();
+            final int lines = pb.lines();
+            final int columns = pb.columns();
 
             int i = 0;
-            for (int l = 0; l < LINES; l++) {
-                for (int c = 0; c < COLUMNS; c++) {
+            for (int l = 0; l < lines; l++) {
+                for (int c = 0; c < columns; c++) {
                     if (pb.getTileAt(l, c).tileType == TileType.ShipPiece) {
                         i++;
                     }

@@ -1,5 +1,7 @@
 package Common;
 
+import org.jetbrains.annotations.NotNull;
+
 public class PlayerBoardFactory {
 
     public static final Ship.ShipType[] DEFAULT_SIZES = {
@@ -8,11 +10,14 @@ public class PlayerBoardFactory {
             Ship.ShipType.One, Ship.ShipType.One, Ship.ShipType.One, Ship.ShipType.One
     };
 
-    public static PlayerBoard getRandomPlayerBoard() {
-        PlayerBoard pb = new PlayerBoard();
-        pb.placeShips(ShipFactory.getRandomShips(DEFAULT_SIZES));
-        //pb.allPieces();
+    public static @NotNull PlayerBoard getRandomPlayerBoard(int lines, int columns, Ship.ShipType[] shipTypes) {
+        PlayerBoard pb = new PlayerBoard(lines, columns);
+        pb.placeShips(ShipFactory.getRandomShips(lines, columns, shipTypes));
         return pb;
+    }
+
+    public static PlayerBoard getRandomPlayerBoard() {
+        return getRandomPlayerBoard(PlayerBoardConstants.DEFAULT_LINES, PlayerBoardConstants.DEFAULT_COLUMNS, DEFAULT_SIZES);
     }
 
 }

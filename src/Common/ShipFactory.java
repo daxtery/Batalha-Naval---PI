@@ -28,8 +28,8 @@ public class ShipFactory {
 
     private static Ship constructWithSizeAndPossibleDirections(PlayerBoard pb, Ship.ShipType size, Direction[] directions) {
         while (true) {
-            int x = random.nextInt(PlayerBoard.LINES);
-            int y = random.nextInt(PlayerBoard.COLUMNS);
+            int x = random.nextInt(pb.lines());
+            int y = random.nextInt(pb.columns());
 
             int randomIndex = random.nextInt(directions.length);
 
@@ -43,19 +43,15 @@ public class ShipFactory {
         }
     }
 
-    static Ship[] getRandomShips(Ship.ShipType[] types) {
+    static Ship[] getRandomShips(int lines, int columns, Ship.ShipType[] types) {
         Ship[] temp = new Ship[PlayerBoard.NUMBER_OF_BOATS];
         // 4
         // 3, 3
         // 2, 2, 2
         // 1, 1, 1, 1
-        PlayerBoard tempBoard = new PlayerBoard();
+        PlayerBoard tempBoard = new PlayerBoard(lines, columns);
         Direction[] directions = Direction.values();
         int i = 0;
-        //System.out.println("I is: " +  i);
-        //tempBoard.lightItUp();
-        //System.out.println(tempBoard);
-        //System.out.println(Arrays.toString(temp));
         do {
             temp[i] = constructWithSizeAndPossibleDirections(tempBoard, types[i], directions);
             i++;

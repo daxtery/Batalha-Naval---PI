@@ -11,7 +11,6 @@ import com.esotericsoftware.kryonet.Listener;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
@@ -24,7 +23,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
@@ -45,6 +43,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.*;
+
+import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;
+import static Common.PlayerBoardConstants.DEFAULT_LINES;
+import static Common.PlayerBoardFactory.DEFAULT_SIZES;
 
 public class App extends Application {
 
@@ -433,7 +435,7 @@ public class App extends Application {
 
         MGCanvasHolder = new Group();
 
-        mGSelfBoard = new SelfGraphBoardFX(500, 500);
+        mGSelfBoard = new SelfGraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, 500, 500);
 
         mGSelfBoard.startTiles(
                 PlayerBoardTransformer.transform(PlayerBoardFactory.getRandomPlayerBoard())
@@ -589,8 +591,8 @@ public class App extends Application {
         sSRoot = new HBox();
         sSRoot.setStyle("-fx-background-image: url(images/BattleShipBigger2.png);-fx-background-size: cover;");
 
-        pb = new PlayerBoard();
-        sSboard = new ShipsBoardFX(700, 500);
+        pb = new PlayerBoard(DEFAULT_LINES, DEFAULT_COLUMNS);
+        sSboard = new ShipsBoardFX(pb.lines(), pb.columns(), 700, 500);
 
         sSboard.setPlayerBoard(pb);
         sSboard.startAnimating();
@@ -629,7 +631,7 @@ public class App extends Application {
         sSReadyButton.setFont(new Font(50));
 
         sSReadyButton.setOnMouseClicked(event -> {
-            if (sSboard.pb.fullOfShips()) {
+            if (sSboard.pb.ships.size() == DEFAULT_SIZES.length) {
 
                 sSReadyButton.setDisable(true);
                 sSRandomButton.setDisable(true);
@@ -676,7 +678,7 @@ public class App extends Application {
 
         sSRoot.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.R) {
-                sSboard.OnRotateKeyPressed(event);
+                sSboard.OnRotateKeyPressed();
             }
         });
         sSboard.setOnMouseMoved(event -> sSboard.OnMouseMoved(event));
@@ -693,8 +695,8 @@ public class App extends Application {
         lastAttacked = new EnemyLocal();
         iCanAttack = false;
 
-        ene1.b = new GraphBoardFX();
-        ene2.b = new GraphBoardFX();
+        ene1.b = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
+        ene2.b = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
 
         PlayerBoard board = PlayerBoardFactory.getRandomPlayerBoard();
         ene1.b.startTiles(PlayerBoardTransformer.transform(board));
@@ -847,7 +849,7 @@ public class App extends Application {
 
     private void setAIScene() {
 
-        selfvsAI = new SelfGraphBoardFX(500, 500);
+        selfvsAI = new SelfGraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, 500, 500);
         ai = new AIPlayer();
         iCanAttack = true;
 
@@ -962,7 +964,7 @@ public class App extends Application {
         AIPlayer() {
             brain = new MyAI();
             board = PlayerBoardFactory.getRandomPlayerBoard();
-            b = new GraphBoardFX();
+            b = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
             b.startTiles(PlayerBoardTransformer.transform(board));
         }
 

@@ -3,7 +3,6 @@ package JavaFX;
 import Common.*;
 import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -11,8 +10,6 @@ import util.Point;
 
 import java.util.List;
 
-import static Common.PlayerBoard.COLUMNS;
-import static Common.PlayerBoard.LINES;
 import static Common.PlayerBoardFactory.DEFAULT_SIZES;
 
 public class ShipsBoardFX extends GraphBoardFX {
@@ -25,16 +22,16 @@ public class ShipsBoardFX extends GraphBoardFX {
     boolean canPlace;
     boolean finished;
 
-    ShipsBoardFX(int _w, int _h) {
-        super(_w, _h);
-        shipsFX = new ShipFX[10];
+    ShipsBoardFX(int lines, int columns, int w, int h) {
+        super(lines, columns, w, h);
+        shipsFX = new ShipFX[DEFAULT_SIZES.length];
         canPlace = false;
-        initShips();
+        initShips(columns);
 
         anim = new AnimationTimer() {
             final double perSec = 0;
-            final int x_max = COLUMNS * TileFX.TILE_SIZE;
-            final int y_max = LINES * TileFX.TILE_SIZE;
+            final int x_max = columns * TileFX.TILE_SIZE;
+            final int y_max = lines * TileFX.TILE_SIZE;
             long lastNano = System.nanoTime();
 
             public void handle(long currentNanoTime) {
@@ -47,11 +44,11 @@ public class ShipsBoardFX extends GraphBoardFX {
                     gc.clearRect(0, 0, getWidth(), getHeight());
                     gc.drawImage(new Image("images/agua_bg.png"), 0, 0);
 
-                    for (int l = 0; l < LINES; l++) {
+                    for (int l = 0; l < lines; l++) {
                         gc.strokeLine(0, l * TileFX.TILE_SIZE, x_max, l * TileFX.TILE_SIZE);
                     }
 
-                    for (int c = 0; c < COLUMNS; c++) {
+                    for (int c = 0; c < columns; c++) {
                         gc.strokeLine(c * TileFX.TILE_SIZE, 0, c * TileFX.TILE_SIZE, y_max);
                     }
 
@@ -92,8 +89,8 @@ public class ShipsBoardFX extends GraphBoardFX {
 
                     gc.setFill(Color.WHITE);
 
-                    for (int l = 0; l < LINES; l++) {
-                        for (int c = 0; c < COLUMNS; c++) {
+                    for (int l = 0; l < lines; l++) {
+                        for (int c = 0; c < columns; c++) {
                             gc.fillText(l + ":" + c, (c + 0.5) * TileFX.TILE_SIZE, (l + 0.5) * TileFX.TILE_SIZE);
                         }
                     }
@@ -107,10 +104,10 @@ public class ShipsBoardFX extends GraphBoardFX {
         };
     }
 
-    void initShips() {
+    void initShips(int columns) {
         for (int i = 0; i < DEFAULT_SIZES.length; i++) {
             shipsFX[i] = new ShipFX(DEFAULT_SIZES[i].value);
-            int startX = TileFX.TILE_SIZE * COLUMNS + 5;
+            int startX = TileFX.TILE_SIZE * columns + 5;
             shipsFX[i].setPosition(startX, i * TileFX.TILE_SIZE);
         }
     }
@@ -141,7 +138,10 @@ public class ShipsBoardFX extends GraphBoardFX {
     }
 
     boolean insideBoard(double x, double y) {
-        return !(x < 0 || x > LINES * TileFX.TILE_SIZE || y < 0 || y > COLUMNS * TileFX.TILE_SIZE);
+        final int lines = pb.lines();
+        final int columns = pb.columns();
+
+        return !(x < 0 || x > lines * TileFX.TILE_SIZE || y < 0 || y > columns * TileFX.TILE_SIZE);
     }
 
     private Point boardPointFromScreenCoords(double x, double y) {
@@ -250,7 +250,7 @@ public class ShipsBoardFX extends GraphBoardFX {
         }
     }
 
-    void OnRotateKeyPressed(KeyEvent event) {
+    void OnRotateKeyPressed() {
         if (preview == null) return;
 
         preview.dir = preview.dir.rotated;

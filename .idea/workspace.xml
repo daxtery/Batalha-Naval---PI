@@ -5,12 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="37b56e5f-9663-4c59-9fe2-fcdf19ec8eed" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/Common/PlayerBoardConstants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Direction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Batalha-Naval---PI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Batalha-Naval---PI.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tests/Common/PlayerBoardTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/Tests/Common/PlayerBoardTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AI/MyAI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AI/MyAI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/Ship.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Ship.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoardFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoardFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoardTransformer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoardTransformer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/ShipFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/ShipFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/JavaFX/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/ShipFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/ShipFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/JavaFX/EmptyGraphBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/EmptyGraphBoardFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/JavaFX/GraphBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/GraphBoardFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/JavaFX/SelfGraphBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/SelfGraphBoardFX.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -42,6 +49,10 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="Downloaded.Files.Path.Enabled" value="true" />
+    <property name="Repository.Attach.Annotations" value="true" />
+    <property name="Repository.Attach.JavaDocs" value="true" />
+    <property name="Repository.Attach.Sources" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -56,10 +67,11 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.30846325" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="inlay.hints.JAVA" />
   </component>
   <component name="RecentsManager">
     <key name="MoveMembersDialog.RECENTS_KEY">
+      <recent name="Common.PlayerBoardConstants" />
       <recent name="Common.PlayerBoardTransformer" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -71,15 +83,13 @@
     </key>
   </component>
   <component name="RunManager" selected="Application.Unnamed">
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
           <option name="containerStateName" value="" />
         </value>
       </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -156,7 +166,8 @@
       <workItem from="1599131156107" duration="3045000" />
       <workItem from="1599137174654" duration="622000" />
       <workItem from="1599419627187" duration="1140000" />
-      <workItem from="1599422708897" duration="2271000" />
+      <workItem from="1599422708897" duration="3734000" />
+      <workItem from="1599435469209" duration="4909000" />
     </task>
     <servers />
   </component>
@@ -176,10 +187,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1599058525803" />
-    <state x="689" y="322" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1598981801144">
+    <state x="689" y="322" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1599438309296">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="689" y="322" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1598981801144" />
+    <state x="689" y="322" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599438309296" />
     <state x="588" y="209" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1598974047542">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -192,10 +203,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="743" y="401" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.packages/0.0.1920.1040@0.0.1920.1040" timestamp="1598973786356" />
-    <state x="676" y="327" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog" timestamp="1598981802321">
+    <state x="676" y="327" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog" timestamp="1599438310750">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="676" y="327" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1598981802321" />
+    <state x="676" y="327" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599438310750" />
     <state x="713" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1599004543711">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -204,10 +215,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599007732997" />
-    <state width="455" height="466" key="DebuggerActiveHint" timestamp="1599066886280">
+    <state width="455" height="466" key="DebuggerActiveHint" timestamp="1599440456948">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="455" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1599066886280" />
+    <state width="455" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1599440456948" />
     <state x="778" y="476" key="DetectedRootsChooserDialog" timestamp="1598972922821">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -216,50 +227,58 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="687" y="332" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1598974619931" />
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1599424907187">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907187" />
-    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1599424907187">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907187" />
-    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1599424907186">
+    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907186" />
-    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1599424907187">
+    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599424907187" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1599424915220">
+    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1599424915220">
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1599424915220">
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1599424915220">
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1599440744679">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599424915220" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599440744679" />
+    <state x="540" y="255" key="IDE.errors.dialog" timestamp="1599437756769">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="540" y="255" key="IDE.errors.dialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599437756769" />
     <state x="636" y="222" key="RollbackChangesDialog" timestamp="1598973841965">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="636" y="222" key="RollbackChangesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1598973841965" />
-    <state x="461" y="165" key="SettingsEditor" timestamp="1599007922124">
+    <state x="461" y="165" key="SettingsEditor" timestamp="1599436947333">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1599007922124" />
+    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1599436947333" />
     <state width="498" height="537" key="SwitcherDM" timestamp="1599059164366">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="498" height="537" key="SwitcherDM/0.0.1920.1040@0.0.1920.1040" timestamp="1599059164366" />
+    <state x="664" y="412" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD" timestamp="1599438360284">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="664" y="412" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD/0.0.1920.1040@0.0.1920.1040" timestamp="1599438360284" />
     <state x="512" y="249" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1599424985661">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -289,9 +308,34 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/JavaFX/App.java</url>
+          <line>687</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/JavaFX/App.java</url>
+          <line>546</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java</url>
-          <line>254</line>
+          <line>67</line>
           <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java</url>
+          <line>89</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java</url>
+          <line>107</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/JavaFX/ShipsBoardFX.java</url>
+          <line>25</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -4,42 +4,80 @@ import util.Point;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PlayerBoard implements Serializable {
 
-    public static final int LINES = 10;
-    public static final int COLUMNS = 10;
     public final static int NUMBER_OF_BOATS = 10;
+    public final Point size;
     public BoardTile[][] boardTiles;
-    protected final List<Ship> ships;
-    protected final List<ShipPiece> pieces;
 
-    public PlayerBoard() {
-        boardTiles = new BoardTile[LINES][COLUMNS];
+    public List<Ship> ships;
+    public List<ShipPiece> pieces;
+
+    public PlayerBoard(int lines, int columns) {
+        size = new Point(lines, columns);
+        boardTiles = new BoardTile[lines][lines];
         pieces = new ArrayList<>();
-        ships = new ArrayList<>();
         fillWithWater();
     }
 
-    public static boolean inBounds(int x, int y) {
+    public int lines() {
+        return size.x;
+    }
+
+    public int columns() {
+        return size.y;
+    }
+
+    public boolean inBounds(int x, int y) {
         return inBounds(new Point(x, y));
     }
 
-    public static boolean inBounds(Point point) {
+    public boolean inBounds(Point point) {
+        final Point lower = new Point(-1, -1);
+
         return point.isConstrainedBy(
-                new Point(-1, -1),
-                new Point(LINES, COLUMNS)
+                lower,
+                size
         );
     }
 
     public List<Ship> getShips() {
+        if (ships == null) {
+            ships = Arrays.stream(boardTiles)
+                    .flatMap(row -> Arrays.stream(row)
+                            .filter(tile -> tile.tileType == TileType.ShipPiece)
+                    )
+                    .map(tile -> ((ShipPiece) tile).ship)
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
         return ships;
     }
 
+    public List<ShipPiece> getPieces() {
+        if (pieces == null) {
+            pieces = Arrays.stream(boardTiles)
+                    .flatMap(row -> Arrays.stream(row)
+                            .filter(tile -> tile.tileType == TileType.ShipPiece)
+                    )
+                    .map(tile -> (ShipPiece) tile)
+                    .collect(Collectors.toList());
+        }
+
+        return pieces;
+    }
+
     protected void fillWithWater() {
-        for (int l = 0; l < LINES; l++) {
-            for (int c = 0; c < COLUMNS; c++) {
+
+        final int lines = lines();
+        final int columns = columns();
+
+        for (int l = 0; l < lines; l++) {
+            for (int c = 0; c < columns; c++) {
                 boardTiles[l][c] = new WaterTile(l, c);
             }
         }
@@ -75,13 +113,18 @@ public class PlayerBoard implements Serializable {
     }
 
     public List<Point> getAvailable() {
-        ArrayList<Point> points = new ArrayList<>();
-        for (int l = 0; l < LINES; l++) {
-            for (int c = 0; c < COLUMNS; c++) {
-                if (boardTiles[l][c].canAttack())
+        List<Point> points = new ArrayList<>();
+        final int lines = lines();
+        final int columns = columns();
+
+        for (int l = 0; l < lines; l++) {
+            for (int c = 0; c < columns; c++) {
+                if (boardTiles[l][c].canAttack()) {
                     points.add(new Point(l, c));
+                }
             }
         }
+
         return points;
     }
 
@@ -103,9 +146,14 @@ public class PlayerBoard implements Serializable {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        for (int i = 0; i < LINES; i++) {
-            for (int c = 0; c < COLUMNS; c++) {
-                s.append(boardTiles[i][c]).append("\n");
+
+        final int lines = lines();
+        final int columns = lines();
+
+        for (int i = 0; i < lines; i++) {
+            for (int c = 0; c < columns; c++) {
+                s.append(boardTiles[i][c])
+                        .append("\n");
             }
             s.append("\n");
         }
@@ -113,18 +161,12 @@ public class PlayerBoard implements Serializable {
     }
 
     protected void placeShips(Ship[] toAdd) {
-        //int i = 0;
         for (Ship ship : toAdd) {
-            //ships[i] = ship;
-            //i++;
             placeShip(ship);
         }
     }
 
-    //region CanPlaceShip
-
     public void placeShip(Ship toAdd) {
-        ships.add(toAdd);
         for (ShipPiece piece : toAdd.pieces) {
             boardTiles[piece.point.x][piece.point.y] = piece;
             pieces.add(piece);
@@ -148,15 +190,12 @@ public class PlayerBoard implements Serializable {
 
     public boolean canShipBeHere(Ship toAdd) {
         for (ShipPiece piece : toAdd.pieces) {
-            //System.out.println(piece.getPointCoordinates());
             boolean isInBounds = inBounds(piece.point);
             if (!isInBounds) {
-                //System.out.println("NO BOUNDS");
                 return false;
             }
             boolean isNotAdjacent = checkSurroundings(piece);
             if (!isNotAdjacent || !freeAt(piece.point)) {
-                //System.out.println("ADJACENT");
                 return false;
             }
         }
@@ -178,8 +217,6 @@ public class PlayerBoard implements Serializable {
         }
         return true;
     }
-
-    //endregion
 
     protected boolean freeAt(Point point) {
         if (inBounds(point)) {
@@ -204,17 +241,11 @@ public class PlayerBoard implements Serializable {
     }
 
     public void removeShip(Ship ship) {
-        ships.remove(ship);
         for (ShipPiece piece : ship.pieces) {
             //System.out.println("REMOVING " + piece.getClass().getSimpleName() + " AT: " + piece.x + " " + piece.y);
             boardTiles[piece.point.x][piece.point.y] = new WaterTile(piece.point.x, piece.point.y);
             pieces.remove(piece);
         }
-    }
-
-    public boolean fullOfShips() {
-        //System.out.println(pieces.size());
-        return pieces.size() == 20;
     }
 
 }

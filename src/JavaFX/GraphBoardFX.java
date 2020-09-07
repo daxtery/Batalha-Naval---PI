@@ -7,8 +7,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import util.Point;
 
-import static Common.PlayerBoard.COLUMNS;
-import static Common.PlayerBoard.LINES;
 
 public class GraphBoardFX extends EmptyGraphBoardFX {
 
@@ -16,30 +14,26 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
     PlayerBoard pb;
     Point last;
 
-    GraphBoardFX() {
-        this(TileFX.TILE_SIZE * COLUMNS, TileFX.TILE_SIZE * LINES);
-    }
-
-    public GraphBoardFX(int _w, int _h) {
-        super(_w, _h);
-        tiles = new TileFX[LINES][COLUMNS];
+    public GraphBoardFX(int lines, int columns, int _w, int _h) {
+        super(lines, columns, _w, _h);
+        tiles = new TileFX[lines][columns];
         gc.setLineWidth(1);
         last = null;
 
         anim = new AnimationTimer() {
             final double perSec = 1;
-            final int x_max = COLUMNS * TileFX.TILE_SIZE;
-            final int y_max = LINES * TileFX.TILE_SIZE;
+            final int x_max = columns * TileFX.TILE_SIZE;
+            final int y_max = lines * TileFX.TILE_SIZE;
             long lastNano = System.nanoTime();
 
             public void handle(long currentNanoTime) {
                 if ((currentNanoTime - lastNano) / 1000000000.0 > perSec) {
-                    for (int l = 0; l < LINES; l++)
-                        for (int c = 0; c < COLUMNS; c++)
+                    for (int l = 0; l < lines; l++)
+                        for (int c = 0; c < columns; c++)
                             tiles[l][c].draw(gc);
-                    for (int l = 0; l < LINES; l++)
+                    for (int l = 0; l < lines; l++)
                         gc.strokeLine(0, l * TileFX.TILE_SIZE, x_max, l * TileFX.TILE_SIZE);
-                    for (int c = 0; c < COLUMNS; c++)
+                    for (int c = 0; c < columns; c++)
                         gc.strokeLine(c * TileFX.TILE_SIZE, 0, c * TileFX.TILE_SIZE, y_max);
                     if (last != null) {
                         Paint p = gc.getStroke();
@@ -71,18 +65,14 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
         return new Point(l, c);
     }
 
-    private boolean aPieceInTheArray(String[][] sent, int l, int c) {
-        return sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.PIECE_ATTACKED_STRING) ||
-                sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.PIECE_NOT_ATTACKED_STRING) ||
-                sent[l][c].equalsIgnoreCase(PlayerBoardTransformer.PIECE_ATTACKED_SHIP_DESTROYED_STRING);
-    }
-
     void startTiles(String[][] sent) {
 
         pb = PlayerBoardTransformer.parse(sent);
+        final int lines = pb.lines();
+        final int columns = pb.columns();
 
-        for (int l = 0; l < LINES; l++) {
-            for (int c = 0; c < COLUMNS; c++) {
+        for (int l = 0; l < lines; l++) {
+            for (int c = 0; c < columns; c++) {
                 BoardTile tile = pb.getTileAt(l, c);
                 switch (tile.tileType) {
                     case Water -> addWaterTileFX(l, c, (WaterTile) pb.getTileAt(l, c));
@@ -105,8 +95,11 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
     }
 
     void updateTiles(String[][] sent) {
-        for (int l = 0; l < LINES; l++) {
-            for (int c = 0; c < COLUMNS; c++) {
+        final int lines = sent.length;
+        final int columns = sent[0].length;
+
+        for (int l = 0; l < lines; l++) {
+            for (int c = 0; c < columns; c++) {
                 TileFX t = tiles[l][c];
                 switch (sent[l][c]) {
                     case PlayerBoardTransformer.PIECE_ATTACKED_SHIP_DESTROYED_STRING:

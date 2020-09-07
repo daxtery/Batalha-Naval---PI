@@ -17,7 +17,7 @@ public class PlayerBoardTransformer {
 
     public static String[][] transform(PlayerBoard playerBoard) {
 
-        String[][] message = new String[PlayerBoard.LINES][PlayerBoard.COLUMNS];
+        String[][] message = new String[playerBoard.lines()][playerBoard.columns()];
         BoardTile[][] boardTiles = playerBoard.boardTiles;
 
         for (int i = 0, nLines = boardTiles.length; i < nLines; i++) {
@@ -65,11 +65,13 @@ public class PlayerBoardTransformer {
 
     public static PlayerBoard parse(String[][] message) {
         HashSet<Point> toSkip = new HashSet<>();
-        PlayerBoard board = new PlayerBoard();
-        BoardTile[][] boardTiles = new BoardTile[PlayerBoard.LINES][PlayerBoard.COLUMNS];
+        final int lines = message.length;
+        final int columns = message[0].length;
 
-        for (int l = 0; l < boardTiles.length; l++) {
-            for (int c = 0; c < boardTiles[l].length; c++) {
+        PlayerBoard board = new PlayerBoard(message.length, message[0].length);
+
+        for (int l = 0; l < lines; l++) {
+            for (int c = 0; c < columns; c++) {
 
                 if (toSkip.contains(new Point(l, c))) {
                     //already found it
@@ -79,13 +81,8 @@ public class PlayerBoardTransformer {
                 String encoded = message[l][c];
 
                 if (isAPiece(encoded)) {
-                    Ship ship = findAllPiecesAndBuildShip(toSkip, message, l, c);
+                    Ship ship = findAllPiecesAndBuildShip(board, toSkip, message, l, c);
                     board.placeShip(ship);
-                } else {
-                    boardTiles[l][c] = new WaterTile(l, c);
-                    if (encoded.equalsIgnoreCase(WATER_VISIBLE_STRING)) {
-                        boardTiles[l][c].visible = true;
-                    }
                 }
             }
         }
@@ -93,14 +90,11 @@ public class PlayerBoardTransformer {
         return board;
     }
 
-    private static boolean isWithinBounds(Point point) {
-        Point lowerBound = new Point(-1, -1);
-        Point higherBound = new Point(PlayerBoard.LINES, PlayerBoard.COLUMNS);
-
-        return point.isConstrainedBy(lowerBound, higherBound);
+    private static boolean isWithinBounds(PlayerBoard board, Point point) {
+        return board.inBounds(point);
     }
 
-    private static Ship findAllPiecesAndBuildShip(HashSet<Point> toSkip, String[][] message, int l, int c) {
+    private static Ship findAllPiecesAndBuildShip(PlayerBoard board, HashSet<Point> toSkip, String[][] message, int l, int c) {
         Point origin = new Point(l, c);
         Direction finalDirection = Direction.Up;
 
@@ -108,7 +102,7 @@ public class PlayerBoardTransformer {
             Point directionVector = direction.vector;
             Point next = origin.moved(directionVector);
 
-            if (isWithinBounds(next) && theresAPieceAt(message, next)) {
+            if (isWithinBounds(board, next) && theresAPieceAt(message, next)) {
                 finalDirection = direction;
                 break;
             }
@@ -118,7 +112,7 @@ public class PlayerBoardTransformer {
         Point next = origin;
         Point directionVector = finalDirection.vector;
 
-        for (int i = 0; isWithinBounds(next) && theresAPieceAt(message, next); next = next.moved(directionVector), i++) {
+        for (int i = 0; isWithinBounds(board, next) && theresAPieceAt(message, next); next = next.moved(directionVector), i++) {
             boolean visible = !message[next.x][next.y].equalsIgnoreCase(PIECE_NOT_ATTACKED_STRING);
             pieces.add(new ShipPiece(i, next, visible));
 

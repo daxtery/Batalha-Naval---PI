@@ -2,21 +2,21 @@ package JavaFX;
 
 import Common.*;
 
-import static Common.PlayerBoard.COLUMNS;
-import static Common.PlayerBoard.LINES;
-
 
 public class SelfGraphBoardFX extends GraphBoardFX {
 
-    SelfGraphBoardFX(int _w, int _h) {
-        super(_w, _h);
+    SelfGraphBoardFX(int lines, int columns, int _w, int _h) {
+        super(lines, columns, _w, _h);
     }
 
     @Override
     void startTiles(String[][] sent) {
         pb = PlayerBoardTransformer.parse(sent);
-        for (int l = 0; l < LINES; l++) {
-            for (int c = 0; c < COLUMNS; c++) {
+        final int lines = pb.lines();
+        final int columns = pb.columns();
+
+        for (int l = 0; l < lines; l++) {
+            for (int c = 0; c < columns; c++) {
                 BoardTile boardTile = pb.getTileAt(l, c);
 
                 switch (boardTile.tileType) {
