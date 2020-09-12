@@ -414,11 +414,36 @@ public class App extends Application {
         //TIPS
         sSTips.setSpacing(5);
         sSTips.getChildren().add(new Text("Hey!"));
-        sSTips.getChildren().add(new Text(
-                " +Left-Mouse to select a ship; Left-Mouse again to deselect it"));
-        sSTips.getChildren().add(new Text(" +R while a ship is selected to rotate it"));
-        sSTips.getChildren().add(new Text(" +Green means it can be placed there; Left-Mouse to do that"));
-        sSTips.getChildren().add(new Text(" +Red means it can't be placed there"));
+        sSTips.getChildren().add(new Text(" + Right-Mouse to select/deselect a ship"));
+        sSTips.getChildren().add(new Text(" + R while a ship is selected to rotate it"));
+        sSTips.getChildren().add(new Text(" + Left-Mouse to confirm the selected ship's position"));
+
+        {
+            final HBox pane = new HBox();
+            final Text red = new Text("Green");
+            red.setFill(Color.GREEN);
+
+            pane.getChildren().addAll(
+                    new Text(" + "),
+                    red,
+                    new Text(" means it can be placed there.")
+            );
+
+            sSTips.getChildren().add(pane);
+        }
+
+        {
+            final HBox pane = new HBox();
+            final Text red = new Text("Red");
+            red.setFill(Color.RED);
+
+            pane.getChildren().addAll(
+                    new Text(" + "),
+                    red,
+                    new Text(" means it can't be placed there"));
+
+            sSTips.getChildren().add(pane);
+        }
 
         sSPlaceIntructions.getChildren().addAll(sSTips);
 
