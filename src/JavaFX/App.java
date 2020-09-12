@@ -4,6 +4,7 @@ import AI.AiMove;
 import AI.MyAI;
 import Common.*;
 import JavaFX.Scenes.MainMenuScene;
+import JavaFX.Scenes.WaitingForPlayersScene;
 import util.Point;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -55,15 +56,13 @@ public class App extends Application {
                     false, false, true, true)
     );
     private final static Rectangle2D SCREEN_RECTANGLE = Screen.getPrimary().getVisualBounds();
+    private final AudioClip soundPlayer = new AudioClip(new File("assets/sound/play.mp3").toURI().toString());
     //FOR OFFLINE
     private AIPlayer ai;
     private boolean vsAI;
     private SelfGraphBoardFX selfvsAI;
     //FOR ONLINE
     private GameClient client;
-
-    private final AudioClip soundPlayer = new AudioClip(new File("assets/sound/play.mp3").toURI().toString());
-
     private PlayerBoard pb;
 
     //region SET SHIPS STUFF
@@ -672,9 +671,8 @@ public class App extends Application {
 
     public void OnConnectedPlayers(ConnectedPlayers players) {
         Platform.runLater(() -> {
-                    textArea.clear();
-                    for (String name : players.names)
-                        textArea.appendText(name + "\n");
+                    WaitingForPlayersScene scene = (WaitingForPlayersScene) App.this.theStage.getScene();
+                    scene.OnConnectedPlayers(players);
                 }
         );
     }
@@ -775,20 +773,8 @@ public class App extends Application {
         };
 
         tryConnectTask.setOnSucceeded(t -> {
-            BorderPane root = new BorderPane();
-            textArea = new TextArea();
-            textArea.setEditable(false);
-
-            root.setCenter(textArea);
-
-            waitingScreen = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
+            waitingScreen = new WaitingForPlayersScene();
             App.this.transitionTo(waitingScreen);
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("YEE");
-            alert.setHeaderText("WE GOT IN");
-            alert.setContentText("TEMP MESSAGE TO SAY WE GOT IN; WAIT NOW! DON'T PRESS ANY MORE SHIT");
-            alert.showAndWait();
         });
 
         tryConnectTask.setOnFailed(t -> {
