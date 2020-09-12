@@ -1,20 +1,16 @@
 package JavaFX.Scenes;
 
 import Common.Network;
-import javafx.scene.Scene;
+import JavaFX.App;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Screen;
 
-public class WaitingForPlayersScene extends Scene {
+public class WaitingForPlayersScene extends BaseGameScene {
 
     private final TextArea textArea;
 
-    public WaitingForPlayersScene() {
-        super(new BorderPane(),
-                Screen.getPrimary().getVisualBounds().getWidth(),
-                Screen.getPrimary().getVisualBounds().getHeight()
-        );
+    public WaitingForPlayersScene(App app) {
+        super(app, new BorderPane());
 
         BorderPane root = (BorderPane) getRoot();
         textArea = new TextArea();
@@ -27,5 +23,15 @@ public class WaitingForPlayersScene extends Scene {
         for (String name : players.names) {
             textArea.appendText(name + "\n");
         }
+    }
+
+    @Override
+    public void OnSceneSet() {
+
+    }
+
+    @Override
+    public void OnSceneUnset() {
+
     }
 }

@@ -3,7 +3,9 @@ package JavaFX;
 import AI.AiMove;
 import AI.MyAI;
 import Common.*;
+import JavaFX.Scenes.BaseGameScene;
 import JavaFX.Scenes.MainMenuScene;
+import JavaFX.Scenes.SetShipsScene;
 import JavaFX.Scenes.WaitingForPlayersScene;
 import util.Point;
 
@@ -164,7 +166,7 @@ public class App extends Application {
     }
 
     private void reset() {
-        setShipsScene();
+        setShips = new SetShipsScene(this);
     }
 
     private void lost(String s) {
@@ -199,7 +201,7 @@ public class App extends Application {
     private void setAllScenes() {
         mainMenu = new MainMenuScene(this);
         setMainGame();
-        setShipsScene();
+        setShips = new SetShipsScene(this);
         setAttackScreen();
         setChatScreen();
         setWonScene();
@@ -210,14 +212,26 @@ public class App extends Application {
         for (EmptyGraphBoardFX g : toAnimate)
             g.stopAnimating();
         toAnimate.clear();
+
+        Scene old = theStage.getScene();
+
+        if (old instanceof BaseGameScene) {
+            ((BaseGameScene) old).OnSceneUnset();
+        }
+
         theStage.setScene(scene);
+
+        if (scene instanceof BaseGameScene) {
+            ((BaseGameScene) scene).OnSceneSet();
+        }
+
         if (scene == mainGame)
             toAnimate.add(mGSelfBoard);
         if (scene == attackScene) {
             toAnimate.add(ene1.b);
             toAnimate.add(ene2.b);
         }
-        if (scene == setShips)
+        if (false && scene == setShips)
             toAnimate.add(sSboard);
         if (scene == AIScene) {
             toAnimate.add(selfvsAI);
@@ -272,132 +286,6 @@ public class App extends Application {
 
     private void setTurnLabel(String name) {
         mGcurrentPlayerText.setText(name);
-    }
-
-    private void setShipsScene() {
-
-        sSRoot = new HBox();
-        sSRoot.setStyle("-fx-background-image: url(images/BattleShipBigger2.png);-fx-background-size: cover;");
-
-        pb = new PlayerBoard(DEFAULT_LINES, DEFAULT_COLUMNS);
-        sSboard = new ShipsBoardFX(pb.lines(), pb.columns(), 700, 500);
-
-        sSboard.setPlayerBoard(pb);
-        sSboard.startAnimating();
-
-        sSRightStuff = new VBox();
-
-        sSPlaceIntructions = new HBox();
-        sSPlaceIntructions.setStyle("-fx-background-color: grey;");
-
-        sSTips = new VBox();
-
-        //TIPS
-        sSTips.setSpacing(5);
-        sSTips.getChildren().add(new Text("Hey!"));
-        sSTips.getChildren().add(new Text(" + Right-Mouse to select/deselect a ship"));
-        sSTips.getChildren().add(new Text(" + R while a ship is selected to rotate it"));
-        sSTips.getChildren().add(new Text(" + Left-Mouse to confirm the selected ship's position"));
-
-        {
-            final HBox pane = new HBox();
-            final Text red = new Text("Green");
-            red.setFill(Color.GREEN);
-
-            pane.getChildren().addAll(
-                    new Text(" + "),
-                    red,
-                    new Text(" means it can be placed there.")
-            );
-
-            sSTips.getChildren().add(pane);
-        }
-
-        {
-            final HBox pane = new HBox();
-            final Text red = new Text("Red");
-            red.setFill(Color.RED);
-
-            pane.getChildren().addAll(
-                    new Text(" + "),
-                    red,
-                    new Text(" means it can't be placed there"));
-
-            sSTips.getChildren().add(pane);
-        }
-
-        sSPlaceIntructions.getChildren().addAll(sSTips);
-
-        sSReadyBox = new HBox();
-        sSReadyBox.setStyle("-fx-background-color: yellow;");
-
-        sSRandomButton = new Button("Random");
-        sSRandomButton.setFont(new Font(50));
-        sSRandomButton.setOnMouseClicked(event -> {
-            pb = PlayerBoardFactory.getRandomPlayerBoard();
-            sSboard.initShips(pb);
-            sSboard.selected = null;
-            //System.out.println(pb);
-        });
-
-        sSReadyButton = new Button("Ready");
-        sSReadyButton.setFont(new Font(50));
-
-        sSReadyButton.setOnMouseClicked(event -> {
-            if (sSboard.pb.ships.size() == DEFAULT_SIZES.length) {
-
-                sSReadyButton.setDisable(true);
-                sSRandomButton.setDisable(true);
-                sSboard.finished = true;
-
-                pb = sSboard.pb;
-
-                if (!vsAI) {
-                    mGSelfBoard.setPlayerBoard(pb);
-
-                    String[][] message = PlayerBoardTransformer.transform(pb);
-
-                    mGSelfBoard.startTiles(message);
-                    mGSelfBoard.updateTiles(message);
-
-                    APlayerboard p = new APlayerboard();
-                    p.board = PlayerBoardTransformer.transform(sSboard.pb);
-                    client.sendTCP(p);
-                } else {
-                    String[][] message = PlayerBoardTransformer.transform(pb);
-                    selfvsAI.startTiles(message);
-                    transitionTo(AIScene);
-                }
-            }
-        });
-
-        sSReadyBox.getChildren().addAll(sSRandomButton, sSReadyButton);
-
-        sSInstructionsGame = new VBox();
-        sSInstructionsGame.setStyle("-fx-background-color: grey;");
-        sSInstructionsGame.setSpacing(5);
-        sSInstructionsGame.getChildren().add(new Text("Instructions: "));
-        sSInstructionsGame.getChildren().add(new Text(
-                " +When you hit a ship piece, you get to go again"));
-        sSInstructionsGame.getChildren().add(new Text(" +Missing means it is now somebody else's turn"));
-        sSInstructionsGame.getChildren().add(new Text(" +If you destroy a ship, surrounding area will be shown"));
-
-        sSRightStuff.getChildren().addAll(sSPlaceIntructions, sSReadyBox, sSInstructionsGame);
-
-        sSRoot.getChildren().addAll(sSboard, sSRightStuff);
-        sSRoot.setPadding(new Insets(25));
-        sSRoot.setSpacing(10);
-
-        sSRoot.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.R) {
-                sSboard.OnRotateKeyPressed();
-            }
-        });
-        sSboard.setOnMouseMoved(event -> sSboard.OnMouseMoved(event));
-        sSboard.setOnMouseClicked(event -> sSboard.OnMouseClicked(event));
-
-        setShips = new Scene(sSRoot, SCREEN_RECTANGLE.getWidth(),
-                SCREEN_RECTANGLE.getHeight());
     }
 
     private void setAttackScreen() {
@@ -773,7 +661,7 @@ public class App extends Application {
         };
 
         tryConnectTask.setOnSucceeded(t -> {
-            waitingScreen = new WaitingForPlayersScene();
+            waitingScreen = new WaitingForPlayersScene(this);
             App.this.transitionTo(waitingScreen);
         });
 
@@ -791,6 +679,25 @@ public class App extends Application {
     public void OnSoloButtonPressed() {
         vsAI = true;
         theStage.setScene(setShips);
+    }
+
+    public void SignalReady(PlayerBoard pb) {
+        if (!vsAI) {
+            mGSelfBoard.setPlayerBoard(pb);
+
+            String[][] message = PlayerBoardTransformer.transform(pb);
+
+            mGSelfBoard.startTiles(message);
+            mGSelfBoard.updateTiles(message);
+
+            Network.APlayerboard p = new Network.APlayerboard();
+            p.board = PlayerBoardTransformer.transform(pb);
+            client.sendTCP(p);
+        } else {
+            String[][] message = PlayerBoardTransformer.transform(pb);
+            selfvsAI.startTiles(message);
+            transitionTo(AIScene);
+        }
     }
 
     private static class EnemyLocal {

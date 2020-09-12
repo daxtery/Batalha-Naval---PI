@@ -36,11 +36,11 @@ class EmptyGraphBoardFX extends Canvas {
 
     }
 
-    void startAnimating() {
+    public void startAnimating() {
         anim.start();
     }
 
-    void stopAnimating() {
+    public void stopAnimating() {
         anim.stop();
     }
 }

@@ -10,15 +10,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Screen;
 
-public class MainMenuScene extends Scene {
+public class MainMenuScene extends BaseGameScene {
 
     public MainMenuScene(App app) {
-        super(new BorderPane(),
-                Screen.getPrimary().getVisualBounds().getWidth(),
-                Screen.getPrimary().getVisualBounds().getHeight()
-        );
+        super(app, new BorderPane());
 
         TextField nameInput = new TextField("Name!");
 
@@ -79,5 +75,15 @@ public class MainMenuScene extends Scene {
         mMMiddle.setStyle("-fx-fill: true; -fx-alignment:bottom-center; -fx-padding: 50");
 
         ((BorderPane) getRoot()).setCenter(mMMiddle);
+    }
+
+    @Override
+    public void OnSceneSet() {
+
+    }
+
+    @Override
+    public void OnSceneUnset() {
+
     }
 }

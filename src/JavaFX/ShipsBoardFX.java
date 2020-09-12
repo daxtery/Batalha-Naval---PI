@@ -20,9 +20,8 @@ public class ShipsBoardFX extends GraphBoardFX {
     ShipFX preview;
 
     boolean canPlace;
-    boolean finished;
 
-    ShipsBoardFX(int lines, int columns, int w, int h) {
+    public ShipsBoardFX(int lines, int columns, int w, int h) {
         super(lines, columns, w, h);
         shipsFX = new ShipFX[DEFAULT_SIZES.length];
         canPlace = false;
@@ -112,7 +111,7 @@ public class ShipsBoardFX extends GraphBoardFX {
         }
     }
 
-    void initShips(PlayerBoard _pb) {
+    public void initShips(PlayerBoard _pb) {
         pb = _pb;
         List<Ship> ships = pb.getShips();
         for (int i = 0; i < ships.size(); i++) {
@@ -121,7 +120,7 @@ public class ShipsBoardFX extends GraphBoardFX {
             shipsFX[i] = new ShipFX(s.size(), s.origin(), s.direction, true);
             shipsFX[i].setShip(s);
         }
-
+        deselectSelected();
     }
 
     @Override
@@ -201,9 +200,6 @@ public class ShipsBoardFX extends GraphBoardFX {
     }
 
     public void OnMouseClicked(MouseEvent event) {
-        if (finished)
-            return;
-
         double x = event.getX();
         double y = event.getY();
 
@@ -250,7 +246,7 @@ public class ShipsBoardFX extends GraphBoardFX {
         }
     }
 
-    void OnRotateKeyPressed() {
+    public void OnRotateKeyPressed() {
         if (preview == null) return;
 
         preview.dir = preview.dir.rotated;
