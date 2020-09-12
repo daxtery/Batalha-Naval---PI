@@ -94,7 +94,7 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
         tiles[l][c] = new WaterTileFX(l, c, Direction.Right);
     }
 
-    void updateTiles(String[][] sent) {
+    public void updateTiles(String[][] sent) {
         final int lines = sent.length;
         final int columns = sent[0].length;
 

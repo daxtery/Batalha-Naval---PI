@@ -3,10 +3,7 @@ package JavaFX;
 import AI.AiMove;
 import AI.MyAI;
 import Common.*;
-import JavaFX.Scenes.BaseGameScene;
-import JavaFX.Scenes.MainMenuScene;
-import JavaFX.Scenes.SetShipsScene;
-import JavaFX.Scenes.WaitingForPlayersScene;
+import JavaFX.Scenes.*;
 import util.Point;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -67,32 +64,6 @@ public class App extends Application {
     private GameClient client;
     private PlayerBoard pb;
 
-    //region SET SHIPS STUFF
-    private GridPane mMMiddle;
-    private HBox sSRoot;
-    private ShipsBoardFX sSboard;
-    private VBox sSRightStuff;
-    private HBox sSPlaceIntructions;
-    private VBox sSTips;
-    private HBox sSReadyBox;
-    private Button sSRandomButton;
-    private Button sSReadyButton;
-    private VBox sSInstructionsGame;
-    private Text sSPlayer1Ready;
-
-    //endregion
-
-    //region MAIN GAME STUFF
-    private Text sSPlayer2Ready;
-    private BorderPane MGRoot;
-    private Group MGCanvasHolder;
-    private SelfGraphBoardFX mGSelfBoard;
-    private StackPane MGTop;
-    private Label mGcurrentPlayerText;
-    private VBox MGRight;
-    private Circle MGShips;
-    private Button MGAttackButton;
-
     //endregion
 
     //region ATTACK WINDOW STUFF
@@ -117,7 +88,7 @@ public class App extends Application {
 
     //SCENES
     private Scene mainMenu;
-    private Scene mainGame;
+    private MainGameScene mainGame;
     private Scene setShips;
     private Scene attackScene;
     private Scene wonScene;
@@ -200,7 +171,7 @@ public class App extends Application {
 
     private void setAllScenes() {
         mainMenu = new MainMenuScene(this);
-        setMainGame();
+        mainGame = new MainGameScene(this);
         setShips = new SetShipsScene(this);
         setAttackScreen();
         setChatScreen();
@@ -225,67 +196,16 @@ public class App extends Application {
             ((BaseGameScene) scene).OnSceneSet();
         }
 
-        if (scene == mainGame)
-            toAnimate.add(mGSelfBoard);
         if (scene == attackScene) {
             toAnimate.add(ene1.b);
             toAnimate.add(ene2.b);
         }
-        if (false && scene == setShips)
-            toAnimate.add(sSboard);
         if (scene == AIScene) {
             toAnimate.add(selfvsAI);
             toAnimate.add(ai.b);
         }
         for (EmptyGraphBoardFX g : toAnimate)
             g.startAnimating();
-    }
-
-    private void setMainGame() {
-
-        MGRoot = new BorderPane();
-        MGRoot.setStyle("-fx-background-image: url(images/BattleShipBigger2.png);-fx-background-size: cover;");
-
-        //GridPane gridPane = new GridPane();
-        //gridPane.setStyle("-fx-background-color:cyan");
-
-        MGCanvasHolder = new Group();
-
-        mGSelfBoard = new SelfGraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, 500, 500);
-
-        mGSelfBoard.startTiles(
-                PlayerBoardTransformer.transform(PlayerBoardFactory.getRandomPlayerBoard())
-        );
-
-        MGCanvasHolder.getChildren().add(mGSelfBoard);
-
-        MGTop = new StackPane();
-
-        mGcurrentPlayerText = new Label("IS PLAYING");
-        mGcurrentPlayerText.setFont(new Font(30));
-        MGTop.getChildren().add(mGcurrentPlayerText);
-
-        MGRight = new VBox(50);
-
-        MGAttackButton = new Button("TO ARMS");
-        MGAttackButton.setOnMouseClicked(event -> transitionTo(attackScene));
-        MGChatButton = new Button("CHAT");
-        MGChatButton.setOnMouseClicked(event -> transitionTo(chatScreen));
-
-        VBox.setVgrow(MGAttackButton, Priority.ALWAYS);
-        VBox.setVgrow(MGChatButton, Priority.ALWAYS);
-
-        MGRight.getChildren().addAll(MGAttackButton, MGChatButton);
-
-        MGRoot.setRight(MGRight);
-        MGRoot.setTop(MGTop);
-        MGRoot.setCenter(MGCanvasHolder);
-
-        mainGame = new Scene(MGRoot, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
-    }
-
-    private void setTurnLabel(String name) {
-        mGcurrentPlayerText.setText(name);
     }
 
     private void setAttackScreen() {
@@ -554,7 +474,7 @@ public class App extends Application {
     }
 
     public void OnWhoseTurn(WhoseTurn whoseTurn) {
-        Platform.runLater(() -> setTurnLabel(whoseTurn.name));
+        Platform.runLater(() -> mainGame.OnWhoseTurn(whoseTurn));
     }
 
     public void OnConnectedPlayers(ConnectedPlayers players) {
@@ -586,7 +506,7 @@ public class App extends Application {
     }
 
     public void OnYourBoardToPaint(YourBoardToPaint toPaint) {
-        Platform.runLater(() -> mGSelfBoard.updateTiles((toPaint).board));
+        Platform.runLater(() -> mainGame.OnYourBoardToPaint(toPaint));
     }
 
     public void OnEnemiesBoardsToPaint(EnemiesBoardsToPaint boards) {
@@ -614,7 +534,7 @@ public class App extends Application {
     public void OnYourTurn() {
         Platform.runLater(() -> {
             iCanAttack = true;
-            setTurnLabel("My TURN!!");
+            mainGame.OnYourTurn();
         });
     }
 
@@ -683,13 +603,7 @@ public class App extends Application {
 
     public void SignalReady(PlayerBoard pb) {
         if (!vsAI) {
-            mGSelfBoard.setPlayerBoard(pb);
-
-            String[][] message = PlayerBoardTransformer.transform(pb);
-
-            mGSelfBoard.startTiles(message);
-            mGSelfBoard.updateTiles(message);
-
+            mainGame.setPlayerBoard(pb);
             Network.APlayerboard p = new Network.APlayerboard();
             p.board = PlayerBoardTransformer.transform(pb);
             client.sendTCP(p);
@@ -698,6 +612,14 @@ public class App extends Application {
             selfvsAI.startTiles(message);
             transitionTo(AIScene);
         }
+    }
+
+    public void OnAttackButtonPressed() {
+        transitionTo(attackScene);
+    }
+
+    public void OnChatButtonPressed() {
+        transitionTo(chatScreen);
     }
 
     private static class EnemyLocal {

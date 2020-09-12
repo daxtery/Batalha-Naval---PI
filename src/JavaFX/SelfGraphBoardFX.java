@@ -5,12 +5,12 @@ import Common.*;
 
 public class SelfGraphBoardFX extends GraphBoardFX {
 
-    SelfGraphBoardFX(int lines, int columns, int _w, int _h) {
+    public SelfGraphBoardFX(int lines, int columns, int _w, int _h) {
         super(lines, columns, _w, _h);
     }
 
     @Override
-    void startTiles(String[][] sent) {
+    public void startTiles(String[][] sent) {
         pb = PlayerBoardTransformer.parse(sent);
         final int lines = pb.lines();
         final int columns = pb.columns();
