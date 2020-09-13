@@ -1,46 +1,37 @@
 package JavaFX;
 
-import AI.AiMove;
-import AI.MyAI;
 import Common.*;
+import Common.Network.*;
 import JavaFX.Scenes.*;
-import util.Point;
-
 import com.esotericsoftware.kryonet.Connection;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-import Common.Network.*;
+import util.Point;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;
 import static Common.PlayerBoardConstants.DEFAULT_LINES;
-import static Common.PlayerBoardFactory.DEFAULT_SIZES;
 
 public class App extends Application {
 
@@ -56,43 +47,29 @@ public class App extends Application {
     );
     private final static Rectangle2D SCREEN_RECTANGLE = Screen.getPrimary().getVisualBounds();
     private final AudioClip soundPlayer = new AudioClip(new File("assets/sound/play.mp3").toURI().toString());
+    private final List<EmptyGraphBoardFX> toAnimate = new ArrayList<>();
+    private final int NUM_PLAYERS = 3;
+    private final int NUM_ENEMIES = NUM_PLAYERS - 1;
+    public final EnemyLocal[] enemies = new EnemyLocal[NUM_ENEMIES];
     //FOR OFFLINE
     private AIPlayer ai;
+    //endregion
     private boolean vsAI;
     private SelfGraphBoardFX selfvsAI;
     //FOR ONLINE
     private GameClient client;
-    private PlayerBoard pb;
-
-    //endregion
-
-    //region ATTACK WINDOW STUFF
-    private Button MGChatButton;
     private boolean iCanAttack;
-    private EnemyLocal lastAttacked;
-    private EnemyLocal ene1;
-    private EnemyLocal ene2;
-    private HBox aWRoot;
-    private VBox aWvBox = new VBox(50);
-    private VBox aWvBox2 = new VBox(50);
     private String aWshipSoundFile = "assets/sound/ship.mp3";
     private String aWwaterSoundFile = "assets/sound/water.mp3";
     private MediaPlayer aWShipSound = new MediaPlayer(new Media(new File(aWshipSoundFile).toURI().toString()));
-
-    //endregion
     private MediaPlayer aWWaterSound = new MediaPlayer(new Media(new File(aWwaterSoundFile).toURI().toString()));
-    private TextArea textArea;
-    private Label cWl1;
-    private Label cWl2;
-    private ArrayList<EmptyGraphBoardFX> toAnimate = new ArrayList<>();
-
     //SCENES
     private Scene mainMenu;
     private MainGameScene mainGame;
     private Scene setShips;
-    private Scene attackScene;
+    private AttackScene attackScene;
     private Scene wonScene;
-    private Scene chatScreen;
+    private ChatScene chatScreen;
     private Scene waitingScreen;
     private Scene AIScene;
 
@@ -152,29 +129,13 @@ public class App extends Application {
         transitionTo(wonScene);
     }
 
-    private void removeEnemy(int who) {
-        if (who == ene2.serverID)
-            aWRoot.getChildren().remove(aWvBox2);
-        else
-            aWRoot.getChildren().remove(aWvBox);
-    }
-
-    private void updateEnemyBoard(int id, String[][] newAttackedBoard) {
-        EnemyLocal toUpdate = ene1;
-
-        if (id == ene2.serverID) {
-            toUpdate = ene2;
-        }
-
-        toUpdate.b.updateTiles(newAttackedBoard);
-    }
-
     private void setAllScenes() {
         mainMenu = new MainMenuScene(this);
         mainGame = new MainGameScene(this);
         setShips = new SetShipsScene(this);
-        setAttackScreen();
-        setChatScreen();
+        attackScene = new AttackScene(this);
+        chatScreen = new ChatScene(this);
+
         setWonScene();
         setAIScene();
     }
@@ -196,98 +157,12 @@ public class App extends Application {
             ((BaseGameScene) scene).OnSceneSet();
         }
 
-        if (scene == attackScene) {
-            toAnimate.add(ene1.b);
-            toAnimate.add(ene2.b);
-        }
         if (scene == AIScene) {
             toAnimate.add(selfvsAI);
             toAnimate.add(ai.b);
         }
         for (EmptyGraphBoardFX g : toAnimate)
             g.startAnimating();
-    }
-
-    private void setAttackScreen() {
-
-        ene1 = new EnemyLocal();
-        ene2 = new EnemyLocal();
-        lastAttacked = new EnemyLocal();
-        iCanAttack = false;
-
-        ene1.b = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
-        ene2.b = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
-
-        PlayerBoard board = PlayerBoardFactory.getRandomPlayerBoard();
-        ene1.b.startTiles(PlayerBoardTransformer.transform(board));
-
-        board = PlayerBoardFactory.getRandomPlayerBoard();
-        ene2.b.startTiles(PlayerBoardTransformer.transform(board));
-
-        ene1.b.startAnimating();
-        ene2.b.startAnimating();
-
-        ene1.labeln = new Label("ENEMY 1");
-        ene1.labeln.setFont(new Font("Verdana", 30));
-        ene1.labeln.setTextFill(Color.rgb(0, 0, 0));
-
-        ene2.labeln = new Label("ENEMY 2");
-        ene2.labeln.setFont(new Font("Verdana", 30));
-        ene2.labeln.setTextFill(Color.rgb(0, 0, 0));
-
-        aWvBox = new VBox(10);
-        aWvBox.getChildren().addAll(ene1.b, ene1.labeln);
-
-        aWvBox2 = new VBox(10);
-        aWvBox2.getChildren().addAll(ene2.b, ene2.labeln);
-
-        Button back = new Button("BACK");
-        back.setOnMouseClicked(event -> transitionTo(mainGame));
-
-        aWRoot = new HBox(50);
-        aWRoot.setStyle("-fx-background-image: url(images/BattleShipBigger2.png);-fx-background-size: cover;");
-
-        aWRoot.getChildren().addAll(aWvBox, aWvBox2, back);
-
-        ene1.b.setOnMouseClicked(event -> {
-            lastAttacked = ene1;
-            if (iCanAttack) {
-                iCanAttack = false;
-
-                Point p = ene1.b.pointCoordinates(event);
-
-                AnAttackAttempt anAttackAttempt = new AnAttackAttempt();
-
-                anAttackAttempt.l = p.x;
-                anAttackAttempt.c = p.y;
-
-                anAttackAttempt.toAttackID = ene1.serverID;
-                anAttackAttempt.otherID = ene2.serverID;
-
-                client.sendTCP(anAttackAttempt);
-            }
-        });
-
-
-        ene2.b.setOnMouseClicked(event -> {
-            lastAttacked = ene2;
-            if (iCanAttack) {
-                iCanAttack = false;
-
-                Point p = ene2.b.pointCoordinates(event);
-
-                AnAttackAttempt anAttackAttempt = new AnAttackAttempt();
-                anAttackAttempt.l = p.x;
-                anAttackAttempt.c = p.y;
-                anAttackAttempt.toAttackID = ene2.serverID;
-                anAttackAttempt.otherID = ene1.serverID;
-
-                client.sendTCP(anAttackAttempt);
-            }
-        });
-
-        attackScene = new Scene(aWRoot, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
-
     }
 
     private void setWonScene() {
@@ -299,72 +174,6 @@ public class App extends Application {
         root.getChildren().add(b);
 
         wonScene = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
-    }
-
-    private void setChatScreen() {
-
-        Button n = new Button("BACK");
-        n.setOnMouseClicked(event -> transitionTo(mainGame));
-
-        cWl1 = new Label();
-        cWl1.setFont(new Font(30));
-        cWl2 = new Label();
-        cWl2.setFont(new Font(30));
-
-        VBox vBox1 = new VBox(20);
-        VBox vBox2 = new VBox(20);
-
-        ene1.conversation = new TextArea();
-        ene1.conversation.setEditable(false);
-        ene1.conversation.setWrapText(true);
-
-        TextArea tf1 = new TextArea();
-        tf1.setWrapText(true);
-        tf1.setMinSize(tf1.getPrefWidth() * 2, tf1.getPrefHeight() * 2);
-        tf1.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                String message = tf1.getText();
-                tf1.clear();
-                ChatMessageFromClient c = new ChatMessageFromClient();
-                ene1.conversation.appendText("ME: " + message);
-                c.text = message;
-                c.to = ene1.serverID;
-                client.sendTCP(c);
-            }
-        });
-
-        ene2.conversation = new TextArea();
-        ene2.conversation.setEditable(false);
-        ene2.conversation.setWrapText(true);
-
-        TextArea tf2 = new TextArea();
-        tf2.setWrapText(true);
-        tf2.setMinSize(tf2.getPrefWidth(), tf2.getPrefHeight());
-        tf2.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                String message = tf2.getText();
-                tf2.clear();
-                ChatMessageFromClient c = new ChatMessageFromClient();
-                ene2.conversation.appendText("ME: " + message);
-                c.text = message;
-                c.to = ene2.serverID;
-                client.sendTCP(c);
-            }
-        });
-
-        vBox1.getChildren().addAll(cWl1, ene1.conversation, tf1);
-        vBox2.getChildren().addAll(cWl2, ene2.conversation, tf2);
-
-        VBox.setVgrow(ene1.conversation, Priority.ALWAYS);
-        VBox.setVgrow(ene2.conversation, Priority.ALWAYS);
-
-        HBox hBox = new HBox(50);
-        HBox.setHgrow(vBox1, Priority.ALWAYS);
-        HBox.setHgrow(vBox2, Priority.ALWAYS);
-        hBox.getChildren().addAll(vBox1, vBox2, n);
-
-        chatScreen = new Scene(hBox, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
-
     }
 
     private void setAIScene() {
@@ -415,7 +224,6 @@ public class App extends Application {
         });
 
         AIScene = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
-
     }
 
     private void doSounds(AttackResult result) {
@@ -435,32 +243,32 @@ public class App extends Application {
     }
 
     private void aiTurn() {
-        AiMove move = ai.brain.nextMove(pb);
-        System.out.println("CHOSE " + move);
-
-        AttackResult result = pb.getAttacked(move.point);
-        boolean hit = result.status == AttackResultStatus.HitShipPiece;
-
-        selfvsAI.updateTiles(PlayerBoardTransformer.transform(pb));
-        selfvsAI.setLast(move.point);
-
-        ai.brain.react(pb, move, result);
-
-        if (hit && !pb.isGameOver()) {
-            Task<Void> wait = new Task<>() {
-                @Override
-                protected Void call() throws Exception {
-                    Thread.sleep(1000);
-                    return null;
-                }
-            };
-            wait.setOnSucceeded(event -> aiTurn());
-            new Thread(wait).start();
-        } else if (hit && pb.isGameOver())
-            lost("YOU LOST TO AI LOL!");
-        else {
-            iCanAttack = true;
-        }
+//        AiMove move = ai.brain.nextMove(pb);
+//        System.out.println("CHOSE " + move);
+//
+//        AttackResult result = pb.getAttacked(move.point);
+//        boolean hit = result.status == AttackResultStatus.HitShipPiece;
+//
+//        selfvsAI.updateTiles(PlayerBoardTransformer.transform(pb));
+//        selfvsAI.setLast(move.point);
+//
+//        ai.brain.react(pb, move, result);
+//
+//        if (hit && !pb.isGameOver()) {
+//            Task<Void> wait = new Task<>() {
+//                @Override
+//                protected Void call() throws Exception {
+//                    Thread.sleep(1000);
+//                    return null;
+//                }
+//            };
+//            wait.setOnSucceeded(event -> aiTurn());
+//            new Thread(wait).start();
+//        } else if (hit && pb.isGameOver())
+//            lost("YOU LOST TO AI LOL!");
+//        else {
+//            iCanAttack = true;
+//        }
     }
 
     public void OnIsFull() {
@@ -491,17 +299,10 @@ public class App extends Application {
 
     public void OnOtherSpecs(OthersSpecs othersSpecs) {
         Platform.runLater(() -> {
-
-            ene1.serverID = othersSpecs.ene1;
-            ene1.name = othersSpecs.ene1n;
-            ene1.labeln.setText(ene1.name);
-            cWl1.setText(ene1.name);
-
-            ene2.serverID = othersSpecs.ene2;
-            ene2.name = othersSpecs.ene2n;
-            ene2.labeln.setText(ene2.name);
-            cWl2.setText(ene2.name);
-
+            enemies[0] = new EnemyLocal(othersSpecs.ene1, othersSpecs.ene1n);
+            enemies[1] = new EnemyLocal(othersSpecs.ene2, othersSpecs.ene2n);
+            chatScreen.onOtherSpecs(othersSpecs);
+            attackScene.onOtherSpecs(othersSpecs);
         });
     }
 
@@ -510,30 +311,26 @@ public class App extends Application {
     }
 
     public void OnEnemiesBoardsToPaint(EnemiesBoardsToPaint boards) {
-        Platform.runLater(() -> {
-            ene1.b.startTiles(boards.board1);
-            ene2.b.startTiles(boards.board2);
-        });
+        Platform.runLater(() -> attackScene.onEnemiesBoardsToPaint(boards));
     }
 
     public void OnEnemyBoardToPaint(EnemyBoardToPaint board) {
         Platform.runLater(() -> {
-            updateEnemyBoard(board.id, board.newAttackedBoard);
             System.out.println("ENEMY BOARD TO PAINT WITH INDEX " + board.id);
+            attackScene.onEnemyBoardToPaint(board);
         });
     }
 
     public void OnAnAttackResponse(AnAttackResponse attackResponse) {
         Platform.runLater(() -> {
-            lastAttacked.b.updateTiles(attackResponse.newAttackedBoard);
-            iCanAttack = attackResponse.again;
+            attackScene.OnAttackResponse(attackResponse);
             doSounds(attackResponse.actualHit, attackResponse.shipHit);
         });
     }
 
     public void OnYourTurn() {
         Platform.runLater(() -> {
-            iCanAttack = true;
+            attackScene.OnYourTurn();
             mainGame.OnYourTurn();
         });
     }
@@ -546,7 +343,10 @@ public class App extends Application {
     }
 
     public void OnPlayerDied(PlayerDied playerDied) {
-        Platform.runLater(() -> removeEnemy(playerDied.who));
+        Platform.runLater(() -> {
+            chatScreen.onPlayerDied(playerDied);
+            attackScene.onPlayerDied(playerDied);
+        });
     }
 
     public void OnYouWon() {
@@ -559,13 +359,7 @@ public class App extends Application {
     }
 
     public void OnChatMessage(ChatMessage chatMessage) {
-        Platform.runLater(() -> {
-            App.EnemyLocal toUpdate = ene1;
-            if (chatMessage.saidIt == ene2.serverID) {
-                toUpdate = ene2;
-            }
-            toUpdate.conversation.setText(toUpdate.conversation.getText() + chatMessage.message);
-        });
+        Platform.runLater(() -> chatScreen.onChatMessage(chatMessage));
     }
 
     public void OnConnected(Connection connection) {
@@ -573,6 +367,9 @@ public class App extends Application {
     }
 
     public void OnMultiplayerButtonPressed(String name) {
+
+        System.out.println("I am " + name);
+
         Task<Network.Register> tryConnectTask = new Task<>() {
             @Override
             protected Network.Register call() throws IOException {
@@ -614,6 +411,15 @@ public class App extends Application {
         }
     }
 
+    public Optional<EnemyLocal> maybeEnemyLocalById(int id) {
+        for (var enemy : enemies) {
+            if (enemy.serverID == id) {
+                return Optional.of(enemy);
+            }
+        }
+        return Optional.empty();
+    }
+
     public void OnAttackButtonPressed() {
         transitionTo(attackScene);
     }
@@ -622,38 +428,24 @@ public class App extends Application {
         transitionTo(chatScreen);
     }
 
-    private static class EnemyLocal {
-        private int serverID;
-        private GraphBoardFX b;
-        private String name;
-        private Label labeln;
-        private TextArea conversation;
-
-        private EnemyLocal() {
-            serverID = 0;
-        }
+    public void OnAttackSceneBackButton() {
+        transitionTo(mainGame);
     }
 
-    private static class AIPlayer {
-
-        GraphBoardFX b;
-        PlayerBoard board;
-        MyAI brain;
-
-        AIPlayer() {
-            brain = new MyAI();
-            board = PlayerBoardFactory.getRandomPlayerBoard();
-            b = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
-            b.startTiles(PlayerBoardTransformer.transform(board));
-        }
-
-        public AttackResult getAttacked(Point p) {
-            AttackResult result = board.getAttacked(p);
-            b.updateTiles(PlayerBoardTransformer.transform(board));
-            return result;
-        }
+    public void CommunicateAttackAttempt(AnAttackAttempt anAttackAttempt) {
+        client.sendTCP(anAttackAttempt);
     }
 
+    public void OnChatSceneBackButton() {
+        transitionTo(mainGame);
+    }
+
+    public void SendMessage(EnemyLocal enemy, String message) {
+        Network.ChatMessageFromClient c = new Network.ChatMessageFromClient();
+        c.text = message;
+        c.to = enemy.serverID;
+        client.sendTCP(c);
+    }
 }
 
 

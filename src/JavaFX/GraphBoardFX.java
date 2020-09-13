@@ -54,7 +54,7 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
      * @param event
      * @return a point with coordenates (L, C) -> L - Line; C -> Column
      */
-    Point pointCoordinates(MouseEvent event) {
+    public Point pointCoordinates(MouseEvent event) {
         //BECAUSE ON SCREEN IS THE OTHER WAY AROUND
         int l = (int) event.getY() / TileFX.TILE_SIZE;
         int c = (int) event.getX() / TileFX.TILE_SIZE;
@@ -65,7 +65,7 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
         return new Point(l, c);
     }
 
-    void startTiles(String[][] sent) {
+    public void startTiles(String[][] sent) {
 
         pb = PlayerBoardTransformer.parse(sent);
         final int lines = pb.lines();

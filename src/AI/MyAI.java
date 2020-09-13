@@ -15,10 +15,6 @@ public class MyAI {
         possibleMoves = new ArrayList<>();
     }
 
-    private boolean inBounds(PlayerBoard board, Point p) {
-        return board.inBounds(p);
-    }
-
     public void react(PlayerBoard playerBoard, AiMove lastMove, AttackResult result) {
 
         boolean hitShip = result.status == AttackResultStatus.HitShipPiece;
@@ -43,7 +39,7 @@ public class MyAI {
 
             AiMove candidate = lastMove.withAdvancedDirection();
 
-            if (inBounds(playerBoard, candidate.point) && positions.contains(candidate.point)) {
+            if (playerBoard.inBounds(candidate.point) && positions.contains(candidate.point)) {
                 possibleMoves.add(candidate);
             }
             return;
@@ -55,7 +51,7 @@ public class MyAI {
 
         for (Direction direction : Direction.values()) {
             Point point = lastMove.point.moved(direction.vector);
-            if (inBounds(playerBoard, point) && positions.contains(point)) {
+            if (playerBoard.inBounds(point) && positions.contains(point)) {
                 possibleMoves.add(new AiMove(direction, point));
             }
         }

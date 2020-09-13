@@ -12,7 +12,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.Screen;
 
 import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;
 import static Common.PlayerBoardConstants.DEFAULT_LINES;

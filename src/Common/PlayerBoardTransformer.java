@@ -73,7 +73,9 @@ public class PlayerBoardTransformer {
         for (int l = 0; l < lines; l++) {
             for (int c = 0; c < columns; c++) {
 
-                if (toSkip.contains(new Point(l, c))) {
+                Point point = new Point(l, c);
+
+                if (toSkip.contains(point)) {
                     //already found it
                     continue;
                 }
@@ -83,6 +85,8 @@ public class PlayerBoardTransformer {
                 if (isAPiece(encoded)) {
                     Ship ship = findAllPiecesAndBuildShip(board, toSkip, message, l, c);
                     board.placeShip(ship);
+                } else if (encoded.equals(WATER_VISIBLE_STRING)) {
+                    board.getAttacked(point);
                 }
             }
         }

@@ -3,7 +3,6 @@ package JavaFX;
 
 import Common.Direction;
 import Common.Ship;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import util.Point;
 

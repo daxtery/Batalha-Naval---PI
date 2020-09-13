@@ -5,7 +5,7 @@ import javafx.scene.image.Image;
 
 public abstract class TileFX extends SpriteTileFX {
 
-    final static int TILE_SIZE = 50;
+    public final static int TILE_SIZE = 50;
     boolean attacked;
     boolean normalBoard;
 
