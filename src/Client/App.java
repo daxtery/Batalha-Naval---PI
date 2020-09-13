@@ -119,9 +119,9 @@ public class App extends Application {
         setShips = new SetShipsScene(this);
     }
 
-    private void lost(String s) {
+    private void lost() {
         Alert lost = new Alert(Alert.AlertType.INFORMATION);
-        lost.setContentText(s);
+        lost.setContentText("You died a horrible death. RIP you");
         lost.showAndWait();
         reset();
     }
@@ -339,7 +339,7 @@ public class App extends Application {
 
     public void OnYouDead() {
         Platform.runLater(() -> {
-            lost("You died a horrible death. RIP you");
+            lost();
             transitionTo(mainMenu);
         });
     }
@@ -414,7 +414,7 @@ public class App extends Application {
     }
 
     public Optional<EnemyLocal> maybeEnemyLocalById(int id) {
-        for (var enemy : enemies) {
+        for (EnemyLocal enemy : enemies) {
             if (enemy.serverID == id) {
                 return Optional.of(enemy);
             }

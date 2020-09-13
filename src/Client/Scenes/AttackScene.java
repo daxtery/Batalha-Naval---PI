@@ -1,5 +1,6 @@
 package Client.Scenes;
 
+import Client.FX.EmptyGraphBoardFX;
 import Common.Network;
 import Client.App;
 import Client.EnemyLocal;
@@ -39,19 +40,19 @@ public class AttackScene extends BaseGameScene {
         Button back = new Button("Back");
         back.setOnMouseClicked(event -> app.OnAttackSceneBackButton());
 
-        var aWRoot = (HBox) getRoot();
+        HBox aWRoot = (HBox) getRoot();
         aWRoot.setStyle("-fx-background-image: url(images/BattleShipBigger2.png);-fx-background-size: cover;");
         aWRoot.getChildren().add(back);
     }
 
     @Override
     public void OnSceneSet() {
-        graphBoards.values().forEach(b -> b.startAnimating());
+        graphBoards.values().forEach(EmptyGraphBoardFX::startAnimating);
     }
 
     @Override
     public void OnSceneUnset() {
-        graphBoards.values().forEach(b -> b.stopAnimating());
+        graphBoards.values().forEach(EmptyGraphBoardFX::stopAnimating);
     }
 
     public void OnYourTurn() {
@@ -59,14 +60,14 @@ public class AttackScene extends BaseGameScene {
     }
 
     public void OnAttackResponse(Network.AnAttackResponse attackResponse) {
-        var board = graphBoards.get(lastAttacked);
+        GraphBoardFX board = graphBoards.get(lastAttacked);
         board.updateTiles(attackResponse.newAttackedBoard);
         iCanAttack = attackResponse.again;
     }
 
     public void onPlayerDied(Network.PlayerDied playerDied) {
         final int who = playerDied.who;
-        var enemy = app.maybeEnemyLocalById(who).orElseThrow();
+        EnemyLocal enemy = app.maybeEnemyLocalById(who).orElseThrow();
         graphBoards.get(enemy).setOnMouseClicked((mouseEvent -> {
         }));
     }
@@ -94,7 +95,7 @@ public class AttackScene extends BaseGameScene {
 
         labels.put(enemy2, label2);
 
-        var board1 = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
+        GraphBoardFX board1 = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
 
         board1.setOnMouseClicked(event -> {
             lastAttacked = enemy1;
@@ -115,7 +116,7 @@ public class AttackScene extends BaseGameScene {
             }
         });
 
-        var board2 = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
+        GraphBoardFX board2 = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
 
         board2.setOnMouseClicked(event -> {
             lastAttacked = enemy2;
@@ -139,22 +140,22 @@ public class AttackScene extends BaseGameScene {
         graphBoards.put(enemy1, board1);
         graphBoards.put(enemy2, board2);
 
-        var aWvBox1 = new VBox(10);
+        VBox aWvBox1 = new VBox(10);
         aWvBox1.getChildren().addAll(board1, label1);
 
-        var aWvBox2 = new VBox(10);
+        VBox aWvBox2 = new VBox(10);
         aWvBox2.getChildren().addAll(board2, label2);
 
         vBoxes.put(enemy1, aWvBox1);
         vBoxes.put(enemy2, aWvBox2);
 
-        var aWRoot = (HBox) getRoot();
+        HBox aWRoot = (HBox) getRoot();
         aWRoot.getChildren().addAll(aWvBox1, aWvBox2);
     }
 
     public void onEnemyBoardToPaint(Network.EnemyBoardToPaint board) {
         final int who = board.id;
-        var enemy = app.maybeEnemyLocalById(who).orElseThrow();
+        EnemyLocal enemy = app.maybeEnemyLocalById(who).orElseThrow();
         graphBoards.get(enemy).updateTiles(board.newAttackedBoard);
     }
 }

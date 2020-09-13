@@ -45,32 +45,32 @@ public class ChatScene extends BaseGameScene {
     }
 
     public void onPlayerDied(Network.PlayerDied playerDied) {
-        var enemy = app.maybeEnemyLocalById(playerDied.who).orElseThrow();
-        var textArea = textAreas.get(enemy);
+        EnemyLocal enemy = app.maybeEnemyLocalById(playerDied.who).orElseThrow();
+        TextArea textArea = textAreas.get(enemy);
         textArea.setEditable(false);
         textArea.setOnKeyPressed((event) -> {
         });
     }
 
     public void onOtherSpecs(Network.OthersSpecs othersSpecs) {
-        var enemy1 = app.maybeEnemyLocalById(othersSpecs.ene1).orElseThrow();
-        var enemy2 = app.maybeEnemyLocalById(othersSpecs.ene2).orElseThrow();
+        EnemyLocal enemy1 = app.maybeEnemyLocalById(othersSpecs.ene1).orElseThrow();
+        EnemyLocal enemy2 = app.maybeEnemyLocalById(othersSpecs.ene2).orElseThrow();
 
-        var cWl1 = new Label(othersSpecs.ene1n);
+        Label cWl1 = new Label(othersSpecs.ene1n);
         cWl1.setFont(new Font(30));
         labels.put(enemy1, cWl1);
 
-        var cWl2 = new Label(othersSpecs.ene2n);
+        Label cWl2 = new Label(othersSpecs.ene2n);
         cWl2.setFont(new Font(30));
         labels.put(enemy2, cWl2);
 
-        var ene1Conversation = new TextArea();
+        TextArea ene1Conversation = new TextArea();
         ene1Conversation.setEditable(false);
         ene1Conversation.setWrapText(true);
 
         conversations.put(enemy1, ene1Conversation);
 
-        var ene2Conversation = new TextArea();
+        TextArea ene2Conversation = new TextArea();
         ene2Conversation.setEditable(false);
         ene2Conversation.setWrapText(true);
 
@@ -123,8 +123,8 @@ public class ChatScene extends BaseGameScene {
     }
 
     public void onChatMessage(Network.ChatMessage chatMessage) {
-        var enemy = app.maybeEnemyLocalById(chatMessage.saidIt).orElseThrow();
-        var conversation = textAreas.get(enemy);
+        EnemyLocal enemy = app.maybeEnemyLocalById(chatMessage.saidIt).orElseThrow();
+        TextArea conversation = textAreas.get(enemy);
         conversation.appendText(chatMessage.message);
     }
 }

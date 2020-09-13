@@ -5,18 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="37b56e5f-9663-4c59-9fe2-fcdf19ec8eed" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/JavaFX/AIPlayer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/JavaFX/EnemyLocal.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/JavaFX/Scenes/AttackScene.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/JavaFX/Scenes/ChatScene.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AI/MyAI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AI/MyAI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoardTransformer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoardTransformer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/GraphBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/GraphBoardFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/Scenes/SetShipsScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/Scenes/SetShipsScene.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/ShipFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/ShipFX.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/JavaFX/TileFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/JavaFX/TileFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/AttackScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/AttackScene.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,6 +82,19 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -178,6 +180,7 @@
       <workItem from="1599940302641" duration="3273000" />
       <workItem from="1599943801938" duration="5973000" />
       <workItem from="1599987020882" duration="6456000" />
+      <workItem from="1599993579919" duration="393000" />
     </task>
     <servers />
   </component>
@@ -185,6 +188,10 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="586" y="198" key="#Inspections" timestamp="1599993973142">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="586" y="198" key="#Inspections/0.0.1920.1040@0.0.1920.1040" timestamp="1599993973142" />
     <state x="440" y="94" key="#Project_Structure" timestamp="1599005561103">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -205,6 +212,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="588" y="209" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1598974047542" />
+    <state x="738" y="444" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1599993836134">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="738" y="444" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599993836134" />
     <state x="743" y="389" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1598984820192">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
