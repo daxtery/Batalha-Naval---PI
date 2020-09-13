@@ -5,7 +5,7 @@ import Common.PlayerBoard;
 import Common.PlayerBoardFactory;
 import Common.PlayerBoardTransformer;
 import JavaFX.App;
-import JavaFX.SelfGraphBoardFX;
+import JavaFX.FX.SelfGraphBoardFX;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

@@ -1,11 +1,11 @@
-package JavaFX;
+package JavaFX.FX;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-class EmptyGraphBoardFX extends Canvas {
+public class EmptyGraphBoardFX extends Canvas {
 
     final static Image BACKGROUND_WATER = new Image("images/water_bg.jpg");
     GraphicsContext gc;

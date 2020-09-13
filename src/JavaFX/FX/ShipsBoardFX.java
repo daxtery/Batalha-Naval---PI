@@ -1,4 +1,4 @@
-package JavaFX;
+package JavaFX.FX;
 
 import Common.*;
 import javafx.animation.AnimationTimer;

@@ -2,6 +2,8 @@ package JavaFX;
 
 import Common.*;
 import Common.Network.*;
+import JavaFX.FX.EmptyGraphBoardFX;
+import JavaFX.FX.SelfGraphBoardFX;
 import JavaFX.Scenes.*;
 import com.esotericsoftware.kryonet.Connection;
 import javafx.application.Application;
