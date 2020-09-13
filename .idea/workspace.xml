@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="37b56e5f-9663-4c59-9fe2-fcdf19ec8eed" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/AttackScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/AttackScene.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/App.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +180,7 @@
       <workItem from="1599940302641" duration="3273000" />
       <workItem from="1599943801938" duration="5973000" />
       <workItem from="1599987020882" duration="6456000" />
-      <workItem from="1599993579919" duration="393000" />
+      <workItem from="1599993579919" duration="764000" />
     </task>
     <servers />
   </component>

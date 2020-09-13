@@ -50,13 +50,6 @@ public class MainMenuScene extends BaseGameScene {
 
         multiplayerButton.setStyle("-fx-background-color: transparent;");
 
-        Button mMAloneButton = new Button();
-        Image mMAloneButtonImage = new Image("images/Botao_Solo_Play.png");
-        mMAloneButton.setGraphic(new ImageView(mMAloneButtonImage));
-        mMAloneButton.setOnAction(event -> app.OnSoloButtonPressed());
-
-        mMAloneButton.setStyle("-fx-background-color: transparent;");
-
         Button mMExit = new Button();
         Image mMExitButtonImage = new Image("images/Botao_Exit.png");
         mMExit.setGraphic(new ImageView(mMExitButtonImage));
@@ -67,10 +60,9 @@ public class MainMenuScene extends BaseGameScene {
         mMExit.setStyle("-fx-background-color: transparent;");
 
         GridPane mMMiddle = new GridPane();
-        mMMiddle.add(multiplayerButton, 0, 2);
-        mMMiddle.add(mMAloneButton, 1, 2);
-        mMMiddle.add(mMExit, 1, 3);
         mMMiddle.add(nameInput, 0, 1);
+        mMMiddle.add(multiplayerButton, 0, 2);
+        mMMiddle.add(mMExit, 0, 3);
         mMMiddle.setStyle("-fx-fill: true; -fx-alignment:bottom-center; -fx-padding: 50");
 
         ((BorderPane) getRoot()).setCenter(mMMiddle);
