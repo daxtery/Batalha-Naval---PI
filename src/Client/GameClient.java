@@ -1,4 +1,4 @@
-package JavaFX;
+package Client;
 
 import Common.Network;
 import com.esotericsoftware.kryonet.Client;

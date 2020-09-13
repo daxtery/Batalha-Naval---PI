@@ -1,12 +1,12 @@
-package JavaFX;
+package Client;
 
 import AI.MyAI;
 import Common.AttackResult;
 import Common.PlayerBoard;
 import Common.PlayerBoardFactory;
 import Common.PlayerBoardTransformer;
-import JavaFX.FX.GraphBoardFX;
-import JavaFX.FX.TileFX;
+import Client.FX.GraphBoardFX;
+import Client.FX.TileFX;
 import util.Point;
 
 import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;

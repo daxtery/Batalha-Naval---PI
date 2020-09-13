@@ -1,8 +1,7 @@
-package JavaFX.Scenes;
+package Client.Scenes;
 
-import JavaFX.App;
+import Client.App;
 import javafx.application.Platform;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;

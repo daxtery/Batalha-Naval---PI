@@ -1,11 +1,11 @@
-package JavaFX.Scenes;
+package Client.Scenes;
 
 import Common.Network;
 import Common.PlayerBoard;
 import Common.PlayerBoardFactory;
 import Common.PlayerBoardTransformer;
-import JavaFX.App;
-import JavaFX.FX.SelfGraphBoardFX;
+import Client.App;
+import Client.FX.SelfGraphBoardFX;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

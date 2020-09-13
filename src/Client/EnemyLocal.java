@@ -1,4 +1,4 @@
-package JavaFX;
+package Client;
 
 public class EnemyLocal {
 

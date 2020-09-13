@@ -1,4 +1,4 @@
-package JavaFX.FX;
+package Client.FX;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;

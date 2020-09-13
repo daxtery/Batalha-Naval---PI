@@ -1,10 +1,10 @@
-package JavaFX;
+package Client;
 
 import Common.*;
 import Common.Network.*;
-import JavaFX.FX.EmptyGraphBoardFX;
-import JavaFX.FX.SelfGraphBoardFX;
-import JavaFX.Scenes.*;
+import Client.FX.EmptyGraphBoardFX;
+import Client.FX.SelfGraphBoardFX;
+import Client.Scenes.*;
 import com.esotericsoftware.kryonet.Connection;
 import javafx.application.Application;
 import javafx.application.Platform;

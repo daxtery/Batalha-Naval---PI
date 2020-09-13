@@ -1,7 +1,7 @@
-package JavaFX.Scenes;
+package Client.Scenes;
 
 import Common.Network;
-import JavaFX.App;
+import Client.App;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 

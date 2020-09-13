@@ -1,9 +1,9 @@
-package JavaFX.Scenes;
+package Client.Scenes;
 
 import Common.PlayerBoard;
 import Common.PlayerBoardFactory;
-import JavaFX.App;
-import JavaFX.FX.ShipsBoardFX;
+import Client.App;
+import Client.FX.ShipsBoardFX;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;

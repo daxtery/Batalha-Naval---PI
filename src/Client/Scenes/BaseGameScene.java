@@ -1,6 +1,6 @@
-package JavaFX.Scenes;
+package Client.Scenes;
 
-import JavaFX.App;
+import Client.App;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Unnamed" type="Application" factoryName="Application" singleton="false">
-    <option name="MAIN_CLASS_NAME" value="JavaFX.App" />
+    <option name="MAIN_CLASS_NAME" value="Client.App" />
     <module name="Batalha-Naval---PI" />
     <option name="VM_PARAMETERS" value="--module-path &quot;F:\PC\Downloads\23\openjfx-11.0.2_windows-x64_bin-sdk\javafx-sdk-11.0.2\lib&quot; --add-modules javafx.controls,javafx.fxml,javafx.media" />
     <method v="2">

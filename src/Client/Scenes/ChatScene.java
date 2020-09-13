@@ -1,8 +1,8 @@
-package JavaFX.Scenes;
+package Client.Scenes;
 
 import Common.Network;
-import JavaFX.App;
-import JavaFX.EnemyLocal;
+import Client.App;
+import Client.EnemyLocal;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;

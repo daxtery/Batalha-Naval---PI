@@ -1,4 +1,4 @@
-package JavaFX.FX;
+package Client.FX;
 
 import Common.Direction;
 import javafx.scene.SnapshotParameters;

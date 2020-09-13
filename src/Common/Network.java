@@ -1,6 +1,5 @@
 package Common;
 
-import JavaFX.GameClient;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 

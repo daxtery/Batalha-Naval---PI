@@ -1,10 +1,10 @@
-package JavaFX.Scenes;
+package Client.Scenes;
 
 import Common.Network;
-import JavaFX.App;
-import JavaFX.EnemyLocal;
-import JavaFX.FX.GraphBoardFX;
-import JavaFX.FX.TileFX;
+import Client.App;
+import Client.EnemyLocal;
+import Client.FX.GraphBoardFX;
+import Client.FX.TileFX;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
