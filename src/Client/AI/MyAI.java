@@ -1,4 +1,4 @@
-package AI;
+package Client.AI;
 
 import Common.*;
 import util.Point;

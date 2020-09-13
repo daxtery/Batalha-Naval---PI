@@ -191,7 +191,7 @@ public class App extends Application {
         VBox forYou = new VBox(10);
         forYou.getChildren().addAll(selfvsAI, label);
 
-        Label ene = new Label("ENEMY(AI)!");
+        Label ene = new Label("ENEMY(Client.AI)!");
         ene.setFont(new Font("Verdana", 30));
         ene.setTextFill(Color.ROSYBROWN);
 
@@ -267,7 +267,7 @@ public class App extends Application {
 //            wait.setOnSucceeded(event -> aiTurn());
 //            new Thread(wait).start();
 //        } else if (hit && pb.isGameOver())
-//            lost("YOU LOST TO AI LOL!");
+//            lost("YOU LOST TO Client.AI LOL!");
 //        else {
 //            iCanAttack = true;
 //        }

@@ -1,6 +1,6 @@
 package Client;
 
-import AI.MyAI;
+import Client.AI.MyAI;
 import Common.AttackResult;
 import Common.PlayerBoard;
 import Common.PlayerBoardFactory;
