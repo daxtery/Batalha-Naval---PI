@@ -124,7 +124,7 @@ public class ChatScene extends BaseGameScene {
 
     public void onChatMessage(Network.ChatMessage chatMessage) {
         EnemyLocal enemy = app.maybeEnemyLocalById(chatMessage.saidIt).orElseThrow();
-        TextArea conversation = textAreas.get(enemy);
+        TextArea conversation = conversations.get(enemy);
         conversation.appendText(chatMessage.message);
     }
 }

@@ -1,5 +1,6 @@
 package Client;
 
+import Client.AI.AiClient;
 import Client.Scenes.*;
 import Common.*;
 import Common.Network.*;
@@ -25,9 +26,9 @@ import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
+import java.util.*;
 
-public class App extends Application {
+public class App extends Application implements IClient {
 
     private static final String ADDRESS = "localhost";
     private final static String MM_IMAGE_BACKGROUND_PATH = "images/BattleShipBigger.png";
@@ -46,22 +47,27 @@ public class App extends Application {
     private final int NUM_PLAYERS = 3;
     private final int NUM_ENEMIES = NUM_PLAYERS - 1;
     public final EnemyLocal[] enemies = new EnemyLocal[NUM_ENEMIES];
+
     private final String aWshipSoundFile = "assets/sound/ship.mp3";
     private final String aWwaterSoundFile = "assets/sound/water.mp3";
     private final MediaPlayer aWShipSound = new MediaPlayer(new Media(new File(aWshipSoundFile).toURI().toString()));
     private final MediaPlayer aWWaterSound = new MediaPlayer(new Media(new File(aWwaterSoundFile).toURI().toString()));
-    //FOR ONLINE
+
+    private final Map<Integer, Thread> aiThreads = new HashMap<>();
+
     private GameClient client;
+
     //SCENES
-    private Scene mainMenu;
+    private MainMenuScene mainMenu;
     private MainGameScene mainGame;
-    private Scene setShips;
+    private SetShipsScene setShips;
     private AttackScene attackScene;
     private Scene wonScene;
     private ChatScene chatScreen;
-    private Scene waitingScreen;
+    private LobbyScene lobbyScene;
 
     private Stage theStage;
+    private AiClient aiClient;
 
     public static void main(String[] args) {
         launch(args);
@@ -72,7 +78,6 @@ public class App extends Application {
 
         client = new GameClient(this);
         client.start();
-        Network.register(client.getNative());
 
         theStage = primaryStage;
         setAllScenes();
@@ -121,6 +126,7 @@ public class App extends Application {
         setShips = new SetShipsScene(this);
         attackScene = new AttackScene(this);
         chatScreen = new ChatScene(this);
+        lobbyScene = new LobbyScene(this);
         setWonScene();
     }
 
@@ -171,6 +177,7 @@ public class App extends Application {
     }
 
     public void OnCanStart() {
+        System.out.println("Can start");
         Platform.runLater(() -> transitionTo(mainGame));
     }
 
@@ -178,12 +185,10 @@ public class App extends Application {
         Platform.runLater(() -> mainGame.OnWhoseTurn(whoseTurn));
     }
 
-    public void OnConnectedPlayers(ConnectedPlayers players) {
+    public void onConnectedPlayers(ConnectedPlayers players) {
         Platform.runLater(() -> {
-                    WaitingForPlayersScene scene = (WaitingForPlayersScene) App.this.theStage.getScene();
-                    scene.OnConnectedPlayers(players);
-                }
-        );
+            lobbyScene.onConnectedPlayers(players);
+        });
     }
 
     public void OnReadyForShips() {
@@ -228,6 +233,17 @@ public class App extends Application {
         });
     }
 
+    public void onAddBotButton(int slot, BotDifficulty botDifficulty) {
+        Thread thread = new Thread(new AiClient(this, slot, botDifficulty, "Damien", ADDRESS));
+        thread.start();
+        aiThreads.put(slot, thread);
+    }
+
+    public void onRemovePlayerButton(int slot) {
+        aiThreads.get(slot).interrupt();
+        client.sendTCP(new RemovePlayerFromLobby(slot));
+    }
+
     public void OnYouDead() {
         Platform.runLater(() -> {
             lost();
@@ -255,24 +271,34 @@ public class App extends Application {
         Platform.runLater(() -> chatScreen.onChatMessage(chatMessage));
     }
 
+    @Override
+    public void onJoinLobbyResponse(JoinLobbyResponse joinLobbyResponse) {
+        Platform.runLater(() -> {
+            lobbyScene.setNumber(joinLobbyResponse.slots, false);
+            transitionTo(lobbyScene);
+        });
+    }
+
     public void OnConnected(Connection connection) {
 
     }
 
-    public void OnMultiplayerButtonPressed(String name) {
+    public void onJoinButtonPressed(String name) {
 
         System.out.println("I am " + name);
 
-        Task<Network.Register> tryConnectTask = new Task<>() {
+        Task<Void> tryConnectTask = new Task<>() {
             @Override
-            protected Network.Register call() throws IOException {
-                return client.tryConnect(name, ADDRESS, Network.port);
+            protected Void call() throws IOException {
+                client.tryConnect(ADDRESS, Network.port);
+                return null;
             }
         };
 
         tryConnectTask.setOnSucceeded(t -> {
-            waitingScreen = new WaitingForPlayersScene(this);
-            App.this.transitionTo(waitingScreen);
+            JoinLobby join = new JoinLobby();
+            join.name = name;
+            client.sendTCP(join);
         });
 
         tryConnectTask.setOnFailed(t -> {
@@ -290,6 +316,7 @@ public class App extends Application {
         mainGame.setPlayerBoard(pb);
         Network.APlayerboard p = new Network.APlayerboard();
         p.board = PlayerBoardTransformer.transform(pb);
+        System.out.println("I sent myself");
         client.sendTCP(p);
     }
 
@@ -322,11 +349,44 @@ public class App extends Application {
         transitionTo(mainGame);
     }
 
+    public void onCreateLobbyButton(String name, int count) {
+        System.out.println("I am creating a lobby! (" + name + ")");
+
+        lobbyScene.setNumber(count, true);
+
+        Task<Void> tryConnectTask = new Task<>() {
+            @Override
+            protected Void call() throws IOException {
+                client.tryConnect(ADDRESS, Network.port);
+                return null;
+            }
+        };
+
+        tryConnectTask.setOnSucceeded(t -> {
+            client.sendTCP(new CreateLobby(name, count));
+            transitionTo(lobbyScene);
+        });
+
+        tryConnectTask.setOnFailed(t -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Noo!");
+            alert.setHeaderText("Can't connect to server :(");
+            alert.setContentText("Please try again (:");
+            alert.showAndWait();
+        });
+
+        new Thread(tryConnectTask).start();
+    }
+
     public void SendMessage(EnemyLocal enemy, String message) {
         Network.ChatMessageFromClient c = new Network.ChatMessageFromClient();
         c.text = message;
         c.to = enemy.serverID;
         client.sendTCP(c);
+    }
+
+    public void onLobbyStartButtonClicked() {
+        client.sendTCP(new StartLobby());
     }
 }
 

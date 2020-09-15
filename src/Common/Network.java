@@ -11,9 +11,17 @@ public class Network {
     // This registers objects that are going to be sent over the network.
     public static void register(EndPoint endPoint) {
         Kryo kryo = endPoint.getKryo();
-        kryo.register(Register.class);
+        kryo.register(JoinLobby.class);
+        kryo.register(CreateLobby.class);
+        kryo.register(Participant.class);
+        kryo.register(Participant[].class);
+        kryo.register(BotDifficulty.class);
         kryo.register(ChatMessage.class);
         kryo.register(ChatMessageFromClient.class);
+        kryo.register(AddBotToLobby.class);
+        kryo.register(RemovePlayerFromLobby.class);
+        kryo.register(StartLobby.class);
+        kryo.register(JoinLobbyResponse.class);
         //
         kryo.register(int[][].class);
         kryo.register(int[].class);
@@ -105,10 +113,6 @@ public class Network {
     public static class ReadyForShips {
     }
 
-    public static class Register {
-        public String name;
-    }
-
     public static class ChatMessage {
         public String message;
         public int saidIt;
@@ -119,11 +123,88 @@ public class Network {
         public int to;
     }
 
+    public static class Participant {
+        public BotDifficulty botDifficulty;
+        public String name;
+
+        public Participant(BotDifficulty botDifficulty, String name) {
+            this.botDifficulty = botDifficulty;
+            this.name = name;
+        }
+
+        public Participant(String name) {
+            this.name = name;
+        }
+
+        public Participant() {
+        }
+
+        @Override
+        public String toString() {
+            return "Participant{" +
+                    "botDifficulty=" + botDifficulty +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
+    }
+
     public static class ConnectedPlayers {
-        public String[] names;
+        public Participant[] participants;
     }
 
     public static class CanStart {
+    }
+
+    public static class JoinLobby {
+        public String name;
+    }
+
+    public static class JoinLobbyResponse {
+        public int slots;
+    }
+
+    public static class CreateLobby {
+        public String name;
+        public int count;
+
+        public CreateLobby() {
+
+        }
+
+        public CreateLobby(String name, int count) {
+            this.name = name;
+            this.count = count;
+        }
+    }
+
+    public static class StartLobby {
+    }
+
+    public static class AddBotToLobby {
+        public int slot;
+        public BotDifficulty botDifficulty;
+        public String name;
+
+        public AddBotToLobby(int slot, BotDifficulty botDifficulty, String name) {
+            this.slot = slot;
+            this.botDifficulty = botDifficulty;
+            this.name = name;
+        }
+
+        public AddBotToLobby() {
+
+        }
+    }
+
+    public static class RemovePlayerFromLobby {
+        public int slot;
+
+        public RemovePlayerFromLobby(int slot) {
+            this.slot = slot;
+        }
+
+        public RemovePlayerFromLobby() {
+        }
     }
 
     public static class IsFull {
