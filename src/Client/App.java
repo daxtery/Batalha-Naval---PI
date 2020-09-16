@@ -214,7 +214,7 @@ public class App extends Application implements IClient {
     public void OnAnAttackResponse(AnAttackResponse attackResponse) {
         Platform.runLater(() -> {
             attackScene.OnAttackResponse(attackResponse);
-            doSounds(attackResponse.actualHit, attackResponse.shipHit);
+            doSounds(attackResponse.attackResult);
         });
     }
 

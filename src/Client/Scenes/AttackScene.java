@@ -61,7 +61,7 @@ public class AttackScene extends BaseGameScene {
     public void OnAttackResponse(Network.AnAttackResponse attackResponse) {
         GraphBoardFX board = graphBoards.get(lastAttacked);
         board.updateTiles(attackResponse.newAttackedBoard);
-        iCanAttack = attackResponse.again;
+        iCanAttack = attackResponse.attackResult.shouldPlayAgain();
     }
 
     public void onPlayerDied(Network.PlayerDied playerDied) {

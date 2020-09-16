@@ -184,7 +184,6 @@ public class GameServer {
 
             lobby.participants[0].connection.sendTCP(new YourTurn());
 
-
             for (int i = 0; i < lobby.playersInLobby(); i++) {
                 final int slot = i;
 
@@ -235,19 +234,14 @@ public class GameServer {
 
         AttackResult result = attackedBoard.getAttacked(a.l, a.c);
 
-        boolean hitShip = result.status == AttackResultStatus.HitShipPiece;
-        boolean shouldGoAgain = result.shouldPlayAgain();
-        boolean hitSomething = result.valid();
-
         String[][] attackedBoardString = PlayerBoardTransformer.transform(attackedBoard);
 
         System.out.println(Arrays.deepToString(attackedBoardString));
 
         AnAttackResponse response = new AnAttackResponse();
-        response.again = shouldGoAgain;
+        response.attackResult = result;
         response.newAttackedBoard = attackedBoardString;
-        response.actualHit = hitSomething;
-        response.shipHit = hitShip;
+
         connection.sendTCP(response);
 
         // TO THE ATTACKED GUY
@@ -270,16 +264,8 @@ public class GameServer {
             lobby.participants[i].connection.sendTCP(eb);
         }
 
-        if (!shouldGoAgain) {
+        if (!result.shouldPlayAgain()) {
             currentPlayer = nextTurnId();
-
-            final LobbyParticipant nextParticipant = lobby.participants[currentPlayer];
-
-            WhoseTurn whoseTurn = new WhoseTurn();
-            whoseTurn.name = nextParticipant.name;
-
-            sendToAllExcept(currentPlayer, whoseTurn);
-            nextParticipant.connection.sendTCP(new YourTurn());
         } else {
             if (lobby.gameIsOver()) {
                 System.out.println("Game over " + connection + " won!");
@@ -293,6 +279,16 @@ public class GameServer {
                 sendToAllExcept(a.toAttackID, playerDied);
             }
         }
+
+        final LobbyParticipant nextParticipant = lobby.participants[currentPlayer];
+
+        WhoseTurn whoseTurn = new WhoseTurn();
+        whoseTurn.name = nextParticipant.name;
+
+        sendToAllExcept(currentPlayer, whoseTurn);
+        nextParticipant.connection.sendTCP(new YourTurn());
+
+        System.out.println("Player is [" + currentPlayer + "]: " + lobby.participants[currentPlayer]);
 
     }
 

@@ -1,6 +1,5 @@
 package Client.AI;
 
-import Client.App;
 import Client.GameClient;
 import Client.IClient;
 import Common.*;
@@ -19,6 +18,10 @@ public class AiClient implements IClient, Runnable {
     private Network.ConnectedPlayers connectedPlayers;
     private int focusing;
     private String lastMessage;
+    private MyAI brain;
+
+    private PlayerBoard[] playerBoards;
+    private AiMove move;
 
     public AiClient(int slot, BotDifficulty botDifficulty, String name, String address) {
         this.slot = slot;
@@ -26,6 +29,7 @@ public class AiClient implements IClient, Runnable {
         this.name = name;
         this.address = address;
         this.gameClient = new GameClient(this);
+        this.brain = new MyAI();
     }
 
     @Override
@@ -43,6 +47,30 @@ public class AiClient implements IClient, Runnable {
     public void OnCanStart(Network.CanStart canStart) {
         IntStream slots = new Random().ints(0, connectedPlayers.participants.length);
         focusing = slots.filter(slot -> slot != connectedPlayers.slot).findFirst().orElseThrow();
+
+        playerBoards = new PlayerBoard[canStart.boards.length + 1];
+
+        for (int i = 0; i < canStart.boards.length; i++) {
+            playerBoards[canStart.indices[i]] = PlayerBoardTransformer.parse(canStart.boards[i]);
+        }
+
+        Network.ChatMessageFromClient message = new Network.ChatMessageFromClient();
+        message.to = focusing;
+
+        final String[] taunts = {
+                "I'm coming for you :)\n",
+                "You won't live much longer haha\n",
+                "This is the end of your path, say your prayers\n",
+                "終わりました\n",
+                "I feel sorry for you\n",
+                "I'm sorry, it's nothing personal, I must do this\n",
+                "Feel the wrath of a thousand battle ships\n"
+        };
+
+        final int index = new Random().nextInt(taunts.length);
+
+        message.text = taunts[index];
+        gameClient.sendTCP(message);
     }
 
     @Override
@@ -72,18 +100,29 @@ public class AiClient implements IClient, Runnable {
 
     @Override
     public void OnEnemyBoardToPaint(Network.EnemyBoardToPaint object) {
+        playerBoards[object.id] = PlayerBoardTransformer.parse(object.newAttackedBoard);
     }
 
     @Override
     public void OnAnAttackResponse(Network.AnAttackResponse object) {
+        brain.react(playerBoards[focusing], move, object.attackResult);
     }
 
     @Override
     public void OnYourTurn() {
-        Network.ChatMessageFromClient message = new Network.ChatMessageFromClient();
-        message.to = focusing;
-        message.text = "I'm coming for you :)";
-        gameClient.sendTCP(message);
+        move = brain.nextMove(playerBoards[focusing]);
+
+        Network.AnAttackAttempt attack = new Network.AnAttackAttempt();
+        attack.toAttackID = focusing;
+        attack.l = move.point.x;
+        attack.c = move.point.y;
+
+        try {
+            Thread.sleep(1000);
+            gameClient.sendTCP(attack);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -105,12 +144,26 @@ public class AiClient implements IClient, Runnable {
             return;
         }
 
-        lastMessage = object.message;
+        if (object.saidIt == focusing) {
+            lastMessage = object.message;
 
-        Network.ChatMessageFromClient message = new Network.ChatMessageFromClient();
-        message.to = focusing;
-        message.text = "I'm coming for you :)";
-        gameClient.sendTCP(message);
+            final String[] comebacks = {
+                    "Despair\n",
+                    "There's no talking out of this\n",
+                    "Don't even try\n",
+                    "お前はもう死んでいる\n",
+                    "Good, good, plea more\n",
+                    "This makes me as sad as it makes you\n",
+                    "Accept that you've lost\n"
+            };
+
+            final int index = new Random().nextInt(comebacks.length);
+
+            Network.ChatMessageFromClient message = new Network.ChatMessageFromClient();
+            message.to = focusing;
+            message.text = comebacks[index];
+            gameClient.sendTCP(message);
+        }
     }
 
     @Override

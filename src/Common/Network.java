@@ -22,6 +22,8 @@ public class Network {
         kryo.register(RemovePlayerFromLobby.class);
         kryo.register(StartLobby.class);
         kryo.register(JoinLobbyResponse.class);
+        kryo.register(AttackResult.class);
+        kryo.register(AttackResultStatus.class);
         //
         kryo.register(int[][].class);
         kryo.register(int[].class);
@@ -76,9 +78,7 @@ public class Network {
 
     public static class AnAttackResponse {
         public String[][] newAttackedBoard;
-        public boolean again;
-        public boolean shipHit;
-        public boolean actualHit;
+        public AttackResult attackResult;
     }
 
     public static class YourBoardToPaint {

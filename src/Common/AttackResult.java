@@ -2,12 +2,15 @@ package Common;
 
 public class AttackResult {
 
-    public final AttackResultStatus status;
-    public final boolean destroyedShip;
+    public AttackResultStatus status;
+    public boolean destroyedShip;
 
     private AttackResult(AttackResultStatus status, boolean destroyedShip) {
         this.status = status;
         this.destroyedShip = destroyedShip;
+    }
+
+    private AttackResult() {
     }
 
     static AttackResult OutsideBounds() {
