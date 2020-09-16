@@ -141,10 +141,12 @@ public class Network {
 
         @Override
         public String toString() {
-            return "Participant{" +
-                    "botDifficulty=" + botDifficulty +
-                    ", name='" + name + '\'' +
-                    '}';
+
+            if (botDifficulty == null) {
+                return name;
+            }
+
+            return name + "(Bot: " + botDifficulty + ")";
         }
     }
 
