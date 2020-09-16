@@ -9,17 +9,14 @@ import javafx.util.Pair;
 
 import java.io.*;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 
 public class GameServer {
 
     private final static long TIME_TO_WAIT = 1000 * 60;
     private final Server server;
-    private Game game;
-
     public GameLobby lobby;
-
+    private Game game;
     //WILL SAVE WHAT CONNECTIONS THE GAME STARTED WITH
     //SO IT'S POSSIBLE TO KNOW IF SOMEBODY WHO DROPPED IS RECONNECTING
     private long currentWaitedTime;
@@ -79,11 +76,15 @@ public class GameServer {
     }
 
     private void onRemovePlayerFromLobby(RemovePlayerFromLobby removePlayerFromLobby) {
+        System.out.println("Removing player from lobby at slot " + removePlayerFromLobby.slot);
         lobby.removeParticipant(removePlayerFromLobby.slot);
+        sendConnections();
     }
 
     private void onAddBotToLobby(Connection connection, AddBotToLobby addBotToLobby) {
-        System.out.println("Added bot to lobby!");
+        System.out.println("Added bot at slot " + addBotToLobby.slot + ": " +
+                addBotToLobby.name + "(" + addBotToLobby.botDifficulty + ")");
+
         connection.setName(addBotToLobby.name);
         lobby.addBot(addBotToLobby.slot, addBotToLobby.name, addBotToLobby.botDifficulty, connection);
         sendConnections();
@@ -91,8 +92,10 @@ public class GameServer {
     }
 
     private void onCreateLobby(Connection connection, CreateLobby createLobby) {
-        System.out.println("Created lobby!");
         connection.setName(createLobby.name);
+
+        System.out.println(connection + " created lobby!");
+
         lobby = new GameLobby(createLobby.count);
         lobby.addPlayer(0, connection);
         game = new Game(createLobby.count);
@@ -101,8 +104,8 @@ public class GameServer {
     }
 
     private void onJoinLobby(Connection connection, JoinLobby joinLobby) {
-        System.out.println("Joined lobby!");
         connection.setName(joinLobby.name);
+        System.out.println(connection + " joined lobby!");
 
         switch (state) {
             case waitingForPlayers:
@@ -147,7 +150,8 @@ public class GameServer {
         ChatMessage chats = new ChatMessage();
         chats.saidIt = from;
         chats.message = line.decode(lobby.participants[from].name);
-        System.out.println("SENDING FROM: " + chats.saidIt + " TO: " + to + " CONTENT: " + chats.message);
+
+        System.out.println(chats.saidIt + " -> " + to + ": «\n" + chats.message + "\n»");
         lobby.participants[to].connection.sendTCP(chats);
     }
 
@@ -155,7 +159,7 @@ public class GameServer {
         final int gameID = lobby.getSlotOf(connection);
         game.setBoard(gameID, aPlayerBoard.board);
 
-        System.out.println("A playerBoard " + connection + " -> " + gameID);
+        System.out.println("A playerBoard from" + connection + "(" + gameID + ")");
 
         //IF WE'VE RECEIVED ALL, WE CAN START
         if (game.allBoardsSet()) {
@@ -180,7 +184,7 @@ public class GameServer {
 
         final Connection connection = connectionAndId.getKey();
 
-        System.out.println(connection.toString() + " IS ATTACKING " + lobby.participants[a.toAttackID].name);
+        System.out.println(connection + " is attacking " + lobby.participants[a.toAttackID].name);
 
         AttackResult result = game.attack(
                 a.toAttackID,
@@ -208,7 +212,6 @@ public class GameServer {
 
         YourBoardToPaint attacked = new YourBoardToPaint();
         attacked.board = attackedOne;
-
 
         //TO THE GUY THAT ATTACKED
         //TO THE GUY NOT ATTACKED
@@ -316,7 +319,10 @@ public class GameServer {
         ConnectedPlayers connectedPlayers = new ConnectedPlayers();
 
         connectedPlayers.participants =
-                Arrays.stream(lobby.participants).filter(Objects::nonNull).map(p -> {
+                Arrays.stream(lobby.participants).map(p -> {
+                    if (p == null) {
+                        return null;
+                    }
                     if (p.isBot()) {
                         BotLobbyParticipant asBot = (BotLobbyParticipant) p;
                         return new Participant(asBot.difficulty, asBot.name);

@@ -234,13 +234,19 @@ public class App extends Application implements IClient {
     }
 
     public void onAddBotButton(int slot, BotDifficulty botDifficulty) {
-        Thread thread = new Thread(new AiClient(this, slot, botDifficulty, "Damien", ADDRESS));
-        thread.start();
+        Thread thread = new Thread(new AiClient(slot, botDifficulty, "Damien", ADDRESS));
         aiThreads.put(slot, thread);
+        thread.start();
     }
 
     public void onRemovePlayerButton(int slot) {
-        aiThreads.get(slot).interrupt();
+
+        System.out.println("Removing from slot " + slot);
+
+        if (aiThreads.containsKey(slot)) {
+            aiThreads.get(slot).interrupt();
+        }
+
         client.sendTCP(new RemovePlayerFromLobby(slot));
     }
 

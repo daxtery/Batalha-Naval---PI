@@ -13,7 +13,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class LobbyScene extends BaseGameScene {
 
@@ -32,7 +34,7 @@ public class LobbyScene extends BaseGameScene {
         addButtons = new ArrayList<>();
         removeButtons = new ArrayList<>();
 
-        grid.setAlignment(Pos.CENTER);
+        grid.setAlignment(Pos.TOP_LEFT);
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
@@ -56,6 +58,12 @@ public class LobbyScene extends BaseGameScene {
         addButtons.clear();
         removeButtons.clear();
 
+        for (int i = 0; i < count; i++) {
+            Label userName = new Label();
+            labels.add(userName);
+            grid.add(userName, 1, i + 1);
+        }
+
         if (admin) {
             for (int i = 0; i < count; i++) {
                 Button addBotButton = new Button("+");
@@ -66,25 +74,14 @@ public class LobbyScene extends BaseGameScene {
                 addButtons.add(addBotButton);
                 grid.add(addBotButton, 0, i + 1);
 
-                Label userName = new Label("<EMPTY> Slot #" + i);
-                labels.add(userName);
-                grid.add(userName, 1, i + 1);
-
                 Button removeButton = new Button("x");
                 removeButton.setOnMouseClicked(event -> app.onRemovePlayerButton(slot));
 
                 removeButtons.add(removeButton);
                 grid.add(removeButton, 2, i + 1);
             }
-        } else {
-            for (int i = 0; i < count; i++) {
-                Label userName = new Label("<EMPTY> Slot #" + i);
-                labels.add(userName);
-                grid.add(userName, 0, i + 1);
-            }
+            grid.add(startButton, 1, this.count + 1);
         }
-
-
     }
 
     @Override
@@ -101,17 +98,20 @@ public class LobbyScene extends BaseGameScene {
 
         for (int i = 0, playerLobbyParticipantsLength = playerLobbyParticipants.length; i < playerLobbyParticipantsLength; i++) {
             Network.Participant participant = playerLobbyParticipants[i];
+
+            if (participant == null) {
+                labels.get(i).setText("Slot #" + i);
+                if (admin) {
+                    addButtons.get(i).setVisible(true);
+                    removeButtons.get(i).setVisible(false);
+                }
+                continue;
+            }
+
+            labels.get(i).setText(participant.toString());
             if (admin) {
                 addButtons.get(i).setVisible(false);
                 removeButtons.get(i).setVisible(i != 0);
-            }
-            labels.get(i).setText(participant.toString());
-        }
-
-        if (admin) {
-            for (int i = playerLobbyParticipants.length; i < count; i++) {
-                addButtons.get(i).setVisible(true);
-                removeButtons.get(i).setVisible(false);
             }
         }
 
@@ -119,12 +119,6 @@ public class LobbyScene extends BaseGameScene {
             return;
         }
 
-        GridPane grid = ((GridPane) getRoot());
-
-        if (playerLobbyParticipants.length == count) {
-            grid.add(startButton, 0, this.count + 1);
-        } else {
-            grid.getChildren().remove(startButton);
-        }
+        startButton.setDisable(Arrays.stream(playerLobbyParticipants).filter(Objects::nonNull).count() != count);
     }
 }

@@ -7,19 +7,15 @@ import Common.*;
 
 import java.io.IOException;
 
-import static java.lang.Thread.sleep;
-
 public class AiClient implements IClient, Runnable {
 
     public final int slot;
     public final BotDifficulty botDifficulty;
     public final String name;
     public final GameClient gameClient;
-    private final App app;
     private final String address;
 
-    public AiClient(App app, int slot, BotDifficulty botDifficulty, String name, String address) {
-        this.app = app;
+    public AiClient(int slot, BotDifficulty botDifficulty, String name, String address) {
         this.slot = slot;
         this.botDifficulty = botDifficulty;
         this.name = name;
@@ -133,11 +129,12 @@ public class AiClient implements IClient, Runnable {
             );
 
             while (!Thread.currentThread().isInterrupted()) {
-                sleep(100);
+                Thread.sleep(1000);
             }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        OnAbort();
     }
 }

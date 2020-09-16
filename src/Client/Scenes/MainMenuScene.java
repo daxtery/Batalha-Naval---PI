@@ -2,14 +2,14 @@ package Client.Scenes;
 
 import Client.App;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+
+import java.util.Optional;
 
 public class MainMenuScene extends BaseGameScene {
 
@@ -68,12 +68,37 @@ public class MainMenuScene extends BaseGameScene {
                 return;
             }
 
-            TextInputDialog countDialog = new TextInputDialog();
-            countDialog.showAndWait();
+            final int maxPlayers = 3;
+            final int minPlayers = 2;
 
-            int count = Integer.parseInt(countDialog.getEditor().getText());
+            Spinner<Integer> spinner = new Spinner<>(minPlayers, maxPlayers, maxPlayers);
 
-            app.onCreateLobbyButton(name, count);
+            Dialog<Integer> dialog = new Dialog<>();
+            dialog.setTitle("Create Lobby");
+
+            // Set the button types.
+            ButtonType okButtonType = new ButtonType("Set", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            grid.add(new Label("Number of players:"), 0, 0);
+            grid.add(spinner, 1, 0);
+
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == okButtonType) {
+                    return spinner.getValue();
+                }
+                return null;
+            });
+
+            Optional<Integer> result = dialog.showAndWait();
+            result.ifPresent(slots -> app.onCreateLobbyButton(name, slots));
         });
 
         createLobbyButton.setStyle("-fx-background-color: transparent;");
