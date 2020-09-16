@@ -14,13 +14,14 @@ import javafx.scene.text.Font;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ChatScene extends BaseGameScene {
 
-    private final Map<EnemyLocal, Label> labels;
-    private final Map<EnemyLocal, TextArea> textAreas;
-    private final Map<EnemyLocal, TextArea> conversations;
-    private final Map<EnemyLocal, VBox> vBoxes;
+    private final Map<Integer, Label> labels;
+    private final Map<Integer, TextArea> textAreas;
+    private final Map<Integer, TextArea> conversations;
+    private final Map<Integer, VBox> vBoxes;
 
     public ChatScene(App app) {
         super(app, new HBox(50));
@@ -45,86 +46,54 @@ public class ChatScene extends BaseGameScene {
     }
 
     public void onPlayerDied(Network.PlayerDied playerDied) {
-        EnemyLocal enemy = app.maybeEnemyLocalById(playerDied.who).orElseThrow();
-        TextArea textArea = textAreas.get(enemy);
+        TextArea textArea = textAreas.get(playerDied.who);
         textArea.setEditable(false);
         textArea.setOnKeyPressed((event) -> {
         });
     }
 
-    public void onOtherSpecs(Network.OthersSpecs othersSpecs) {
-        EnemyLocal enemy1 = app.maybeEnemyLocalById(othersSpecs.ene1).orElseThrow();
-        EnemyLocal enemy2 = app.maybeEnemyLocalById(othersSpecs.ene2).orElseThrow();
-
-        Label cWl1 = new Label(othersSpecs.ene1n);
-        cWl1.setFont(new Font(30));
-        labels.put(enemy1, cWl1);
-
-        Label cWl2 = new Label(othersSpecs.ene2n);
-        cWl2.setFont(new Font(30));
-        labels.put(enemy2, cWl2);
-
-        TextArea ene1Conversation = new TextArea();
-        ene1Conversation.setEditable(false);
-        ene1Conversation.setWrapText(true);
-
-        conversations.put(enemy1, ene1Conversation);
-
-        TextArea ene2Conversation = new TextArea();
-        ene2Conversation.setEditable(false);
-        ene2Conversation.setWrapText(true);
-
-        conversations.put(enemy2, ene2Conversation);
-
-        TextArea tf1 = new TextArea();
-        tf1.setWrapText(true);
-        tf1.setMinSize(tf1.getPrefWidth() * 2, tf1.getPrefHeight() * 2);
-        tf1.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                String message = tf1.getText();
-                tf1.clear();
-                app.SendMessage(enemy1, message);
-                ene1Conversation.appendText("ME: " + message);
-            }
-        });
-
-        textAreas.put(enemy1, tf1);
-
-        TextArea tf2 = new TextArea();
-        tf2.setWrapText(true);
-        tf2.setMinSize(tf1.getPrefWidth() * 2, tf1.getPrefHeight() * 2);
-        tf2.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                String message = tf2.getText();
-                tf2.clear();
-                app.SendMessage(enemy2, message);
-                ene2Conversation.appendText("ME: " + message);
-            }
-        });
-
-        textAreas.put(enemy2, tf2);
-
-        VBox vBox1 = new VBox(20);
-        VBox vBox2 = new VBox(20);
-
-        vBoxes.put(enemy1, vBox1);
-        vBoxes.put(enemy2, vBox2);
-
-        vBox1.getChildren().addAll(cWl1, ene1Conversation, tf1);
-        vBox2.getChildren().addAll(cWl2, ene2Conversation, tf2);
-
-        VBox.setVgrow(ene1Conversation, Priority.ALWAYS);
-        VBox.setVgrow(ene2Conversation, Priority.ALWAYS);
-
-        HBox hBox = (HBox) getRoot();
-        HBox.setHgrow(vBox1, Priority.ALWAYS);
-        HBox.setHgrow(vBox2, Priority.ALWAYS);
-        hBox.getChildren().addAll(vBox1, vBox2);
+    public void onChatMessage(Network.ChatMessage chatMessage) {
+        TextArea conversation = conversations.get(chatMessage.saidIt);
+        conversation.appendText(chatMessage.message);
     }
 
-    public void onChatMessage(Network.ChatMessage chatMessage) {
-        EnemyLocal enemy = app.maybeEnemyLocalById(chatMessage.saidIt).orElseThrow();
-        TextArea conversation = conversations.get(enemy);
-        conversation.appendText(chatMessage.message);
+    public void setupWithPlayers(Network.ConnectedPlayers players) {
+        HBox hBox = (HBox) getRoot();
+
+        for (Network.Participant participant : players.participants) {
+
+            if (participant.slot == players.slot) {
+                continue;
+            }
+
+            Label label = new Label(participant.name);
+            label.setFont(new Font(30));
+            labels.put(participant.slot, label);
+
+            TextArea conversation = new TextArea();
+            conversation.setEditable(false);
+            conversation.setWrapText(true);
+
+            conversations.put(participant.slot, conversation);
+
+            TextArea chatTextArea = new TextArea();
+            chatTextArea.setWrapText(true);
+            chatTextArea.setMinSize(chatTextArea.getPrefWidth() * 2, chatTextArea.getPrefHeight() * 2);
+            chatTextArea.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ENTER) {
+                    String message = chatTextArea.getText();
+                    chatTextArea.clear();
+                    app.SendMessage(participant.slot, message);
+                    conversation.appendText("You: " + message);
+                }
+            });
+
+            VBox vBox = new VBox(20);
+            vBoxes.put(participant.slot, vBox);
+
+            vBox.getChildren().addAll(label, conversation, chatTextArea);
+            HBox.setHgrow(vBox, Priority.ALWAYS);
+            hBox.getChildren().add(vBox);
+        }
     }
 }

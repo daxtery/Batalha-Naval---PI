@@ -3,7 +3,6 @@ package Client.Scenes;
 import Client.FX.EmptyGraphBoardFX;
 import Common.Network;
 import Client.App;
-import Client.EnemyLocal;
 import Client.FX.GraphBoardFX;
 import Client.FX.TileFX;
 import javafx.scene.control.Button;
@@ -21,12 +20,12 @@ import static Common.PlayerBoardConstants.DEFAULT_LINES;
 
 public class AttackScene extends BaseGameScene {
 
-    private final Map<EnemyLocal, Label> labels;
-    private final Map<EnemyLocal, VBox> vBoxes;
-    private final Map<EnemyLocal, GraphBoardFX> graphBoards;
+    private final Map<Integer, Label> labels;
+    private final Map<Integer, VBox> vBoxes;
+    private final Map<Integer, GraphBoardFX> graphBoards;
 
     private boolean iCanAttack;
-    private EnemyLocal lastAttacked;
+    private int lastAttacked;
 
     public AttackScene(App app) {
         super(app, new HBox(50));
@@ -67,95 +66,68 @@ public class AttackScene extends BaseGameScene {
 
     public void onPlayerDied(Network.PlayerDied playerDied) {
         final int who = playerDied.who;
-        EnemyLocal enemy = app.maybeEnemyLocalById(who).orElseThrow();
-        graphBoards.get(enemy).setOnMouseClicked((mouseEvent -> {
+        graphBoards.get(who).setOnMouseClicked((mouseEvent -> {
         }));
-    }
-
-    public void onEnemiesBoardsToPaint(Network.EnemiesBoardsToPaint boards) {
-        graphBoards.get(app.enemies[0]).startTiles(boards.board1);
-        graphBoards.get(app.enemies[1]).startTiles(boards.board2);
-    }
-
-    public void onOtherSpecs(Network.OthersSpecs othersSpecs) {
-
-        EnemyLocal enemy1 = app.maybeEnemyLocalById(othersSpecs.ene1).orElseThrow();
-
-        Label label1 = new Label(othersSpecs.ene1n);
-        label1.setFont(new Font("Verdana", 30));
-        label1.setTextFill(Color.rgb(0, 0, 0));
-
-        labels.put(enemy1, label1);
-
-        Label label2 = new Label(othersSpecs.ene2n);
-        label2.setFont(new Font("Verdana", 30));
-        label2.setTextFill(Color.rgb(0, 0, 0));
-
-        EnemyLocal enemy2 = app.maybeEnemyLocalById(othersSpecs.ene2).orElseThrow();
-
-        labels.put(enemy2, label2);
-
-        GraphBoardFX board1 = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
-
-        board1.setOnMouseClicked(event -> {
-            lastAttacked = enemy1;
-            if (iCanAttack) {
-                iCanAttack = false;
-
-                Point p = board1.pointCoordinates(event);
-
-                Network.AnAttackAttempt anAttackAttempt = new Network.AnAttackAttempt();
-
-                anAttackAttempt.l = p.x;
-                anAttackAttempt.c = p.y;
-
-                anAttackAttempt.toAttackID = enemy1.serverID;
-                anAttackAttempt.otherID = enemy2.serverID;
-
-                app.CommunicateAttackAttempt(anAttackAttempt);
-            }
-        });
-
-        GraphBoardFX board2 = new GraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_COLUMNS, TileFX.TILE_SIZE * DEFAULT_LINES);
-
-        board2.setOnMouseClicked(event -> {
-            lastAttacked = enemy2;
-            if (iCanAttack) {
-                iCanAttack = false;
-
-                Point p = board1.pointCoordinates(event);
-
-                Network.AnAttackAttempt anAttackAttempt = new Network.AnAttackAttempt();
-
-                anAttackAttempt.l = p.x;
-                anAttackAttempt.c = p.y;
-
-                anAttackAttempt.toAttackID = enemy2.serverID;
-                anAttackAttempt.otherID = enemy1.serverID;
-
-                app.CommunicateAttackAttempt(anAttackAttempt);
-            }
-        });
-
-        graphBoards.put(enemy1, board1);
-        graphBoards.put(enemy2, board2);
-
-        VBox aWvBox1 = new VBox(10);
-        aWvBox1.getChildren().addAll(board1, label1);
-
-        VBox aWvBox2 = new VBox(10);
-        aWvBox2.getChildren().addAll(board2, label2);
-
-        vBoxes.put(enemy1, aWvBox1);
-        vBoxes.put(enemy2, aWvBox2);
-
-        HBox aWRoot = (HBox) getRoot();
-        aWRoot.getChildren().addAll(aWvBox1, aWvBox2);
     }
 
     public void onEnemyBoardToPaint(Network.EnemyBoardToPaint board) {
         final int who = board.id;
-        EnemyLocal enemy = app.maybeEnemyLocalById(who).orElseThrow();
-        graphBoards.get(enemy).updateTiles(board.newAttackedBoard);
+        graphBoards.get(who).updateTiles(board.newAttackedBoard);
+    }
+
+
+    public void setupWithPlayers(Network.ConnectedPlayers players) {
+        HBox root = (HBox) getRoot();
+
+        for (Network.Participant participant : players.participants) {
+
+            if (players.slot == participant.slot) {
+                continue;
+            }
+
+            Label label = new Label(participant.toString());
+            label.setFont(new Font("Verdana", 30));
+            label.setTextFill(Color.rgb(0, 0, 0));
+
+            labels.put(participant.slot, label);
+
+            GraphBoardFX boardFX = new GraphBoardFX(
+                    DEFAULT_LINES,
+                    DEFAULT_COLUMNS,
+                    TileFX.TILE_SIZE * DEFAULT_COLUMNS,
+                    TileFX.TILE_SIZE * DEFAULT_LINES
+            );
+
+            boardFX.setOnMouseClicked(event -> {
+                lastAttacked = participant.slot;
+                if (iCanAttack) {
+                    iCanAttack = false;
+
+                    Point p = boardFX.pointCoordinates(event);
+
+                    Network.AnAttackAttempt anAttackAttempt = new Network.AnAttackAttempt();
+
+                    anAttackAttempt.l = p.x;
+                    anAttackAttempt.c = p.y;
+
+                    anAttackAttempt.toAttackID = participant.slot;
+
+                    app.CommunicateAttackAttempt(anAttackAttempt);
+                }
+            });
+
+            graphBoards.put(participant.slot, boardFX);
+
+            VBox vBox = new VBox(10);
+            vBox.getChildren().addAll(boardFX, label);
+            vBoxes.put(participant.slot, vBox);
+            root.getChildren().add(vBox);
+        }
+    }
+
+    public void onCanStart(Network.CanStart canStart) {
+        for (int i = 0; i < canStart.boards.length; i++) {
+            graphBoards.get(canStart.indices[i]).startTiles(canStart.boards[i]);
+        }
     }
 }

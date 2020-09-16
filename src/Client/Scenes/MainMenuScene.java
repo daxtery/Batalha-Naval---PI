@@ -85,7 +85,7 @@ public class MainMenuScene extends BaseGameScene {
             grid.setVgap(10);
             grid.setPadding(new Insets(20, 150, 10, 10));
 
-            grid.add(new Label("Number of players:"), 0, 0);
+            grid.add(new Label("Number of playersAlive:"), 0, 0);
             grid.add(spinner, 1, 0);
 
             dialog.getDialogPane().setContent(grid);

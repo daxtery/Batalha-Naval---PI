@@ -29,6 +29,7 @@ public class Network {
         kryo.register(String.class);
         kryo.register(String[].class);
         kryo.register(String[][].class);
+        kryo.register(String[][][].class);
         //
         kryo.register(IsFull.class);
         kryo.register(ReadyForShips.class);
@@ -37,25 +38,15 @@ public class Network {
         kryo.register(WhoseTurn.class);
         kryo.register(ConnectedPlayers.class);
         kryo.register(YourBoardToPaint.class);
-        kryo.register(EnemiesBoardsToPaint.class);
         kryo.register(AnAttackAttempt.class);
         kryo.register(AnAttackResponse.class);
         kryo.register(EnemyBoardToPaint.class);
         kryo.register(YourTurn.class);
         kryo.register(YouDead.class);
         kryo.register(PlayerDied.class);
-        kryo.register(OthersSpecs.class);
         kryo.register(YouWon.class);
         kryo.register(PlayerBoard.class);
         kryo.register(APlayerboard.class);
-    }
-
-    public static class OthersSpecs {
-        public int ene1;
-        public int ene2;
-
-        public String ene1n;
-        public String ene2n;
     }
 
     public static class YouWon {
@@ -68,17 +59,11 @@ public class Network {
         public int who;
     }
 
-    public static class EnemiesBoardsToPaint {
-        public String[][] board1;
-        public String[][] board2;
-    }
-
     public static class APlayerboard {
         public String[][] board;
     }
 
     public static class AnAttackAttempt {
-        public int otherID;
         public int toAttackID;
         public int l;
         public int c;
@@ -126,14 +111,17 @@ public class Network {
     public static class Participant {
         public BotDifficulty botDifficulty;
         public String name;
+        public int slot;
 
-        public Participant(BotDifficulty botDifficulty, String name) {
+        public Participant(BotDifficulty botDifficulty, String name, int slot) {
             this.botDifficulty = botDifficulty;
             this.name = name;
+            this.slot = slot;
         }
 
-        public Participant(String name) {
+        public Participant(String name, int slot) {
             this.name = name;
+            this.slot = slot;
         }
 
         public Participant() {
@@ -143,18 +131,21 @@ public class Network {
         public String toString() {
 
             if (botDifficulty == null) {
-                return name;
+                return name + " #" + slot;
             }
 
-            return name + "(Bot: " + botDifficulty + ")";
+            return name + "(Bot: " + botDifficulty + ")" + " #" + slot;
         }
     }
 
     public static class ConnectedPlayers {
         public Participant[] participants;
+        public int slot;
     }
 
     public static class CanStart {
+        public String[][][] boards;
+        public int[] indices;
     }
 
     public static class JoinLobby {
@@ -170,7 +161,6 @@ public class Network {
         public int count;
 
         public CreateLobby() {
-
         }
 
         public CreateLobby(String name, int count) {
@@ -194,7 +184,6 @@ public class Network {
         }
 
         public AddBotToLobby() {
-
         }
     }
 

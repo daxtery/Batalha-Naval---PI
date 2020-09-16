@@ -28,19 +28,15 @@ public class GameClient {
                 } else if (object instanceof Network.JoinLobbyResponse) {
                     GameClient.this.clientApplication.onJoinLobbyResponse((Network.JoinLobbyResponse) object);
                 } else if (object instanceof Network.CanStart) {
-                    GameClient.this.clientApplication.OnCanStart();
+                    GameClient.this.clientApplication.OnCanStart((Network.CanStart) object);
                 } else if (object instanceof Network.WhoseTurn) {
                     GameClient.this.clientApplication.OnWhoseTurn((Network.WhoseTurn) object);
                 } else if (object instanceof Network.ConnectedPlayers) {
                     GameClient.this.clientApplication.onConnectedPlayers((Network.ConnectedPlayers) object);
                 } else if (object instanceof Network.ReadyForShips) {
                     GameClient.this.clientApplication.OnReadyForShips();
-                } else if (object instanceof Network.OthersSpecs) {
-                    GameClient.this.clientApplication.OnOtherSpecs((Network.OthersSpecs) object);
                 } else if (object instanceof Network.YourBoardToPaint) {
                     GameClient.this.clientApplication.OnYourBoardToPaint((Network.YourBoardToPaint) object);
-                } else if (object instanceof Network.EnemiesBoardsToPaint) {
-                    GameClient.this.clientApplication.OnEnemiesBoardsToPaint((Network.EnemiesBoardsToPaint) object);
                 } else if (object instanceof Network.EnemyBoardToPaint) {
                     GameClient.this.clientApplication.OnEnemyBoardToPaint((Network.EnemyBoardToPaint) object);
                 } else if (object instanceof Network.AnAttackResponse) {

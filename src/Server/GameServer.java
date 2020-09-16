@@ -9,24 +9,23 @@ import javafx.util.Pair;
 
 import java.io.*;
 import java.util.Arrays;
-import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class GameServer {
 
     private final static long TIME_TO_WAIT = 1000 * 60;
     private final Server server;
     public GameLobby lobby;
-    private Game game;
     //WILL SAVE WHAT CONNECTIONS THE GAME STARTED WITH
     //SO IT'S POSSIBLE TO KNOW IF SOMEBODY WHO DROPPED IS RECONNECTING
     private long currentWaitedTime;
-    private GameState state;
     private Conversations conversations;
     private int currentPlayer;
 
     public GameServer(int port) throws IOException {
-
-        state = GameState.waitingForPlayers;
         server = new Server();
         Network.register(server);
 
@@ -47,18 +46,16 @@ public class GameServer {
                 } else if (object instanceof APlayerboard) {
                     onAPlayerBoard(c, (APlayerboard) object);
                 } else if (object instanceof AnAttackAttempt) {
-                    int gameID = lobby.getSlotOf(c);
+                    int gameID = lobby.getSlotOf(c).orElseThrow();
                     onAttackAttempt(new Pair<>(c, gameID), (AnAttackAttempt) object);
                 } else if (object instanceof ChatMessageFromClient) {
-                    int gameID = lobby.getSlotOf(c);
+                    int gameID = lobby.getSlotOf(c).orElseThrow();
                     onChatMessageFromClient(new Pair<>(c, gameID), (ChatMessageFromClient) object);
                 }
             }
 
             public void disconnected(Connection c) {
-                if (true) return;
-                int gameID = lobby.getSlotOf(c);
-                onDisconnected(new Pair<>(c, gameID));
+                onDisconnected(c);
             }
 
         });
@@ -72,7 +69,9 @@ public class GameServer {
             return;
         }
 
-        sendReadyForShips();
+        conversations = new Conversations();
+        server.sendToAllTCP(new ReadyForShips());
+        lobby.transitionToShips();
     }
 
     private void onRemovePlayerFromLobby(RemovePlayerFromLobby removePlayerFromLobby) {
@@ -98,7 +97,7 @@ public class GameServer {
 
         lobby = new GameLobby(createLobby.count);
         lobby.addPlayer(0, connection);
-        game = new Game(createLobby.count);
+
         sendConnections();
         printConnections();
     }
@@ -107,35 +106,44 @@ public class GameServer {
         connection.setName(joinLobby.name);
         System.out.println(connection + " joined lobby!");
 
-        switch (state) {
-            case waitingForPlayers:
-                int slot = lobby.count();
-                lobby.addPlayer(slot, connection);
-                JoinLobbyResponse response = new JoinLobbyResponse();
-                response.slots = game.playerBoards.length;
-                connection.sendTCP(response);
-                break;
-            case waitingForShips:
-                connection.sendTCP(new IsFull());
-                break;
-            case playing:
-            case playing2left:
-                break;
+        if (lobby.full()) {
+            connection.sendTCP(new IsFull());
+            return;
         }
 
+        int slot = lobby.playersInLobby();
+        lobby.addPlayer(slot, connection);
+
+        JoinLobbyResponse response = new JoinLobbyResponse();
+        response.slots = lobby.slots();
+        connection.sendTCP(response);
+
         sendConnections();
+
         printConnections();
     }
 
-    private void onDisconnected(Pair<Connection, Integer> connectionAndId) {
-        final Connection connection = connectionAndId.getKey();
-        System.out.println("Disconnected " + connection.toString());
-        switch (state) {
-            case waitingForPlayers -> sendConnections();
-            case waitingForShips -> handleLeavingWhileShips(connectionAndId);
+    private void onDisconnected(Connection connection) {
+        System.out.println("Disconnected " + connection);
+
+        switch (lobby.getState()) {
+            case InGame -> {
+                // TODO
+                System.err.println("Boy left during game :(");
+            }
+            case SettingShips -> {
+                handleLeavingWhileShips(new Pair<>(connection, lobby.getSlotOf(connection).orElseThrow()));
+            }
+            case InLobby -> {
+                Optional<Integer> result = lobby.getSlotOf(connection);
+                result.ifPresent(slot -> {
+                    lobby.removeParticipant(slot);
+                    sendConnections();
+                    printConnections();
+                    System.out.println("Count : " + lobby.playersInLobby());
+                });
+            }
         }
-        System.out.println("Count : " + lobby.count());
-        printConnections();
     }
 
     private void onChatMessageFromClient(Pair<Connection, Integer> connectionAndId, ChatMessageFromClient message) {
@@ -156,145 +164,144 @@ public class GameServer {
     }
 
     private void onAPlayerBoard(Connection connection, APlayerboard aPlayerBoard) {
-        final int gameID = lobby.getSlotOf(connection);
-        game.setBoard(gameID, aPlayerBoard.board);
+        final int gameID = lobby.getSlotOf(connection).orElseThrow();
+
+        lobby.setGameBoardOfPlayer(gameID, aPlayerBoard.board);
 
         System.out.println("A playerBoard from" + connection + "(" + gameID + ")");
 
+        IBoardSetup asBoardManager = lobby;
+
         //IF WE'VE RECEIVED ALL, WE CAN START
-        if (game.allBoardsSet()) {
+        if (asBoardManager.allBoardsSet()) {
+            System.out.println("All boards are set, the player can now start");
 
-            System.out.println("All set");
-
-            sendOthersDetails();
-            sendOthersBoards();
-
-            state = GameState.playing;
+            sendConnections();
 
             WhoseTurn whoseTurn = new WhoseTurn();
             whoseTurn.name = lobby.participants[0].name;
             server.sendToAllTCP(whoseTurn);
 
             lobby.participants[0].connection.sendTCP(new YourTurn());
-            server.sendToAllTCP(new CanStart());
+
+
+            for (int i = 0; i < lobby.playersInLobby(); i++) {
+                final int slot = i;
+
+                IntStream base = IntStream.range(0, lobby.playersInLobby());
+                IntStream otherIndexes = base.filter(n -> n != slot);
+
+                Stream<String[][]> otherBoards = otherIndexes
+                        .mapToObj(n -> lobby.playerBoards[n])
+                        .map(PlayerBoardTransformer::transform);
+
+                CanStart canStart = new CanStart();
+
+                canStart.boards = otherBoards.toArray(String[][][]::new);
+
+                // REALLY JAVA?
+                base = IntStream.range(0, lobby.playersInLobby());
+                otherIndexes = base.filter(n -> n != slot);
+
+                canStart.indices = otherIndexes.toArray();
+
+                lobby.participants[i].connection.sendTCP(canStart);
+            }
         }
     }
 
+    private int nextTurnId() {
+
+        for (int i = 1; i < lobby.playersInLobby(); i++) {
+            int playerIndex = (currentPlayer + i) % lobby.playersInLobby();
+            if (!lobby.playerBoards[playerIndex].isGameOver()) {
+                return playerIndex;
+
+            }
+        }
+
+        System.err.println("No next turn id??" + currentPlayer + " " + lobby.playersInLobby());
+        return 0;
+    }
+
     private void onAttackAttempt(Pair<Connection, Integer> connectionAndId, AnAttackAttempt a) {
-
         final Connection connection = connectionAndId.getKey();
+        final int slot = lobby.getSlotOf(connection).orElseThrow();
+        final LobbyParticipant attackedParticipant = lobby.participants[a.toAttackID];
 
-        System.out.println(connection + " is attacking " + lobby.participants[a.toAttackID].name);
+        System.out.println(connection + " is attacking " + attackedParticipant.name);
 
-        AttackResult result = game.attack(
-                a.toAttackID,
-                a.l,
-                a.c
-        );
+        final PlayerBoard attackedBoard = lobby.playerBoards[a.toAttackID];
+
+        AttackResult result = attackedBoard.getAttacked(a.l, a.c);
 
         boolean hitShip = result.status == AttackResultStatus.HitShipPiece;
         boolean shouldGoAgain = result.shouldPlayAgain();
         boolean hitSomething = result.valid();
 
-        PlayerBoard _board = game.playerBoards[a.toAttackID];
+        String[][] attackedBoardString = PlayerBoardTransformer.transform(attackedBoard);
 
-        String[][] attackedOne = PlayerBoardTransformer.transform(_board);
-
-        System.out.println(Arrays.deepToString(attackedOne));
+        System.out.println(Arrays.deepToString(attackedBoardString));
 
         AnAttackResponse response = new AnAttackResponse();
         response.again = shouldGoAgain;
-        response.newAttackedBoard = attackedOne;
+        response.newAttackedBoard = attackedBoardString;
         response.actualHit = hitSomething;
         response.shipHit = hitShip;
+        connection.sendTCP(response);
 
         // TO THE ATTACKED GUY
-
         YourBoardToPaint attacked = new YourBoardToPaint();
-        attacked.board = attackedOne;
+        attacked.board = attackedBoardString;
+        attackedParticipant.connection.sendTCP(attacked);
 
-        //TO THE GUY THAT ATTACKED
-        //TO THE GUY NOT ATTACKED
-        //TO THE ATTACKED
-        switch (state) {
-            case playing -> {
-                connection.sendTCP(response);
-                EnemyBoardToPaint eb = new EnemyBoardToPaint();
-                eb.newAttackedBoard = attackedOne;
-                eb.id = a.toAttackID;
+        final int nPlayers = lobby.playersInLobby();
 
-                lobby.participants[a.otherID].connection.sendTCP(eb);
-                lobby.participants[a.toAttackID].connection.sendTCP(attacked);
-                if (!shouldGoAgain) {
-                    currentPlayer = (currentPlayer + 1) % 3;
-                    WhoseTurn whoseTurn = new WhoseTurn();
-                    whoseTurn.name = lobby.participants[currentPlayer].name;
-                    sendToAllExcept(currentPlayer, whoseTurn);
-                    lobby.participants[currentPlayer].connection.sendTCP(new YourTurn());
-                } else {
-                    System.out.println("HIT");
-                    if (game.isGameOverFor(a.toAttackID)) {
-                        System.out.println("MAN DOWN!");
-                        state = GameState.playing2left;
-                        lobby.participants[a.toAttackID].connection.sendTCP(new YouDead());
-                        PlayerDied playerDied = new PlayerDied();
-                        playerDied.who = a.toAttackID;
-                        sendToAllExcept(a.toAttackID, playerDied);
-                    }
-                }
+        for (int i = 0; i < nPlayers; i++) {
+
+            if (i == a.toAttackID || i == slot) {
+                continue;
             }
-            case playing2left -> {
-                connection.sendTCP(response);
-                lobby.participants[a.toAttackID].connection.sendTCP(attacked);
-                if (!shouldGoAgain) {
-                    currentPlayer = a.toAttackID;
-                    WhoseTurn whoseTurn = new WhoseTurn();
-                    whoseTurn.name = lobby.participants[currentPlayer].name;
-                    sendToAllExcept(currentPlayer, whoseTurn);
 
-                    lobby.participants[currentPlayer].connection.sendTCP(new YourTurn());
-                } else {
-                    System.out.println("HIT");
-                    if (game.isGameOverFor(a.toAttackID)) {
-                        //GAME IS OVER
-                        lobby.participants[a.toAttackID].connection.sendTCP(new YouDead());
-                        lobby.participants[currentPlayer].connection.sendTCP(new YouWon());
-                        state = GameState.waitingForPlayers;
-                    }
-                }
+            EnemyBoardToPaint eb = new EnemyBoardToPaint();
+            eb.newAttackedBoard = attackedBoardString;
+            eb.id = a.toAttackID;
+
+            lobby.participants[i].connection.sendTCP(eb);
+        }
+
+        if (!shouldGoAgain) {
+            currentPlayer = nextTurnId();
+
+            final LobbyParticipant nextParticipant = lobby.participants[currentPlayer];
+
+            WhoseTurn whoseTurn = new WhoseTurn();
+            whoseTurn.name = nextParticipant.name;
+
+            sendToAllExcept(currentPlayer, whoseTurn);
+            nextParticipant.connection.sendTCP(new YourTurn());
+        } else {
+            if (lobby.gameIsOver()) {
+                System.out.println("Game over " + connection + " won!");
+                attackedParticipant.connection.sendTCP(new YouDead());
+                connection.sendTCP(new YouWon());
+            } else if (lobby.isGameOverFor(a.toAttackID)) {
+                System.out.println("Man down: " + attackedParticipant.connection);
+                attackedParticipant.connection.sendTCP(new YouDead());
+                PlayerDied playerDied = new PlayerDied();
+                playerDied.who = a.toAttackID;
+                sendToAllExcept(a.toAttackID, playerDied);
             }
         }
 
-    }
-
-    private void sendOthersBoards() {
-        for (int i = 0; i < game.playerBoards.length; i++) {
-            EnemiesBoardsToPaint enemiesBoardsToPaint = new EnemiesBoardsToPaint();
-            //int own = game.getPlayerById(i).id();
-
-            enemiesBoardsToPaint.board1 = PlayerBoardTransformer.transform(game.playerBoards[((i + 1) % 3)]);
-            enemiesBoardsToPaint.board2 = PlayerBoardTransformer.transform(game.playerBoards[((i + 2) % 3)]);
-
-            lobby.participants[i].connection.sendTCP(enemiesBoardsToPaint);
-        }
-    }
-
-    private void sendOthersDetails() {
-        for (int i = 0; i < lobby.count(); i++) {
-            OthersSpecs send = new OthersSpecs();
-            send.ene1 = (i + 1) % 3;
-            send.ene2 = (i + 2) % 3;
-
-            send.ene1n = lobby.participants[((i + 1) % 3)].name;
-            send.ene2n = lobby.participants[((i + 2) % 3)].name;
-
-            lobby.participants[i].connection.sendTCP(send);
-        }
     }
 
     private void sendToAllExcept(int i, Object object) {
-        lobby.participants[((i + 4) % 3)].connection.sendTCP(object);
-        lobby.participants[((i + 5) % 3)].connection.sendTCP(object);
+        for (int k = 0; k < lobby.participants.length; ++k) {
+            if (k != i) {
+                lobby.participants[k].connection.sendTCP(object);
+            }
+        }
     }
 
     public void start() {
@@ -316,31 +323,37 @@ public class GameServer {
     }
 
     private void sendConnections() {
+
         ConnectedPlayers connectedPlayers = new ConnectedPlayers();
+        connectedPlayers.participants = new Participant[lobby.participants.length];
 
-        connectedPlayers.participants =
-                Arrays.stream(lobby.participants).map(p -> {
-                    if (p == null) {
-                        return null;
-                    }
-                    if (p.isBot()) {
-                        BotLobbyParticipant asBot = (BotLobbyParticipant) p;
-                        return new Participant(asBot.difficulty, asBot.name);
-                    } else {
-                        return new Participant(p.name);
-                    }
-                }).toArray(Participant[]::new);
+        for (int i = 0; i < lobby.participants.length; ++i) {
+            final LobbyParticipant participant = lobby.participants[i];
 
-        server.sendToAllTCP(connectedPlayers);
+            if (participant == null) {
+                connectedPlayers.participants[i] = null;
+                continue;
+            }
+
+            if (participant.isBot()) {
+                BotLobbyParticipant asBot = (BotLobbyParticipant) participant;
+                connectedPlayers.participants[i] = new Participant(asBot.difficulty, asBot.name, i);
+            } else {
+                connectedPlayers.participants[i] = new Participant(participant.name, i);
+            }
+
+        }
+
+        for (int i = 0; i < lobby.participants.length; ++i) {
+            if (lobby.participants[i] != null) {
+                connectedPlayers.slot = i;
+                lobby.participants[i].connection.sendTCP(connectedPlayers);
+            }
+        }
+
     }
 
     private void handleLeavingWhileShips(Pair<Connection, Integer> connectionAndId) {
-    }
-
-    private void sendReadyForShips() {
-        conversations = new Conversations();
-        server.sendToAllTCP(new ReadyForShips());
-        state = GameState.waitingForShips;
     }
 
 }

@@ -35,7 +35,7 @@ public class AiClient implements IClient, Runnable {
     }
 
     @Override
-    public void OnCanStart() {
+    public void OnCanStart(Network.CanStart canStart) {
     }
 
     @Override
@@ -59,15 +59,7 @@ public class AiClient implements IClient, Runnable {
     }
 
     @Override
-    public void OnOtherSpecs(Network.OthersSpecs object) {
-    }
-
-    @Override
     public void OnYourBoardToPaint(Network.YourBoardToPaint object) {
-    }
-
-    @Override
-    public void OnEnemiesBoardsToPaint(Network.EnemiesBoardsToPaint object) {
     }
 
     @Override

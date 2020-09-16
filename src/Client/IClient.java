@@ -7,7 +7,7 @@ public interface IClient {
 
     void OnAbort();
 
-    void OnCanStart();
+    void OnCanStart(Network.CanStart canStart);
 
     void OnWhoseTurn(Network.WhoseTurn whoseTurn);
 
@@ -15,11 +15,7 @@ public interface IClient {
 
     void OnReadyForShips();
 
-    void OnOtherSpecs(Network.OthersSpecs object);
-
     void OnYourBoardToPaint(Network.YourBoardToPaint object);
-
-    void OnEnemiesBoardsToPaint(Network.EnemiesBoardsToPaint object);
 
     void OnEnemyBoardToPaint(Network.EnemyBoardToPaint object);
 

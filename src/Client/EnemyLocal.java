@@ -2,11 +2,11 @@ package Client;
 
 public class EnemyLocal {
 
-    public int serverID;
-    public String name;
+    public final int slot;
+    public final String name;
 
-    public EnemyLocal(int serverID, String name) {
-        this.serverID = serverID;
+    public EnemyLocal(int slot, String name) {
+        this.slot = slot;
         this.name = name;
     }
 

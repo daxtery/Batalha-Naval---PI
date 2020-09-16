@@ -44,10 +44,6 @@ public class App extends Application implements IClient {
     private final static Rectangle2D SCREEN_RECTANGLE = Screen.getPrimary().getVisualBounds();
     private final AudioClip soundPlayer = new AudioClip(new File("assets/sound/play.mp3").toURI().toString());
 
-    private final int NUM_PLAYERS = 3;
-    private final int NUM_ENEMIES = NUM_PLAYERS - 1;
-    public final EnemyLocal[] enemies = new EnemyLocal[NUM_ENEMIES];
-
     private final String aWshipSoundFile = "assets/sound/ship.mp3";
     private final String aWwaterSoundFile = "assets/sound/water.mp3";
     private final MediaPlayer aWShipSound = new MediaPlayer(new Media(new File(aWshipSoundFile).toURI().toString()));
@@ -67,7 +63,8 @@ public class App extends Application implements IClient {
     private LobbyScene lobbyScene;
 
     private Stage theStage;
-    private AiClient aiClient;
+
+    private ConnectedPlayers players;
 
     public static void main(String[] args) {
         launch(args);
@@ -176,9 +173,16 @@ public class App extends Application implements IClient {
     public void OnAbort() {
     }
 
-    public void OnCanStart() {
+    @Override
+    public void OnCanStart(CanStart canStart) {
         System.out.println("Can start");
-        Platform.runLater(() -> transitionTo(mainGame));
+
+        Platform.runLater(() -> {
+            attackScene.setupWithPlayers(players);
+            chatScreen.setupWithPlayers(players);
+            attackScene.onCanStart(canStart);
+            transitionTo(mainGame);
+        });
     }
 
     public void OnWhoseTurn(WhoseTurn whoseTurn) {
@@ -187,6 +191,7 @@ public class App extends Application implements IClient {
 
     public void onConnectedPlayers(ConnectedPlayers players) {
         Platform.runLater(() -> {
+            this.players = players;
             lobbyScene.onConnectedPlayers(players);
         });
     }
@@ -195,21 +200,8 @@ public class App extends Application implements IClient {
         Platform.runLater(() -> transitionTo(setShips));
     }
 
-    public void OnOtherSpecs(OthersSpecs othersSpecs) {
-        Platform.runLater(() -> {
-            enemies[0] = new EnemyLocal(othersSpecs.ene1, othersSpecs.ene1n);
-            enemies[1] = new EnemyLocal(othersSpecs.ene2, othersSpecs.ene2n);
-            chatScreen.onOtherSpecs(othersSpecs);
-            attackScene.onOtherSpecs(othersSpecs);
-        });
-    }
-
     public void OnYourBoardToPaint(YourBoardToPaint toPaint) {
         Platform.runLater(() -> mainGame.OnYourBoardToPaint(toPaint));
-    }
-
-    public void OnEnemiesBoardsToPaint(EnemiesBoardsToPaint boards) {
-        Platform.runLater(() -> attackScene.onEnemiesBoardsToPaint(boards));
     }
 
     public void OnEnemyBoardToPaint(EnemyBoardToPaint board) {
@@ -326,15 +318,6 @@ public class App extends Application implements IClient {
         client.sendTCP(p);
     }
 
-    public Optional<EnemyLocal> maybeEnemyLocalById(int id) {
-        for (EnemyLocal enemy : enemies) {
-            if (enemy.serverID == id) {
-                return Optional.of(enemy);
-            }
-        }
-        return Optional.empty();
-    }
-
     public void OnAttackButtonPressed() {
         transitionTo(attackScene);
     }
@@ -384,15 +367,19 @@ public class App extends Application implements IClient {
         new Thread(tryConnectTask).start();
     }
 
-    public void SendMessage(EnemyLocal enemy, String message) {
+    public void SendMessage(int slot, String message) {
         Network.ChatMessageFromClient c = new Network.ChatMessageFromClient();
         c.text = message;
-        c.to = enemy.serverID;
+        c.to = slot;
         client.sendTCP(c);
     }
 
     public void onLobbyStartButtonClicked() {
         client.sendTCP(new StartLobby());
+    }
+
+    public ConnectedPlayers getPlayers() {
+        return players;
     }
 }
 
