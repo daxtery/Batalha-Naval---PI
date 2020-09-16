@@ -6,6 +6,8 @@ import Client.IClient;
 import Common.*;
 
 import java.io.IOException;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public class AiClient implements IClient, Runnable {
 
@@ -14,6 +16,9 @@ public class AiClient implements IClient, Runnable {
     public final String name;
     public final GameClient gameClient;
     private final String address;
+    private Network.ConnectedPlayers connectedPlayers;
+    private int focusing;
+    private String lastMessage;
 
     public AiClient(int slot, BotDifficulty botDifficulty, String name, String address) {
         this.slot = slot;
@@ -36,6 +41,8 @@ public class AiClient implements IClient, Runnable {
 
     @Override
     public void OnCanStart(Network.CanStart canStart) {
+        IntStream slots = new Random().ints(0, connectedPlayers.participants.length);
+        focusing = slots.filter(slot -> slot != connectedPlayers.slot).findFirst().orElseThrow();
     }
 
     @Override
@@ -44,6 +51,7 @@ public class AiClient implements IClient, Runnable {
 
     @Override
     public void onConnectedPlayers(Network.ConnectedPlayers connectedPlayers) {
+        this.connectedPlayers = connectedPlayers;
     }
 
     @Override
@@ -72,6 +80,10 @@ public class AiClient implements IClient, Runnable {
 
     @Override
     public void OnYourTurn() {
+        Network.ChatMessageFromClient message = new Network.ChatMessageFromClient();
+        message.to = focusing;
+        message.text = "I'm coming for you :)";
+        gameClient.sendTCP(message);
     }
 
     @Override
@@ -88,7 +100,17 @@ public class AiClient implements IClient, Runnable {
 
     @Override
     public void OnChatMessage(Network.ChatMessage object) {
-        // TODO respond
+
+        if (lastMessage != null && lastMessage.equals(object.message)) {
+            return;
+        }
+
+        lastMessage = object.message;
+
+        Network.ChatMessageFromClient message = new Network.ChatMessageFromClient();
+        message.to = focusing;
+        message.text = "I'm coming for you :)";
+        gameClient.sendTCP(message);
     }
 
     @Override
