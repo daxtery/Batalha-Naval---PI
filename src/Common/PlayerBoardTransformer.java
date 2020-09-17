@@ -85,6 +85,9 @@ public class PlayerBoardTransformer {
                 if (isAPiece(encoded)) {
                     Ship ship = findAllPiecesAndBuildShip(board, toSkip, message, l, c);
                     board.placeShip(ship);
+                    if (encoded.equals(PIECE_ATTACKED_SHIP_DESTROYED_STRING) || encoded.equals(PIECE_ATTACKED_STRING)) {
+                        board.getAttacked(point);
+                    }
                 } else if (encoded.equals(WATER_VISIBLE_STRING)) {
                     board.getAttacked(point);
                 }
