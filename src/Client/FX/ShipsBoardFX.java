@@ -112,8 +112,8 @@ public class ShipsBoardFX extends GraphBoardFX {
     }
 
     public void initShips(PlayerBoard _pb) {
-        pb = _pb;
-        List<Ship> ships = pb.getShips();
+        playerBoard = _pb;
+        List<Ship> ships = playerBoard.getShips();
         for (int i = 0; i < ships.size(); i++) {
             Ship s = ships.get(i);
             //System.out.println(s);
@@ -125,8 +125,8 @@ public class ShipsBoardFX extends GraphBoardFX {
 
     @Override
     public void setPlayerBoard(PlayerBoard playerBoard) {
-        pb = playerBoard;
-        initShips(pb);
+        this.playerBoard = playerBoard;
+        initShips(this.playerBoard);
     }
 
     public ShipFX raycastForShip(double x, double y) {
@@ -137,8 +137,8 @@ public class ShipsBoardFX extends GraphBoardFX {
     }
 
     boolean insideBoard(double x, double y) {
-        final int lines = pb.lines();
-        final int columns = pb.columns();
+        final int lines = playerBoard.lines();
+        final int columns = playerBoard.columns();
 
         return !(x < 0 || x > lines * TileFX.TILE_SIZE || y < 0 || y > columns * TileFX.TILE_SIZE);
     }
@@ -175,13 +175,13 @@ public class ShipsBoardFX extends GraphBoardFX {
     public void computeCanPlacePreview() {
         if (selected != null && selected.ship != null) {
             Ship old = selected.ship;
-            pb.removeShip(old);
-            canPlace = pb.canShipBeHere(preview.ship);
-            pb.placeShip(old);
+            playerBoard.removeShip(old);
+            canPlace = playerBoard.canShipBeHere(preview.ship);
+            playerBoard.placeShip(old);
             return;
         }
 
-        canPlace = pb.canShipBeHere(preview.ship);
+        canPlace = playerBoard.canShipBeHere(preview.ship);
     }
 
     public void select(ShipFX shipFX) {
@@ -222,11 +222,11 @@ public class ShipsBoardFX extends GraphBoardFX {
 
                 if (selected.ship != null) {
                     Ship old = selected.ship;
-                    pb.removeShip(old);
+                    playerBoard.removeShip(old);
                 }
 
                 selected.setShip(ship);
-                pb.placeShip(ship);
+                playerBoard.placeShip(ship);
                 deselectSelected();
             }
             case SECONDARY -> {

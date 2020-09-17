@@ -11,7 +11,7 @@ import util.Point;
 public class GraphBoardFX extends EmptyGraphBoardFX {
 
     TileFX[][] tiles;
-    PlayerBoard pb;
+    PlayerBoard playerBoard;
     Point last;
 
     public GraphBoardFX(int lines, int columns, int _w, int _h) {
@@ -67,17 +67,17 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
 
     public void startTiles(String[][] sent) {
 
-        pb = PlayerBoardTransformer.parse(sent);
-        final int lines = pb.lines();
-        final int columns = pb.columns();
+        playerBoard = PlayerBoardTransformer.parse(sent);
+        final int lines = playerBoard.lines();
+        final int columns = playerBoard.columns();
 
         for (int l = 0; l < lines; l++) {
             for (int c = 0; c < columns; c++) {
-                BoardTile tile = pb.getTileAt(l, c);
+                BoardTile tile = playerBoard.getTileAt(l, c);
                 switch (tile.tileType) {
-                    case Water -> addWaterTileFX(l, c, (WaterTile) pb.getTileAt(l, c));
+                    case Water -> addWaterTileFX(l, c, (WaterTile) playerBoard.getTileAt(l, c));
                     case ShipPiece -> {
-                        ShipPiece sp = (ShipPiece) pb.getTileAt(l, c);
+                        ShipPiece sp = (ShipPiece) playerBoard.getTileAt(l, c);
                         //System.out.println(sp.getShip().getDirection());
                         addShipTileFX(l, c, sp);
                     }
@@ -128,7 +128,7 @@ public class GraphBoardFX extends EmptyGraphBoardFX {
     }
 
     public void setPlayerBoard(PlayerBoard playerBoard) {
-        pb = playerBoard;
+        this.playerBoard = playerBoard;
     }
 
     public void setLast(Point p) {

@@ -11,17 +11,17 @@ public class SelfGraphBoardFX extends GraphBoardFX {
 
     @Override
     public void startTiles(String[][] sent) {
-        pb = PlayerBoardTransformer.parse(sent);
-        final int lines = pb.lines();
-        final int columns = pb.columns();
+        playerBoard = PlayerBoardTransformer.parse(sent);
+        final int lines = playerBoard.lines();
+        final int columns = playerBoard.columns();
 
         for (int l = 0; l < lines; l++) {
             for (int c = 0; c < columns; c++) {
-                BoardTile boardTile = pb.getTileAt(l, c);
+                BoardTile boardTile = playerBoard.getTileAt(l, c);
 
                 switch (boardTile.tileType) {
                     case ShipPiece -> {
-                        ShipPiece sp = (ShipPiece) pb.getTileAt(l, c);
+                        ShipPiece sp = (ShipPiece) playerBoard.getTileAt(l, c);
                         tiles[l][c] = new ShipTileFX(sp.getShip().size(), sp.getIdInsideShip(), l, c, sp.getShip().direction);
                     }
 
