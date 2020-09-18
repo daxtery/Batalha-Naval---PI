@@ -14,7 +14,7 @@ public class GameClient {
 
     public GameClient(IClient clientApplication) {
         this.clientApplication = clientApplication;
-        client = new Client();
+        client = new Client(1000000, 1000000);
         Network.register(client);
 
         client.addListener(new Listener() {

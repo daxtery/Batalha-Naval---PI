@@ -65,6 +65,7 @@ public class App extends Application implements IClient {
     private Stage theStage;
 
     private ConnectedPlayers players;
+    private int ourId;
 
     public static void main(String[] args) {
         launch(args);
@@ -175,17 +176,25 @@ public class App extends Application implements IClient {
 
     @Override
     public void OnCanStart(CanStart canStart) {
-        System.out.println("Can start");
+        System.out.println("OnCanStart");
 
         Platform.runLater(() -> {
+            ourId = players.slot;
+
+            mainGame.setupWithPlayers(players);
             attackScene.setupWithPlayers(players);
             chatScreen.setupWithPlayers(players);
+
+            mainGame.onCanStart(canStart);
             attackScene.onCanStart(canStart);
+
             transitionTo(mainGame);
         });
     }
 
     public void OnWhoseTurn(WhoseTurn whoseTurn) {
+        System.out.println("OnWhoseTurn");
+
         Platform.runLater(() -> mainGame.OnWhoseTurn(whoseTurn));
     }
 
@@ -219,6 +228,8 @@ public class App extends Application implements IClient {
     }
 
     public void OnYourTurn() {
+        System.out.println("OnYourTurn");
+
         Platform.runLater(() -> {
             attackScene.OnYourTurn();
             mainGame.OnYourTurn();
@@ -376,6 +387,10 @@ public class App extends Application implements IClient {
 
     public void onLobbyStartButtonClicked() {
         client.sendTCP(new StartLobby());
+    }
+
+    public int getOurId() {
+        return ourId;
     }
 
     public ConnectedPlayers getPlayers() {

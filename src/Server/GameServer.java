@@ -130,6 +130,8 @@ public class GameServer {
             case InGame -> {
                 // TODO
                 System.err.println("Boy left during game :(");
+                // TODO
+                lobby.transitionToLobby();
             }
             case SettingShips -> {
                 handleLeavingWhileShips(new Pair<>(connection, lobby.getSlotOf(connection).orElseThrow()));
@@ -178,12 +180,6 @@ public class GameServer {
 
             sendConnections();
 
-            WhoseTurn whoseTurn = new WhoseTurn();
-            whoseTurn.name = lobby.participants[0].name;
-            server.sendToAllTCP(whoseTurn);
-
-            lobby.participants[0].connection.sendTCP(new YourTurn());
-
             for (int i = 0; i < lobby.playersInLobby(); i++) {
                 final int slot = i;
 
@@ -206,6 +202,12 @@ public class GameServer {
 
                 lobby.participants[i].connection.sendTCP(canStart);
             }
+
+            WhoseTurn whoseTurn = new WhoseTurn();
+            whoseTurn.index = 0;
+            server.sendToAllTCP(whoseTurn);
+
+            lobby.participants[0].connection.sendTCP(new YourTurn());
         }
     }
 
@@ -235,8 +237,6 @@ public class GameServer {
         AttackResult result = attackedBoard.getAttacked(a.l, a.c);
 
         String[][] attackedBoardString = PlayerBoardTransformer.transform(attackedBoard);
-
-        System.out.println(Arrays.deepToString(attackedBoardString));
 
         AnAttackResponse response = new AnAttackResponse();
         response.attackResult = result;
@@ -283,7 +283,7 @@ public class GameServer {
         final LobbyParticipant nextParticipant = lobby.participants[currentPlayer];
 
         WhoseTurn whoseTurn = new WhoseTurn();
-        whoseTurn.name = nextParticipant.name;
+        whoseTurn.index = currentPlayer;
 
         sendToAllExcept(currentPlayer, whoseTurn);
         nextParticipant.connection.sendTCP(new YourTurn());

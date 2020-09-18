@@ -1,0 +1,12 @@
+.scroll-pane{
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > * {
+    -fx-background-color: transparent;
+}
+
+#k {
+    /*-fx-border-color: red;*/
+    /*-fx-background-color: rgba(102,67,67,25);*/
+}

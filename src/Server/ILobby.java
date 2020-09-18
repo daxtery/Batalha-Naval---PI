@@ -15,5 +15,4 @@ public interface ILobby {
     void removeParticipant(int slot);
     Optional<Integer> getSlotOf(Connection connection);
     void transitionToLobby();
-
 }

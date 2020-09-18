@@ -86,7 +86,7 @@ public class Network {
     }
 
     public static class WhoseTurn {
-        public String name;
+        public int index;
     }
 
     public static class YourTurn {
