@@ -28,6 +28,8 @@ public class MyAI {
         List<Point> positions = playerBoard.getAvailable();
 
         if (possibleMoves.size() > 0) {
+            possibleMoves.remove(lastMove);
+
             if (!hitShip) {
                 possibleMoves.removeIf(move -> move.direction == lastMove.direction);
                 return;
@@ -67,6 +69,10 @@ public class MyAI {
         }
 
         int index = new Random().nextInt(possibleMoves.size());
-        return possibleMoves.remove(index);
+        return possibleMoves.get(index);
+    }
+
+    public List<AiMove> getPossibleMoves() {
+        return possibleMoves;
     }
 }
