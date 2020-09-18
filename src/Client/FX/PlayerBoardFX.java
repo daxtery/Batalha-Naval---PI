@@ -16,15 +16,16 @@ public class PlayerBoardFX extends GridPane {
 
         for (int j = 0; j < lines; j++) {
             for (int k = 0; k < columns; k++) {
-                Tile tile = new Tile(new Point(j, k));
-                add(tile, j, k);
-                tiles[j][k] = tile;
-                Point point = new Point(k, j);
-                tiles[j][k].setOnMouseClicked(clicked -> {
+                Point point = new Point(j, k);
+                Tile tile = new Tile(point);
+                add(tile, k, j);
+                tile.setOnMouseClicked(clicked -> {
                     if (handler != null) {
                         handler.handle(point);
                     }
                 });
+
+                tiles[j][k] = tile;
             }
         }
     }
@@ -32,7 +33,7 @@ public class PlayerBoardFX extends GridPane {
     public void setBoard(PlayerBoard board) {
         for (int j = 0; j < tiles.length; j++) {
             for (int k = 0; k < tiles[0].length; k++) {
-                tiles[j][k].update(!isEnemy, board.boardTiles[k][j]);
+                tiles[j][k].update(!isEnemy, board.boardTiles[j][k]);
             }
         }
     }
