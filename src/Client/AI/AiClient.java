@@ -119,7 +119,13 @@ public class AiClient implements IClient, Runnable {
         attack.c = move.point.y;
 
         try {
-            Thread.sleep(1500);
+            Network.ChatMessageFromClient chatMessageFromClient = new Network.ChatMessageFromClient();
+            chatMessageFromClient.text = "Gonna attack you with " + move + " out of: " + brain.getPossibleMoves().toString() + "\n";
+            chatMessageFromClient.to = focusing;
+
+            gameClient.sendTCP(chatMessageFromClient);
+
+            Thread.sleep(500);
             gameClient.sendTCP(attack);
         } catch (InterruptedException e) {
             e.printStackTrace();
