@@ -20,7 +20,11 @@ public class PlayerBoardFX extends GridPane {
                 add(tile, j, k);
                 tiles[j][k] = tile;
                 Point point = new Point(k, j);
-                tiles[j][k].setOnMouseClicked(clicked -> handler.handle(point));
+                tiles[j][k].setOnMouseClicked(clicked -> {
+                    if (handler != null) {
+                        handler.handle(point);
+                    }
+                });
             }
         }
     }
