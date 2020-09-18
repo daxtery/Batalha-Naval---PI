@@ -185,8 +185,6 @@ public class App extends Application implements IClient {
     }
 
     public void OnWhoseTurn(WhoseTurn whoseTurn) {
-        System.out.println("OnWhoseTurn");
-
         Platform.runLater(() -> mainGame.OnWhoseTurn(whoseTurn));
     }
 
@@ -207,7 +205,6 @@ public class App extends Application implements IClient {
 
     public void OnEnemyBoardToPaint(EnemyBoardToPaint board) {
         Platform.runLater(() -> {
-            System.out.println("ENEMY BOARD TO PAINT WITH INDEX " + board.id);
             mainGame.onEnemyBoardToPaint(board);
         });
     }
@@ -220,8 +217,6 @@ public class App extends Application implements IClient {
     }
 
     public void OnYourTurn() {
-        System.out.println("OnYourTurn");
-
         Platform.runLater(() -> {
             mainGame.OnYourTurn();
         });
