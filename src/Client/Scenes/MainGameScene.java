@@ -20,7 +20,6 @@ public class MainGameScene extends BaseGameScene {
 
     private final Group canvasWrapper;
 
-    private final Map<Integer, PlayerBoardFX> otherBoards;
     private final Map<Integer, PlayerBoardFX> tabBoards;
 
     private final TurnQueue turnQueue;
@@ -45,7 +44,6 @@ public class MainGameScene extends BaseGameScene {
         turnQueue.setAlignment(Pos.CENTER);
         turnQueue.setSpacing(25);
 
-        otherBoards = new HashMap<>();
         tabBoards = new HashMap<>();
 
         chats = new HashMap<>();
@@ -54,9 +52,6 @@ public class MainGameScene extends BaseGameScene {
 
         tabs = new TabPane();
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        Tab allTab = new Tab("All");
-        tabs.getTabs().add(allTab);
 
         HBox.setMargin(canvasWrapper, new Insets(10, 10, 50, 50));
         HBox.setMargin(turnQueue, new Insets(10, 10, 50, 50));
@@ -106,37 +101,7 @@ public class MainGameScene extends BaseGameScene {
 
     public void onCanStart(Network.CanStart canStart) {
         Network.ConnectedPlayers connected = app.getPlayers();
-
-        TilePane allPane = new TilePane();
-        allPane.setVgap(10);
-        allPane.setHgap(10);
-
-        ScrollPane allPaneWrapper = new ScrollPane();
-        allPaneWrapper.setContent(allPane);
-
         String[][][] boards = canStart.boards;
-
-        for (int i = 0, boardsLength = boards.length; i < boardsLength; i++) {
-            String[][] boardString = boards[i];
-            int index = canStart.indices[i];
-
-            Label name = new Label(connected.participants[index].name);
-
-            PlayerBoardFX board = new PlayerBoardFX(boardString.length, boardString[0].length, true);
-            board.setBoard(PlayerBoardTransformer.parse(boardString));
-
-            otherBoards.put(index, board);
-
-            BorderPane borderPane = new BorderPane();
-            borderPane.setCenter(board);
-            borderPane.setTop(name);
-            borderPane.setStyle("-fx-border-color: black");
-
-            allPane.getChildren().add(borderPane);
-        }
-
-        Tab allTab = tabs.getTabs().get(0);
-        allTab.setContent(allPaneWrapper);
 
         for (int i = 0, boardsLength = boards.length; i < boardsLength; i++) {
             String[][] boardString = boards[i];
@@ -180,26 +145,22 @@ public class MainGameScene extends BaseGameScene {
 
     public void onEnemyBoardToPaint(Network.EnemyBoardToPaint board) {
         PlayerBoard playerBoard = PlayerBoardTransformer.parse(board.newAttackedBoard);
-        otherBoards.get(board.id).setBoard(playerBoard);
         tabBoards.get(board.id).setBoard(playerBoard);
     }
 
     public void OnAttackResponse(Network.AnAttackResponse attackResponse) {
         PlayerBoard playerBoard = PlayerBoardTransformer.parse(attackResponse.newAttackedBoard);
-        otherBoards.get(attackResponse.attacked).setBoard(playerBoard);
         tabBoards.get(attackResponse.attacked).setBoard(playerBoard);
     }
 
     public void onPlayerDied(Network.PlayerDied playerDied) {
-        turnQueue.removePlayer(playerDied.who);
+        turnQueue.playerDied(playerDied.who);
 
         PlayerBoardFX boardFX = tabBoards.get(playerDied.who);
         boardFX.setOnLocationAttacked(l -> {
         });
-        boardFX.setStyle("-fx-border-color: red");
 
-        boardFX = otherBoards.get(playerDied.who);
-        boardFX.setStyle("-fx-border-color: red");
+        boardFX.setStyle("-fx-background-color: red");
     }
 
     public void onChatMessage(Network.ChatMessage chatMessage) {
@@ -209,12 +170,22 @@ public class MainGameScene extends BaseGameScene {
     private static class TurnQueue extends HBox {
         static final Border highlighted = new Border(
                 new BorderStroke(
+                        Color.BLUE,
+                        BorderStrokeStyle.SOLID,
+                        CornerRadii.EMPTY,
+                        BorderStroke.DEFAULT_WIDTHS
+                )
+        );
+
+        static final Border dead = new Border(
+                new BorderStroke(
                         Color.RED,
                         BorderStrokeStyle.SOLID,
                         CornerRadii.EMPTY,
                         BorderStroke.DEFAULT_WIDTHS
                 )
         );
+
         private final Map<Integer, StackPane> turnPanes;
         private StackPane previousTurnPane;
 
@@ -237,6 +208,10 @@ public class MainGameScene extends BaseGameScene {
         void removePlayer(int slot) {
             StackPane pane = turnPanes.remove(slot);
             getChildren().remove(pane);
+        }
+
+        void playerDied(int slot) {
+            turnPanes.get(slot).setBorder(dead);
         }
 
         void highlightPlayer(int slot) {

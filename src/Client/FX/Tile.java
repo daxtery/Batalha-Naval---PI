@@ -6,8 +6,8 @@ import Common.WaterTile;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import util.Point;
 
 public class Tile extends Pane {
@@ -17,13 +17,19 @@ public class Tile extends Pane {
     private final ImageView pieceView;
     private final ImageView attackedView;
 
+    static final Border border = new Border(
+            new BorderStroke(
+                    Color.BLACK,
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    BorderStroke.DEFAULT_WIDTHS
+            )
+    );
+
     public Tile(Point point) {
         super();
 
         Pane layout = new Pane();
-
-        Label label = new Label(point.toString());
-        label.setAlignment(Pos.CENTER);
 
         waterBaseView = new ImageView();
         BorderPane waterWrapper = new BorderPane(waterBaseView);
@@ -37,10 +43,19 @@ public class Tile extends Pane {
         fogView = new ImageView();
         BorderPane fogWrapper = new BorderPane(fogView);
 
+        Label label = new Label(point.toString());
+        label.layoutXProperty().bind(layout.widthProperty().subtract(label.widthProperty()).divide(2));
+        label.layoutXProperty().bind(layout.widthProperty().subtract(label.widthProperty()).divide(2));
+
+        label.layoutYProperty().bind(layout.heightProperty().subtract(label.heightProperty()).divide(2));
+        label.layoutYProperty().bind(layout.heightProperty().subtract(label.heightProperty()).divide(2));
+
+        label.setTextFill(Color.WHITE);
+
         layout.getChildren().addAll(waterWrapper, pieceWrapper, attackedWrapper, fogWrapper, label);
         getChildren().add(layout);
 
-        setStyle("-fx-border-color: black; -fx-border-style: solid; -fx-border-width: 1;");
+        setBorder(border);
     }
 
     public void update(boolean forSelf, BoardTile boardTile) {
