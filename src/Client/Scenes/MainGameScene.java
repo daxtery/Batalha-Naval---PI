@@ -4,6 +4,7 @@ import Client.FX.PlayerBoardFX;
 import Common.*;
 import Client.App;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -18,11 +19,15 @@ import java.util.Map;
 public class MainGameScene extends BaseGameScene {
 
     private final Group canvasWrapper;
-    private final Map<Integer, PlayerBoardFX> otherBoardsInteractive;
+
     private final Map<Integer, PlayerBoardFX> otherBoards;
+    private final Map<Integer, PlayerBoardFX> tabBoards;
+
     private final TurnQueue turnQueue;
-    private final Map<Integer, TextArea> conversations;
+    private final Map<Integer, Chat> chats;
+
     private final TabPane tabs;
+
     private PlayerBoardFX myBoard;
     private boolean allowAttacks;
 
@@ -37,17 +42,20 @@ public class MainGameScene extends BaseGameScene {
         canvasWrapper = new Group();
 
         turnQueue = new TurnQueue();
+        turnQueue.setAlignment(Pos.CENTER);
         turnQueue.setSpacing(25);
 
-        otherBoardsInteractive = new HashMap<>();
         otherBoards = new HashMap<>();
-        conversations = new HashMap<>();
+        tabBoards = new HashMap<>();
+
+        chats = new HashMap<>();
 
         getStylesheets().add("css/mainGame.css");
 
         tabs = new TabPane();
+        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        Tab allTab = new Tab("All", new Label("All"));
+        Tab allTab = new Tab("All");
         tabs.getTabs().add(allTab);
 
         HBox.setMargin(canvasWrapper, new Insets(10, 10, 50, 50));
@@ -56,11 +64,8 @@ public class MainGameScene extends BaseGameScene {
 
         hBox.getChildren().addAll(canvasWrapper, turnQueue, tabs);
 
-        Pane chat = new Pane();
-        chat.setStyle("-fx-background:rgb(120,26,155); -fx-border-color: green");
-
+        root.setTop(turnQueue);
         root.setCenter(hBox);
-        root.setBottom(chat);
     }
 
     public void setPlayerBoard(PlayerBoard playerBoard) {
@@ -72,19 +77,15 @@ public class MainGameScene extends BaseGameScene {
 
     @Override
     public void OnSceneSet() {
-//        mGSelfBoard.startAnimating();
     }
 
     @Override
     public void OnSceneUnset() {
-//        mGSelfBoard.stopAnimating();
     }
 
     public void OnWhoseTurn(Network.WhoseTurn whoseTurn) {
-
-
         turnQueue.highlightPlayer(whoseTurn.index);
-
+        allowAttacks = false;
     }
 
     public void OnYourBoardToPaint(Network.YourBoardToPaint toPaint) {
@@ -107,7 +108,6 @@ public class MainGameScene extends BaseGameScene {
         Network.ConnectedPlayers connected = app.getPlayers();
 
         TilePane allPane = new TilePane();
-        allPane.setId("k");
         allPane.setVgap(10);
         allPane.setHgap(10);
 
@@ -121,6 +121,7 @@ public class MainGameScene extends BaseGameScene {
             int index = canStart.indices[i];
 
             Label name = new Label(connected.participants[index].name);
+
             PlayerBoardFX board = new PlayerBoardFX(boardString.length, boardString[0].length, true);
             board.setBoard(PlayerBoardTransformer.parse(boardString));
 
@@ -129,8 +130,8 @@ public class MainGameScene extends BaseGameScene {
             BorderPane borderPane = new BorderPane();
             borderPane.setCenter(board);
             borderPane.setTop(name);
-
             borderPane.setStyle("-fx-border-color: black");
+
             allPane.getChildren().add(borderPane);
         }
 
@@ -141,7 +142,10 @@ public class MainGameScene extends BaseGameScene {
             String[][] boardString = boards[i];
             int index = canStart.indices[i];
 
-            FlowPane flowPane = new FlowPane();
+            Tab tab = new Tab(connected.participants[index].name);
+            tabs.getTabs().add(tab);
+
+            HBox tabHBoxContent = new HBox();
 
             PlayerBoardFX board = new PlayerBoardFX(boardString.length, boardString[0].length, true);
             board.setBoard(PlayerBoardTransformer.parse(boardString));
@@ -162,60 +166,47 @@ public class MainGameScene extends BaseGameScene {
                 app.CommunicateAttackAttempt(anAttackAttempt);
             });
 
-            otherBoardsInteractive.put(index, board);
+            tabBoards.put(index, board);
 
-            Tab tab = new Tab(connected.participants[index].name, new Label(connected.participants[index].name));
-            tabs.getTabs().add(tab);
+            Chat chat = new Chat(this.app, index);
+            chats.put(index, chat);
 
-            VBox chat = new VBox();
+            tabHBoxContent.setSpacing(25);
+            tabHBoxContent.getChildren().addAll(board, chat);
 
-            TextArea conversation = new TextArea();
-            conversation.setEditable(false);
-            conversations.put(index, conversation);
-
-            TextArea message = new TextArea();
-            message.setEditable(true);
-            message.setOnKeyPressed(k -> {
-                if (k.getCode() == KeyCode.ENTER) {
-                    app.SendMessage(index, message.getText());
-                    conversation.appendText("You: " + message.getText());
-                    message.clear();
-                }
-            });
-
-            Label label = new Label("Send new message: ");
-            chat.getChildren().addAll(conversation, label, message);
-
-            flowPane.setHgap(25);
-
-            flowPane.getChildren().addAll(board, chat);
-            tab.setContent(flowPane);
+            tab.setContent(tabHBoxContent);
         }
     }
 
     public void onEnemyBoardToPaint(Network.EnemyBoardToPaint board) {
         PlayerBoard playerBoard = PlayerBoardTransformer.parse(board.newAttackedBoard);
-        otherBoardsInteractive.get(board.id).setBoard(playerBoard);
         otherBoards.get(board.id).setBoard(playerBoard);
+        tabBoards.get(board.id).setBoard(playerBoard);
     }
 
     public void OnAttackResponse(Network.AnAttackResponse attackResponse) {
         PlayerBoard playerBoard = PlayerBoardTransformer.parse(attackResponse.newAttackedBoard);
-
-        otherBoardsInteractive.get(attackResponse.attacked).setBoard(playerBoard);
         otherBoards.get(attackResponse.attacked).setBoard(playerBoard);
+        tabBoards.get(attackResponse.attacked).setBoard(playerBoard);
     }
 
     public void onPlayerDied(Network.PlayerDied playerDied) {
         turnQueue.removePlayer(playerDied.who);
+
+        PlayerBoardFX boardFX = tabBoards.get(playerDied.who);
+        boardFX.setOnLocationAttacked(l -> {
+        });
+        boardFX.setStyle("-fx-border-color: red");
+
+        boardFX = otherBoards.get(playerDied.who);
+        boardFX.setStyle("-fx-border-color: red");
     }
 
     public void onChatMessage(Network.ChatMessage chatMessage) {
-        TextArea conversation = conversations.get(chatMessage.saidIt);
-        conversation.appendText(chatMessage.message);
+        chats.get(chatMessage.saidIt).appendToConversation(chatMessage.message);
     }
 
-    private static class TurnQueue extends VBox {
+    private static class TurnQueue extends HBox {
         static final Border highlighted = new Border(
                 new BorderStroke(
                         Color.RED,
@@ -259,4 +250,35 @@ public class MainGameScene extends BaseGameScene {
             previousTurnPane = turnPane;
         }
     }
+
+    private static class Chat extends VBox {
+
+        private final TextArea conversation;
+
+        public Chat(App app, int slot) {
+            conversation = new TextArea();
+            conversation.setEditable(false);
+
+            TextArea message = new TextArea();
+            message.setEditable(true);
+
+            message.setOnKeyPressed(k -> {
+                if (k.getCode() == KeyCode.ENTER) {
+                    app.SendMessage(slot, message.getText());
+                    conversation.appendText("You: " + message.getText());
+                    message.clear();
+                }
+            });
+
+            Label label = new Label("Send new message: ");
+            label.setTextFill(Color.WHITE);
+
+            getChildren().addAll(conversation, label, message);
+        }
+
+        public void appendToConversation(String message) {
+            conversation.appendText(message);
+        }
+    }
+
 }
