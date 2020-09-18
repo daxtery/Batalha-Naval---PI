@@ -75,20 +75,16 @@ public class PlayerBoardTransformer {
 
                 Point point = new Point(l, c);
 
-                if (toSkip.contains(point)) {
-                    //already found it
-                    continue;
-                }
-
                 String encoded = message[l][c];
 
-                if (isAPiece(encoded)) {
+                if (isAPiece(encoded) && !toSkip.contains(point)) {
                     Ship ship = findAllPiecesAndBuildShip(board, toSkip, message, l, c);
                     board.placeShip(ship);
-                    if (encoded.equals(PIECE_ATTACKED_SHIP_DESTROYED_STRING) || encoded.equals(PIECE_ATTACKED_STRING)) {
-                        board.getAttacked(point);
-                    }
-                } else if (encoded.equals(WATER_VISIBLE_STRING)) {
+                }
+
+                if (encoded.equals(WATER_VISIBLE_STRING)
+                        || encoded.equals(PIECE_ATTACKED_STRING)
+                        || encoded.equals(PIECE_ATTACKED_SHIP_DESTROYED_STRING)) {
                     board.getAttacked(point);
                 }
             }
