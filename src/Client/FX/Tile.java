@@ -2,9 +2,9 @@ package Client.FX;
 
 import Common.BoardTile;
 import Common.ShipPiece;
+import Common.WaterTile;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -12,70 +12,90 @@ import util.Point;
 
 public class Tile extends Pane {
 
-    Pane layout;
-    ImageView base;
+    private final ImageView fogView;
+    private final ImageView waterBaseView;
+    private final ImageView pieceView;
+    private final ImageView attackedView;
 
     public Tile(Point point) {
         super();
-        layout = new Pane();
+
+        Pane layout = new Pane();
 
         Label label = new Label(point.toString());
         label.setAlignment(Pos.CENTER);
 
-        base = new ImageView("images/water.png");
+        waterBaseView = new ImageView();
+        BorderPane waterWrapper = new BorderPane(waterBaseView);
 
-        BorderPane imageViewWrapper = new BorderPane(base);
+        pieceView = new ImageView();
+        BorderPane pieceWrapper = new BorderPane(pieceView);
 
-        layout.getChildren().addAll(imageViewWrapper, label);
+        attackedView = new ImageView();
+        BorderPane attackedWrapper = new BorderPane(attackedView);
 
-        imageViewWrapper.setStyle("-fx-border-color: black; -fx-border-style: solid; -fx-border-width: 1;");
+        fogView = new ImageView();
+        BorderPane fogWrapper = new BorderPane(fogView);
 
+        layout.getChildren().addAll(waterWrapper, pieceWrapper, attackedWrapper, fogWrapper, label);
         getChildren().add(layout);
+
+        setStyle("-fx-border-color: black; -fx-border-style: solid; -fx-border-width: 1;");
     }
 
-    public void update(boolean isEnemy, BoardTile boardTile) {
-        if (!boardTile.visible) {
-            base.setImage(new Image("images/fog.png"));
-            return;
-        }
-
-        var newImage = switch (boardTile.tileType){
-            case Water -> new Image("images/water_d.png");
-            case ShipPiece -> {
+    public void update(boolean forSelf, BoardTile boardTile) {
+        switch (boardTile.tileType) {
+            case Water -> {
+                WaterTile waterTile = (WaterTile) boardTile;
+                switch (waterTile.status()) {
+                    case Visible -> {
+                        waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
+                        fogView.setImage(null);
+                    }
+                    case NotVisible -> {
+                        if (forSelf) {
+                            waterBaseView.setImage(WaterTileResources.IMAGE_TO_SELF);
+                            fogView.setImage(null);
+                        } else {
+                            fogView.setImage(TileResources.imageOthersHidden);
+                            waterBaseView.setImage(null);
+                        }
+                    }
+                }
 
             }
-        };
 
-        base.setImage(newImage);
-    }
+            case ShipPiece -> {
+                ShipPiece shipPiece = (ShipPiece) boardTile;
 
-    Image imageForShipPiece(ShipPiece shipPiece){
-
-        switch (shipPiece.getShip().shipType){
-            case One:
-                imageToSelf = giveImageBasedOnDirection(ONE_ONE);
-                break;
-            case Two:
-                switch (id) {
-                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_TWO);
-                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_TWO);
+                switch (shipPiece.status()) {
+                    case AttackedShipDestroyed -> {
+                        fogView.setImage(null);
+                        waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
+                        pieceView.setImage(ShipTileResources.giveRightImageToShow(shipPiece));
+                        attackedView.setImage(ShipTileResources.DESTROYED);
+                    }
+                    case Attacked -> {
+                        fogView.setImage(null);
+                        waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
+                        pieceView.setImage(forSelf ?
+                                ShipTileResources.giveRightImageToShow(shipPiece) :
+                                ShipTileResources.ATTACKED);
+                        attackedView.setImage(ShipTileResources.ATTACKED);
+                    }
+                    case NotAttacked -> {
+                        if (forSelf) {
+                            fogView.setImage(null);
+                            waterBaseView.setImage(WaterTileResources.IMAGE_TO_SELF);
+                            pieceView.setImage(ShipTileResources.giveRightImageToShow(shipPiece));
+                        } else {
+                            waterBaseView.setImage(null);
+                            fogView.setImage(TileResources.imageOthersHidden);
+                            pieceView.setImage(null);
+                        }
+                    }
                 }
-                break;
-            case Three:
-                switch (id) {
-                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_THREE);
-                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_THREE);
-                    case 2 -> imageToSelf = giveImageBasedOnDirection(THREE_THREE);
-                }
-                break;
-            case Four:
-                switch (id) {
-                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_FOUR);
-                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_FOUR);
-                    case 2 -> imageToSelf = giveImageBasedOnDirection(THREE_FOUR);
-                    case 3 -> imageToSelf = giveImageBasedOnDirection(FOUR_FOUR);
-                }
+            }
         }
-        setImageToDraw(imageToSelf);
     }
 }

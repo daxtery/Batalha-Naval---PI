@@ -2,8 +2,6 @@ package Common;
 
 import util.Point;
 
-enum ShipPieceStatus {NotAttacked, Attacked, AttackedShipDestroyed}
-
 public class ShipPiece extends BoardTile {
 
     //WHAT PART OF THE SHIP
@@ -15,7 +13,7 @@ public class ShipPiece extends BoardTile {
         sId = i;
     }
 
-    ShipPieceStatus status() {
+    public ShipPieceStatus status() {
         return visible ?
                 ship.isDestroyed() ?
                         ShipPieceStatus.AttackedShipDestroyed

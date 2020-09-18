@@ -241,6 +241,7 @@ public class GameServer {
         AnAttackResponse response = new AnAttackResponse();
         response.attackResult = result;
         response.newAttackedBoard = attackedBoardString;
+        response.attacked = a.toAttackID;
 
         connection.sendTCP(response);
 

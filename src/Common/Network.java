@@ -79,6 +79,7 @@ public class Network {
     public static class AnAttackResponse {
         public String[][] newAttackedBoard;
         public AttackResult attackResult;
+        public int attacked;
     }
 
     public static class YourBoardToPaint {

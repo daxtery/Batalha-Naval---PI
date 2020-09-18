@@ -2,8 +2,6 @@ package Common;
 
 import util.Point;
 
-enum WaterTileStatus { Visible, NotVisible }
-
 public class WaterTile extends BoardTile {
 
     WaterTile(int _x, int _y){

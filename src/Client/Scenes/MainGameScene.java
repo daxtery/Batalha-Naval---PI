@@ -1,10 +1,8 @@
 package Client.Scenes;
 
 import Client.FX.PlayerBoardFX;
-import Client.FX.Tile;
 import Common.*;
 import Client.App;
-import Client.FX.SelfGraphBoardFX;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.control.*;
@@ -13,30 +11,20 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import util.Point;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;
-import static Common.PlayerBoardConstants.DEFAULT_LINES;
-
 public class MainGameScene extends BaseGameScene {
 
-    static final Border highlighted = new Border(
-            new BorderStroke(
-                    Color.RED,
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii.EMPTY,
-                    BorderStroke.DEFAULT_WIDTHS
-            )
-    );
-
-    private final SelfGraphBoardFX mGSelfBoard;
-    private final VBox turnQueue;
-    private final Map<Integer, StackPane> turnPanes;
+    private final Group canvasWrapper;
+    private final Map<Integer, PlayerBoardFX> otherBoardsInteractive;
+    private final Map<Integer, PlayerBoardFX> otherBoards;
+    private final TurnQueue turnQueue;
+    private final Map<Integer, TextArea> conversations;
     private final TabPane tabs;
-    private StackPane previousTurnPane;
+    private PlayerBoardFX myBoard;
+    private boolean allowAttacks;
 
     public MainGameScene(App app) {
         super(app, new BorderPane());
@@ -46,20 +34,14 @@ public class MainGameScene extends BaseGameScene {
 
         HBox hBox = new HBox();
 
-        Group canvasWrapper = new Group();
+        canvasWrapper = new Group();
 
-        mGSelfBoard = new SelfGraphBoardFX(DEFAULT_LINES, DEFAULT_COLUMNS, 500, 500);
-
-        mGSelfBoard.startTiles(
-                PlayerBoardTransformer.transform(PlayerBoardFactory.getRandomPlayerBoard())
-        );
-
-        canvasWrapper.getChildren().add(mGSelfBoard);
-
-        turnQueue = new VBox();
+        turnQueue = new TurnQueue();
         turnQueue.setSpacing(25);
 
-        turnPanes = new HashMap<>();
+        otherBoardsInteractive = new HashMap<>();
+        otherBoards = new HashMap<>();
+        conversations = new HashMap<>();
 
         getStylesheets().add("css/mainGame.css");
 
@@ -82,65 +64,42 @@ public class MainGameScene extends BaseGameScene {
     }
 
     public void setPlayerBoard(PlayerBoard playerBoard) {
-        mGSelfBoard.setPlayerBoard(playerBoard);
-        String[][] message = PlayerBoardTransformer.transform(playerBoard);
-        mGSelfBoard.startTiles(message);
-        mGSelfBoard.updateTiles(message);
+        myBoard = new PlayerBoardFX(playerBoard.lines(), playerBoard.columns(), false);
+        myBoard.setBoard(playerBoard);
+
+        canvasWrapper.getChildren().add(myBoard);
     }
 
     @Override
     public void OnSceneSet() {
-        mGSelfBoard.startAnimating();
+//        mGSelfBoard.startAnimating();
     }
 
     @Override
     public void OnSceneUnset() {
-        mGSelfBoard.stopAnimating();
+//        mGSelfBoard.stopAnimating();
     }
 
     public void OnWhoseTurn(Network.WhoseTurn whoseTurn) {
 
-        if (previousTurnPane != null) {
-            previousTurnPane.setBorder(Border.EMPTY);
-        }
 
-        StackPane turnPane = turnPanes.get(whoseTurn.index);
-        turnPane.setBorder(highlighted);
+        turnQueue.highlightPlayer(whoseTurn.index);
 
-        previousTurnPane = turnPane;
     }
 
     public void OnYourBoardToPaint(Network.YourBoardToPaint toPaint) {
-        mGSelfBoard.updateTiles((toPaint).board);
+        myBoard.setBoard(PlayerBoardTransformer.parse(toPaint.board));
     }
 
     public void OnYourTurn() {
-
-        if (previousTurnPane != null) {
-            previousTurnPane.setBorder(Border.EMPTY);
-        }
-
-        StackPane turnPane = turnPanes.get(app.getPlayers().slot);
-        turnPane.setBorder(highlighted);
-
-        previousTurnPane = turnPane;
+        turnQueue.highlightPlayer(app.getPlayers().slot);
+        allowAttacks = true;
     }
 
     public void setupWithPlayers(Network.ConnectedPlayers players) {
-
         Network.Participant[] participants = players.participants;
         for (int i = 0, participantsLength = participants.length; i < participantsLength; i++) {
-            Network.Participant participant = participants[i];
-
-            StackPane stackPane = new StackPane();
-            Text text = new Text(participant.name);
-            text.setTextAlignment(TextAlignment.JUSTIFY);
-            text.setFill(Color.WHITE);
-
-            stackPane.getChildren().addAll(text);
-
-            turnPanes.put(i, stackPane);
-            turnQueue.getChildren().add(stackPane);
+            turnQueue.addPlayer(i, participants[i]);
         }
     }
 
@@ -163,6 +122,9 @@ public class MainGameScene extends BaseGameScene {
 
             Label name = new Label(connected.participants[index].name);
             PlayerBoardFX board = new PlayerBoardFX(boardString.length, boardString[0].length, true);
+            board.setBoard(PlayerBoardTransformer.parse(boardString));
+
+            otherBoards.put(index, board);
 
             BorderPane borderPane = new BorderPane();
             borderPane.setCenter(board);
@@ -182,6 +144,25 @@ public class MainGameScene extends BaseGameScene {
             FlowPane flowPane = new FlowPane();
 
             PlayerBoardFX board = new PlayerBoardFX(boardString.length, boardString[0].length, true);
+            board.setBoard(PlayerBoardTransformer.parse(boardString));
+            board.setOnLocationAttacked(p -> {
+                if (!allowAttacks) {
+                    return;
+                }
+
+                allowAttacks = false;
+
+                Network.AnAttackAttempt anAttackAttempt = new Network.AnAttackAttempt();
+
+                anAttackAttempt.l = p.x;
+                anAttackAttempt.c = p.y;
+
+                anAttackAttempt.toAttackID = index;
+
+                app.CommunicateAttackAttempt(anAttackAttempt);
+            });
+
+            otherBoardsInteractive.put(index, board);
 
             Tab tab = new Tab(connected.participants[index].name, new Label(connected.participants[index].name));
             tabs.getTabs().add(tab);
@@ -190,6 +171,7 @@ public class MainGameScene extends BaseGameScene {
 
             TextArea conversation = new TextArea();
             conversation.setEditable(false);
+            conversations.put(index, conversation);
 
             TextArea message = new TextArea();
             message.setEditable(true);
@@ -211,4 +193,70 @@ public class MainGameScene extends BaseGameScene {
         }
     }
 
+    public void onEnemyBoardToPaint(Network.EnemyBoardToPaint board) {
+        PlayerBoard playerBoard = PlayerBoardTransformer.parse(board.newAttackedBoard);
+        otherBoardsInteractive.get(board.id).setBoard(playerBoard);
+        otherBoards.get(board.id).setBoard(playerBoard);
+    }
+
+    public void OnAttackResponse(Network.AnAttackResponse attackResponse) {
+        PlayerBoard playerBoard = PlayerBoardTransformer.parse(attackResponse.newAttackedBoard);
+
+        otherBoardsInteractive.get(attackResponse.attacked).setBoard(playerBoard);
+        otherBoards.get(attackResponse.attacked).setBoard(playerBoard);
+    }
+
+    public void onPlayerDied(Network.PlayerDied playerDied) {
+        turnQueue.removePlayer(playerDied.who);
+    }
+
+    public void onChatMessage(Network.ChatMessage chatMessage) {
+        TextArea conversation = conversations.get(chatMessage.saidIt);
+        conversation.appendText(chatMessage.message);
+    }
+
+    private static class TurnQueue extends VBox {
+        static final Border highlighted = new Border(
+                new BorderStroke(
+                        Color.RED,
+                        BorderStrokeStyle.SOLID,
+                        CornerRadii.EMPTY,
+                        BorderStroke.DEFAULT_WIDTHS
+                )
+        );
+        private final Map<Integer, StackPane> turnPanes;
+        private StackPane previousTurnPane;
+
+        private TurnQueue() {
+            turnPanes = new HashMap<>();
+        }
+
+        void addPlayer(int slot, Network.Participant participant) {
+            StackPane stackPane = new StackPane();
+            Text text = new Text(participant.name);
+            text.setTextAlignment(TextAlignment.JUSTIFY);
+            text.setFill(Color.WHITE);
+
+            stackPane.getChildren().addAll(text);
+
+            turnPanes.put(slot, stackPane);
+            getChildren().add(stackPane);
+        }
+
+        void removePlayer(int slot) {
+            StackPane pane = turnPanes.remove(slot);
+            getChildren().remove(pane);
+        }
+
+        void highlightPlayer(int slot) {
+            if (previousTurnPane != null) {
+                previousTurnPane.setBorder(Border.EMPTY);
+            }
+
+            StackPane turnPane = turnPanes.get(slot);
+            turnPane.setBorder(highlighted);
+
+            previousTurnPane = turnPane;
+        }
+    }
 }

@@ -57,9 +57,7 @@ public class App extends Application implements IClient {
     private MainMenuScene mainMenu;
     private MainGameScene mainGame;
     private SetShipsScene setShips;
-    private AttackScene attackScene;
     private Scene wonScene;
-    private ChatScene chatScreen;
     private LobbyScene lobbyScene;
 
     private Stage theStage;
@@ -122,8 +120,6 @@ public class App extends Application implements IClient {
         mainMenu = new MainMenuScene(this);
         mainGame = new MainGameScene(this);
         setShips = new SetShipsScene(this);
-        attackScene = new AttackScene(this);
-        chatScreen = new ChatScene(this);
         lobbyScene = new LobbyScene(this);
         setWonScene();
     }
@@ -182,11 +178,7 @@ public class App extends Application implements IClient {
             ourId = players.slot;
 
             mainGame.setupWithPlayers(players);
-            attackScene.setupWithPlayers(players);
-            chatScreen.setupWithPlayers(players);
-
             mainGame.onCanStart(canStart);
-            attackScene.onCanStart(canStart);
 
             transitionTo(mainGame);
         });
@@ -216,13 +208,13 @@ public class App extends Application implements IClient {
     public void OnEnemyBoardToPaint(EnemyBoardToPaint board) {
         Platform.runLater(() -> {
             System.out.println("ENEMY BOARD TO PAINT WITH INDEX " + board.id);
-            attackScene.onEnemyBoardToPaint(board);
+            mainGame.onEnemyBoardToPaint(board);
         });
     }
 
     public void OnAnAttackResponse(AnAttackResponse attackResponse) {
         Platform.runLater(() -> {
-            attackScene.OnAttackResponse(attackResponse);
+            mainGame.OnAttackResponse(attackResponse);
             doSounds(attackResponse.attackResult);
         });
     }
@@ -231,7 +223,6 @@ public class App extends Application implements IClient {
         System.out.println("OnYourTurn");
 
         Platform.runLater(() -> {
-            attackScene.OnYourTurn();
             mainGame.OnYourTurn();
         });
     }
@@ -262,8 +253,7 @@ public class App extends Application implements IClient {
 
     public void OnPlayerDied(PlayerDied playerDied) {
         Platform.runLater(() -> {
-            chatScreen.onPlayerDied(playerDied);
-            attackScene.onPlayerDied(playerDied);
+            mainGame.onPlayerDied(playerDied);
         });
     }
 
@@ -277,7 +267,7 @@ public class App extends Application implements IClient {
     }
 
     public void OnChatMessage(ChatMessage chatMessage) {
-        Platform.runLater(() -> chatScreen.onChatMessage(chatMessage));
+        Platform.runLater(() -> mainGame.onChatMessage(chatMessage));
     }
 
     @Override
@@ -327,14 +317,6 @@ public class App extends Application implements IClient {
         p.board = PlayerBoardTransformer.transform(pb);
         System.out.println("I sent myself");
         client.sendTCP(p);
-    }
-
-    public void OnAttackButtonPressed() {
-        transitionTo(attackScene);
-    }
-
-    public void OnChatButtonPressed() {
-        transitionTo(chatScreen);
     }
 
     public void OnAttackSceneBackButton() {

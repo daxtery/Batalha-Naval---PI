@@ -1,121 +1,99 @@
 package Client.FX;
 
 import Common.Direction;
-import javafx.scene.canvas.GraphicsContext;
+import Common.ShipPiece;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 
-public class ShipTileResources extends TileFX {
+public class ShipTileResources {
 
-    public final static Image ATTACKED = new Image("images/FOGO.png");
+    public final static Image ATTACKED = new Image("images/Fogo.png");
     public final static Image DESTROYED = new Image("images/fumeira.png");
-
     public final static Image ONE_ONE = new Image("images/1_1.png");
-
     public final static Image ONE_TWO = new Image("images/1_2.png");
     public final static Image TWO_TWO = new Image("images/2_2.png");
-
     public final static Image ONE_THREE = new Image("images/1_3.png");
     public final static Image TWO_THREE = new Image("images/2_3.png");
     public final static Image THREE_THREE = new Image("images/3_3.png");
-
     public final static Image ONE_FOUR = new Image("images/1_4.png");
     public final static Image TWO_FOUR = new Image("images/2_4.png");
     public final static Image THREE_FOUR = new Image("images/3_4.png");
     public final static Image FOUR_FOUR = new Image("images/4_4.png");
-
-    boolean shipDestroyed;
-
-    private int id;
-    private int sSize;
-
-    ShipTileResources(int _sSize, int _id, int _l, int _c, Direction _dir) {
-        super(_l, _c, _dir);
-        sSize = _sSize;
-        id = _id;
-        imageAttacked = ATTACKED;
-        giveRightImageToShow();
-        forNormalBoard(true);
+    private ShipTileResources() {
     }
 
-    void giveRightImageToShow(){
-        switch (sSize){
-            case 1:
-                imageToSelf = giveImageBasedOnDirection(ONE_ONE);
-                break;
-            case 2:
-                switch (id) {
-                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_TWO);
-                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_TWO);
+    public static Image giveRightImageToShow(ShipPiece shipPiece) {
+        Image image = switch (shipPiece.getShip().shipType) {
+            case One -> ONE_ONE;
+
+            case Two -> switch (shipPiece.getIdInsideShip()) {
+                case 0 -> ONE_TWO;
+                case 1 -> TWO_TWO;
+                default -> {
+                    System.err.println(
+                            "!! Wrong shipPiece! has shipType: "
+                                    + shipPiece.getShip().shipType +
+                                    " but id is " +
+                                    shipPiece.getIdInsideShip()
+                    );
+                    yield null;
                 }
-                break;
-            case 3:
-                switch (id) {
-                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_THREE);
-                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_THREE);
-                    case 2 -> imageToSelf = giveImageBasedOnDirection(THREE_THREE);
+            };
+
+            case Three -> switch (shipPiece.getIdInsideShip()) {
+                case 0 -> ONE_THREE;
+                case 1 -> TWO_THREE;
+                case 2 -> THREE_THREE;
+                default -> {
+                    System.err.println(
+                            "!! Wrong shipPiece! has shipType: "
+                                    + shipPiece.getShip().shipType +
+                                    " but id is " +
+                                    shipPiece.getIdInsideShip()
+                    );
+                    yield null;
                 }
-                break;
-            case 4:
-                switch (id) {
-                    case 0 -> imageToSelf = giveImageBasedOnDirection(ONE_FOUR);
-                    case 1 -> imageToSelf = giveImageBasedOnDirection(TWO_FOUR);
-                    case 2 -> imageToSelf = giveImageBasedOnDirection(THREE_FOUR);
-                    case 3 -> imageToSelf = giveImageBasedOnDirection(FOUR_FOUR);
+            };
+
+            case Four -> switch (shipPiece.getIdInsideShip()) {
+                case 0 -> ONE_FOUR;
+                case 1 -> TWO_FOUR;
+                case 2 -> THREE_FOUR;
+                case 3 -> FOUR_FOUR;
+                default -> {
+                    System.err.println(
+                            "!! Wrong shipPiece! has shipType: "
+                                    + shipPiece.getShip().shipType +
+                                    " but id is " +
+                                    shipPiece.getIdInsideShip()
+                    );
+                    yield null;
                 }
-        }
-        setImageToDraw(imageToSelf);
+            };
+
+        };
+
+        return rotateImageByDirection(image, shipPiece.getShip().direction);
     }
 
-    void attack(){
-        attacked = true;
+    private static Image rotateImageByDirection(Image image, Direction direction) {
+        return switch (direction) {
+            case Right -> rotateImageByAngles(0, image);
+            case Down -> rotateImageByAngles(90, image);
+            case Left -> rotateImageByAngles(180, image);
+            case Up -> rotateImageByAngles(270, image);
+        };
     }
 
-    void shipDestroyed(){
-        attacked = true;
-        shipDestroyed = true;
-        setImageToDraw(imageToSelf);
-    }
+    private static Image rotateImageByAngles(int angles, Image image) {
+        ImageView view = new ImageView(image);
+        view.setRotate(angles);
 
-    @Override
-    void draw(GraphicsContext gc) {
-        if(normalBoard){
-            if(attacked) {
-                gc.drawImage(WaterTileFX.IMAGE_ATTACKED, x, y);
-                if (shipDestroyed) {
-                    super.draw(gc);
-                    gc.drawImage(DESTROYED, x, y);
-                }
-                else
-                    gc.drawImage(ATTACKED, x, y);
-            }
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.rgb(0, 0, 0, 0));
 
-            else {
-                gc.drawImage(WaterTileFX.IMAGE_TO_SELF, x, y);
-                super.draw(gc);
-            }
-        }
-        else{
-            if(attacked) {
-                gc.drawImage(WaterTileFX.IMAGE_ATTACKED, x, y);
-                if (shipDestroyed) {
-                    super.draw(gc);
-                    gc.drawImage(DESTROYED, x, y);
-                }
-                else {
-                    super.draw(gc);
-                    gc.drawImage(ATTACKED, x, y);
-                }
-            }
-
-            else {
-                gc.drawImage(WaterTileFX.IMAGE_TO_SELF, x, y);
-                super.draw(gc);
-            }
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "ST at" + l + ":" + c + "; getAttacked: " + attacked;
+        return view.snapshot(params, null);
     }
 }
