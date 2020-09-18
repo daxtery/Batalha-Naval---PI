@@ -105,6 +105,7 @@ public class AiClient implements IClient, Runnable {
 
     @Override
     public void OnAnAttackResponse(Network.AnAttackResponse object) {
+        playerBoards[object.attacked] = PlayerBoardTransformer.parse(object.newAttackedBoard);
         brain.react(playerBoards[focusing], move, object.attackResult);
     }
 
