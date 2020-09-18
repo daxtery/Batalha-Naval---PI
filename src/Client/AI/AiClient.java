@@ -118,7 +118,7 @@ public class AiClient implements IClient, Runnable {
         attack.c = move.point.y;
 
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1500);
             gameClient.sendTCP(attack);
         } catch (InterruptedException e) {
             e.printStackTrace();
