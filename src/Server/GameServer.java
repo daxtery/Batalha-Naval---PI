@@ -8,9 +8,7 @@ import com.esotericsoftware.kryonet.Server;
 import javafx.util.Pair;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -82,10 +80,10 @@ public class GameServer {
 
     private void onAddBotToLobby(Connection connection, AddBotToLobby addBotToLobby) {
         System.out.println("Added bot at slot " + addBotToLobby.slot + ": " +
-                addBotToLobby.name + "(" + addBotToLobby.botDifficulty + ")");
+                addBotToLobby.name + "(" + addBotToLobby.BotPersonality + ")");
 
         connection.setName(addBotToLobby.name);
-        lobby.addBot(addBotToLobby.slot, addBotToLobby.name, addBotToLobby.botDifficulty, connection);
+        lobby.addBot(addBotToLobby.slot, addBotToLobby.name, addBotToLobby.BotPersonality, connection);
         sendConnections();
         printConnections();
     }

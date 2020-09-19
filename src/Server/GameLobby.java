@@ -55,7 +55,7 @@ public class GameLobby implements ILobby, IGameManager, IBoardSetup {
     }
 
     @Override
-    public void addBot(int slot, String name, BotDifficulty difficulty, Connection connection) {
+    public void addBot(int slot, String name, BotPersonality difficulty, Connection connection) {
         this.participants[slot] = new BotLobbyParticipant(difficulty, name, connection);
     }
 

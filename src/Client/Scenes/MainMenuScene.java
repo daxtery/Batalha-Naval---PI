@@ -71,7 +71,7 @@ public class MainMenuScene extends BaseGameScene {
             final int maxPlayers = 5;
             final int minPlayers = 2;
 
-            Spinner<Integer> spinner = new Spinner<>(minPlayers, maxPlayers, 3);
+            Spinner<Integer> spinner = new Spinner<>(minPlayers, maxPlayers, 2);
 
             Dialog<Integer> dialog = new Dialog<>();
             dialog.setTitle("Create Lobby");

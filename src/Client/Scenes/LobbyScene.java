@@ -1,9 +1,8 @@
 package Client.Scenes;
 
 import Client.App;
-import Common.BotDifficulty;
+import Common.BotPersonality;
 import Common.Network;
-import Server.LobbyParticipant;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -21,10 +20,10 @@ public class LobbyScene extends BaseGameScene {
 
     private int count;
     private boolean admin;
-    private List<Label> labels;
-    private List<Button> addButtons;
-    private List<Button> removeButtons;
-    private Button startButton;
+    private final List<Label> labels;
+    private final List<Button> addButtons;
+    private final List<Button> removeButtons;
+    private final Button startButton;
 
     public LobbyScene(App app) {
         super(app, new GridPane());
@@ -69,7 +68,7 @@ public class LobbyScene extends BaseGameScene {
                 Button addBotButton = new Button("+");
 
                 final int slot = i;
-                addBotButton.setOnMouseClicked(event -> app.onAddBotButton(slot, BotDifficulty.Normal));
+                addBotButton.setOnMouseClicked(event -> app.onAddBotButton(slot, BotPersonality.Focused));
 
                 addButtons.add(addBotButton);
                 grid.add(addBotButton, 0, i + 1);

@@ -15,7 +15,7 @@ public class Network {
         kryo.register(CreateLobby.class);
         kryo.register(Participant.class);
         kryo.register(Participant[].class);
-        kryo.register(BotDifficulty.class);
+        kryo.register(BotPersonality.class);
         kryo.register(ChatMessage.class);
         kryo.register(ChatMessageFromClient.class);
         kryo.register(AddBotToLobby.class);
@@ -110,12 +110,12 @@ public class Network {
     }
 
     public static class Participant {
-        public BotDifficulty botDifficulty;
+        public BotPersonality BotPersonality;
         public String name;
         public int slot;
 
-        public Participant(BotDifficulty botDifficulty, String name, int slot) {
-            this.botDifficulty = botDifficulty;
+        public Participant(BotPersonality BotPersonality, String name, int slot) {
+            this.BotPersonality = BotPersonality;
             this.name = name;
             this.slot = slot;
         }
@@ -131,11 +131,11 @@ public class Network {
         @Override
         public String toString() {
 
-            if (botDifficulty == null) {
+            if (BotPersonality == null) {
                 return name + " #" + slot;
             }
 
-            return name + "(Bot: " + botDifficulty + ")" + " #" + slot;
+            return name + "(Bot: " + BotPersonality + ")" + " #" + slot;
         }
     }
 
@@ -175,12 +175,12 @@ public class Network {
 
     public static class AddBotToLobby {
         public int slot;
-        public BotDifficulty botDifficulty;
+        public BotPersonality BotPersonality;
         public String name;
 
-        public AddBotToLobby(int slot, BotDifficulty botDifficulty, String name) {
+        public AddBotToLobby(int slot, BotPersonality BotPersonality, String name) {
             this.slot = slot;
-            this.botDifficulty = botDifficulty;
+            this.BotPersonality = BotPersonality;
             this.name = name;
         }
 

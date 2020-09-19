@@ -1,6 +1,8 @@
 package Client;
 
+import Client.AI.AIPersonality;
 import Client.AI.AiClient;
+import Client.AI.FocusedBot;
 import Client.Scenes.*;
 import Common.*;
 import Common.Network.*;
@@ -222,8 +224,12 @@ public class App extends Application implements IClient {
         });
     }
 
-    public void onAddBotButton(int slot, BotDifficulty botDifficulty) {
-        Thread thread = new Thread(new AiClient(slot, botDifficulty, "Damien", ADDRESS));
+    public void onAddBotButton(int slot, BotPersonality botPersonality) {
+        AIPersonality personality = switch (botPersonality) {
+            case Focused -> new FocusedBot();
+        };
+
+        Thread thread = new Thread(new AiClient(slot, personality, "Damien", ADDRESS));
         aiThreads.put(slot, thread);
         thread.start();
     }

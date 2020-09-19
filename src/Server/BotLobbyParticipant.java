@@ -1,13 +1,13 @@
 package Server;
 
-import Common.BotDifficulty;
+import Common.BotPersonality;
 import com.esotericsoftware.kryonet.Connection;
 
 public class BotLobbyParticipant extends LobbyParticipant {
 
-    public final BotDifficulty difficulty;
+    public final BotPersonality difficulty;
 
-    public BotLobbyParticipant(BotDifficulty difficulty, String name, Connection connection) {
+    public BotLobbyParticipant(BotPersonality difficulty, String name, Connection connection) {
         super(name, connection);
         this.difficulty = difficulty;
     }
