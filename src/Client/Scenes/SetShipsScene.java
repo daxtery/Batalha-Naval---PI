@@ -1,7 +1,9 @@
 package Client.Scenes;
 
+import Common.Direction;
+import Common.GameConfiguration;
 import Common.PlayerBoard;
-import Common.PlayerBoardFactory;
+import Common.PlayerBoardExtensions;
 import Client.App;
 import Client.FX.ShipsBoardFX;
 import javafx.geometry.Insets;
@@ -13,9 +15,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-import static Common.PlayerBoardConstants.DEFAULT_COLUMNS;
-import static Common.PlayerBoardConstants.DEFAULT_LINES;
-import static Common.PlayerBoardFactory.DEFAULT_SIZES;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static Common.PlayerBoardConstants.*;
 
 public class SetShipsScene extends BaseGameScene {
 
@@ -25,13 +28,26 @@ public class SetShipsScene extends BaseGameScene {
     public SetShipsScene(App app) {
         super(app, new HBox());
 
+        //TODO: Do this well
+        // Java :)
+        GameConfiguration gameConfiguration = new GameConfiguration(
+                DEFAULT_LINES,
+                DEFAULT_COLUMNS,
+                // Java :)
+                IntStream.of(DEFAULT_SIZES)
+                        .boxed()
+                        .collect(Collectors.toList()),
+                Direction.values()
+        );
+
         getRoot().setStyle("-fx-background-image: url(images/BattleShipBigger2.png);-fx-background-size: cover;");
 
-        pb = new PlayerBoard(DEFAULT_LINES, DEFAULT_COLUMNS);
-        sSboard = new ShipsBoardFX(pb.lines(), pb.columns(), 700, 500);
+        pb = new PlayerBoard(gameConfiguration.lines, gameConfiguration.columns);
+
+        System.out.println("sSboard");
+        sSboard = new ShipsBoardFX(gameConfiguration, 700, 500);
 
         sSboard.setPlayerBoard(pb);
-        sSboard.startAnimating();
 
         VBox sSRightStuff = new VBox();
 
@@ -82,15 +98,15 @@ public class SetShipsScene extends BaseGameScene {
         Button sSRandomButton = new Button("Random");
         sSRandomButton.setFont(new Font(50));
         sSRandomButton.setOnMouseClicked(event -> {
-            pb = PlayerBoardFactory.getRandomPlayerBoard();
-            sSboard.initShips(pb);
+            pb = PlayerBoardExtensions.constructRandomPlayerBoard(gameConfiguration);
+            sSboard.setPlayerBoard(pb);
         });
 
         Button sSReadyButton = new Button("Ready");
         sSReadyButton.setFont(new Font(50));
 
         sSReadyButton.setOnMouseClicked(event -> {
-            if (pb.ships.size() == DEFAULT_SIZES.length) {
+            if (pb.ships.size() == gameConfiguration.shipSizes.size()) {
                 sSReadyButton.setDisable(true);
                 sSRandomButton.setDisable(true);
 
@@ -111,29 +127,20 @@ public class SetShipsScene extends BaseGameScene {
 
         sSRightStuff.getChildren().addAll(sSPlaceIntructions, sSReadyBox, sSInstructionsGame);
 
-        sSboard.setOnMouseMoved(sSboard::OnMouseMoved);
-        sSboard.setOnMouseClicked(sSboard::OnMouseClicked);
-
         HBox sSRoot = (HBox) getRoot();
 
         sSRoot.getChildren().addAll(sSboard, sSRightStuff);
         sSRoot.setPadding(new Insets(25));
         sSRoot.setSpacing(10);
-
-        sSRoot.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.R) {
-                sSboard.OnRotateKeyPressed();
-            }
-        });
     }
 
     @Override
     public void OnSceneSet() {
-        sSboard.startAnimating();
+
     }
 
     @Override
     public void OnSceneUnset() {
-        sSboard.stopAnimating();
+
     }
 }

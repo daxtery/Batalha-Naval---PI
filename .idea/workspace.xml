@@ -5,21 +5,56 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="37b56e5f-9663-4c59-9fe2-fcdf19ec8eed" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Client/AI/AIPersonality.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Client/AI/FocusedBot.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Client/FX/LocationEnteredHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Client/FX/LocationExitedHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Common/GameConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Common/PlayerBoardMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Common/Visibility.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tests/Common/PlayerBoardTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/Tests/Common/PlayerBoardTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/AI/AiClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/AI/AiClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/AI/AiMove.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/AI/FocusedBot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/AI/FocusedBot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/AI/MyAI.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/AttackScene.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/ChatScene.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/LobbyScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/LobbyScene.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/MainMenuScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/MainMenuScene.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Common/BotDifficulty.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/BotPersonality.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/EmptyGraphBoardFX.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/GraphBoardFX.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/PlayerBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/PlayerBoardFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/SelfGraphBoardFX.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/ShipFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/ShipFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/ShipTileFX.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/ShipTileResources.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/ShipTileResources.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/ShipsBoardFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/ShipsBoardFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/SpriteTileFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/SpriteTileFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/Tile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/Tile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/TileFX.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/TileFX.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/TileResources.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/TileResources.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/WaterTileFX.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/FX/WaterTileResources.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/FX/WaterTileResources.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/MainGameScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/MainGameScene.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/SetShipsScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/SetShipsScene.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/AttackResult.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/AttackResultStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/BoardTile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/BoardTile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/Direction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Direction.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Common/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Network.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server/BotLobbyParticipant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/BotLobbyParticipant.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoardConstants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoardConstants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoardFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/PlayerBoardExtensions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/PlayerBoardTransformer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/Ship.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Ship.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/ShipFactory.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/ShipPiece.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/ShipPiece.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/ShipPieceStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/ShipSchematics.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/TileType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/WaterTile.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Common/WaterTileStatus.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Server/GameLobby.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/GameLobby.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Server/GameServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/GameServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server/ILobby.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/ILobby.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/IBoardSetup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/IBoardSetup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/IGameManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/IGameManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/Point.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Point.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,6 +67,7 @@
         <option value="FxmlFile" />
         <option value="CSS File" />
         <option value="Interface" />
+        <option value="Enum" />
         <option value="Class" />
       </list>
     </option>
@@ -74,7 +110,7 @@
     <property name="project.structure.last.edited" value="SDKs" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.30846325" />
-    <property name="settings.editor.selected.configurable" value="preferences.JavaFX" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveMembersDialog.RECENTS_KEY">
@@ -87,12 +123,13 @@
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="Client.FX" />
+      <recent name="Common" />
       <recent name="Server" />
       <recent name="Client" />
       <recent name="Client.Scenes" />
-      <recent name="JavaFX.Scenes" />
     </key>
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="Common" />
       <recent name="Client.AI" />
     </key>
   </component>
@@ -111,17 +148,6 @@
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -146,7 +172,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PlayerBoardTest.ships" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="PlayerBoardTest.place4sized" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="Batalha-Naval---PI" />
       <extension name="coverage">
         <pattern>
@@ -156,7 +182,7 @@
       </extension>
       <option name="PACKAGE_NAME" value="Common" />
       <option name="MAIN_CLASS_NAME" value="Common.PlayerBoardTest" />
-      <option name="METHOD_NAME" value="ships" />
+      <option name="METHOD_NAME" value="place4sized" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -166,13 +192,13 @@
       <item itemvalue="Application.Unnamed" />
       <item itemvalue="Application.Server" />
       <item itemvalue="JUnit.PlayerBoardTest" />
-      <item itemvalue="JUnit.PlayerBoardTest.ships" />
+      <item itemvalue="JUnit.PlayerBoardTest.place4sized" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.Server" />
-        <item itemvalue="JUnit.PlayerBoardTest.ships" />
         <item itemvalue="JUnit.PlayerBoardTest" />
+        <item itemvalue="JUnit.PlayerBoardTest.place4sized" />
       </list>
     </recent_temporary>
   </component>
@@ -228,7 +254,25 @@
       <workItem from="1600438199891" duration="10219000" />
       <workItem from="1600458501549" duration="5782000" />
       <workItem from="1600464313572" duration="3184000" />
-      <workItem from="1600513785337" duration="1591000" />
+      <workItem from="1600513785337" duration="3116000" />
+      <workItem from="1600519371460" duration="9109000" />
+      <workItem from="1600529620159" duration="2527000" />
+      <workItem from="1600540343296" duration="1557000" />
+      <workItem from="1600542952209" duration="58000" />
+      <workItem from="1603838483119" duration="112000" />
+      <workItem from="1603838642195" duration="1932000" />
+      <workItem from="1603916753557" duration="27000" />
+      <workItem from="1603916804966" duration="32000" />
+      <workItem from="1603928060791" duration="3964000" />
+      <workItem from="1604008241287" duration="6618000" />
+      <workItem from="1604014895154" duration="6933000" />
+      <workItem from="1604146002420" duration="8818000" />
+      <workItem from="1604250035251" duration="3999000" />
+      <workItem from="1604260394603" duration="1550000" />
+      <workItem from="1604272832887" duration="4263000" />
+      <workItem from="1604362010853" duration="5737000" />
+      <workItem from="1604413986284" duration="868000" />
+      <workItem from="1604443346936" duration="7226000" />
     </task>
     <servers />
   </component>
@@ -252,10 +296,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="175" width="1092" height="810" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599490557565" />
-    <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser" timestamp="1600514032242">
+    <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser" timestamp="1604449187511">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1600514032242" />
+    <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1604449187511" />
     <state x="690" y="296" key="#com.intellij.ide.util.PackageChooserDialog" timestamp="1600008387816">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -268,14 +312,18 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="588" y="209" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1598974047542" />
+    <state x="640" y="256" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1603838530916">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="640" y="256" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1603838530916" />
     <state x="738" y="444" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1599993836134">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="738" y="444" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599993836134" />
-    <state x="743" y="389" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1599996022582">
+    <state x="743" y="389" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1604146212795">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="743" y="389" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1920.1040@0.0.1920.1040" timestamp="1599996022582" />
+    <state x="743" y="389" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1920.1040@0.0.1920.1040" timestamp="1604146212795" />
     <state x="743" y="401" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.packages" timestamp="1599996050079">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -288,26 +336,26 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="676" y="327" key="#com.intellij.refactoring.move.moveMembers.MoveMembersDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599438310750" />
-    <state x="713" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1600514247903">
+    <state x="713" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1604443951303">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="713" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1600514247903" />
-    <state x="1098" y="290" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1600287559750">
+    <state x="713" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604443951303" />
+    <state x="1098" y="290" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1604253186985">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="1098" y="290" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1600287559750" />
-    <state x="690" y="267" key="#com.intellij.refactoring.typeMigration.ui.FailedConversionsDialog" timestamp="1600278925000">
+    <state x="1098" y="290" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604253186985" />
+    <state x="690" y="267" key="#com.intellij.refactoring.typeMigration.ui.FailedConversionsDialog" timestamp="1600525586979">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="690" y="267" key="#com.intellij.refactoring.typeMigration.ui.FailedConversionsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1600278925000" />
+    <state x="690" y="267" key="#com.intellij.refactoring.typeMigration.ui.FailedConversionsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1600525586979" />
     <state x="488" y="345" width="943" height="349" key="#com.intellij.structuralsearch.plugin.ui.StructuralSearchDialog" timestamp="1600370773776">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="488" y="345" width="943" height="349" key="#com.intellij.structuralsearch.plugin.ui.StructuralSearchDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1600370773776" />
-    <state width="511" height="466" key="DebuggerActiveHint" timestamp="1600465728681">
+    <state width="511" height="466" key="DebuggerActiveHint" timestamp="1604446631460">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="511" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1600465728681" />
+    <state width="511" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1604446631460" />
     <state x="778" y="476" key="DetectedRootsChooserDialog" timestamp="1598972922821">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -316,38 +364,38 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="687" y="332" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1600348938454" />
-    <state width="1877" height="376" key="GridCell.Tab.0.bottom" timestamp="1600468465123">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="376" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465123" />
-    <state width="1877" height="376" key="GridCell.Tab.0.center" timestamp="1600468465123">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="376" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465123" />
-    <state width="1877" height="376" key="GridCell.Tab.0.left" timestamp="1600468465123">
+    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="376" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465123" />
-    <state width="1877" height="376" key="GridCell.Tab.0.right" timestamp="1600468465123">
+    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="376" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465123" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1600468465120">
+    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465120" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1600468465120">
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465120" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1600468465120">
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465120" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1600468465120">
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1604450588676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1600468465120" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604450588676" />
     <state x="540" y="255" key="IDE.errors.dialog" timestamp="1600281980365">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -356,14 +404,18 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="636" y="222" key="RollbackChangesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1598973841965" />
-    <state x="461" y="165" key="SettingsEditor" timestamp="1600441823552">
+    <state x="461" y="165" key="SettingsEditor" timestamp="1603916829466">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1600441823552" />
-    <state width="498" height="537" key="SwitcherDM" timestamp="1599495165977">
+    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1603916829466" />
+    <state width="498" height="537" key="SwitcherDM" timestamp="1604148404075">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="498" height="537" key="SwitcherDM/0.0.1920.1040@0.0.1920.1040" timestamp="1599495165977" />
+    <state width="498" height="537" key="SwitcherDM/0.0.1920.1040@0.0.1920.1040" timestamp="1604148404075" />
+    <state x="519" y="268" key="caller.chooser.dialog" timestamp="1604009732310">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="519" y="268" key="caller.chooser.dialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604009732310" />
     <state x="776" y="298" key="chooseDestDirectoryDialog" timestamp="1600348868453">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -384,32 +436,36 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="690" y="284" key="extract.method.dialog/0.0.1920.1040@0.0.1920.1040" timestamp="1600217705034" />
-    <state x="667" y="119" width="585" height="801" key="find.popup" timestamp="1600371367397">
+    <state x="667" y="119" width="585" height="801" key="find.popup" timestamp="1604448683304">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="667" y="119" width="585" height="801" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1600371367397" />
+    <state x="667" y="119" width="585" height="801" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1604448683304" />
     <state x="551" y="140" key="new project wizard" timestamp="1598973762180">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="551" y="140" key="new project wizard/0.0.1920.1040@0.0.1920.1040" timestamp="1598973762180" />
-    <state x="755" y="267" key="refactoring.ChangeSignatureDialog" timestamp="1600012778585">
+    <state x="755" y="267" key="refactoring.ChangeSignatureDialog" timestamp="1604011055314">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="755" y="267" key="refactoring.ChangeSignatureDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1600012778585" />
-    <state x="616" y="240" key="run.anything.popup" timestamp="1600283273945">
+    <state x="755" y="267" key="refactoring.ChangeSignatureDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604011055314" />
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1604021170457">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="240" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1600283273945" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1600466482927">
+    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1604021170457" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1604450485501">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1600466482927" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1604450485501" />
   </component>
   <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="Application">
-        <watch expression="board.getAvailable()" language="JAVA" />
-      </configuration>
-    </watches-manager>
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Client/FX/ShipsBoardFX.java</url>
+          <line>54</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

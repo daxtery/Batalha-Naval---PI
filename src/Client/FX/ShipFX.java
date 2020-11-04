@@ -1,56 +1,64 @@
 package Client.FX;
 
-
 import Common.Direction;
 import Common.Ship;
 import javafx.scene.image.Image;
-import util.Point;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
-class ShipFX extends SpriteTileFX {
+class ShipFX extends BorderPane {
 
     private final static Image ONE = new Image("images/1.png");
     private final static Image TWO = new Image("images/2.png");
     private final static Image THREE = new Image("images/3.png");
     private final static Image FOUR = new Image("images/4.png");
+    private static final Border border = new Border(
+            new BorderStroke(
+                    Color.BLACK,
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    BorderStroke.DEFAULT_WIDTHS
+            )
+    );
+    private final ImageView imageView;
+    private Ship ship;
 
-    int shipSize;
-    boolean placed;
-    Ship ship;
-
-    ShipFX(int _ShipSize, Point point, Direction _dir, boolean boardCoord) {
-        super(point.x, point.y, boardCoord, _dir);
-        shipSize = _ShipSize;
-        selectImage();
+    ShipFX(int size) {
+        super(new ImageView());
+        imageView = (ImageView) getChildren().get(0);
+        setShip(new Ship(Direction.Right, size));
     }
 
-    ShipFX(int _ShipSize) {
-        this(_ShipSize, new Point(), Direction.Right, false);
+    public Ship getShip() {
+        return ship;
     }
 
-    void setShip(Ship ship) {
+    public void setShip(Ship ship) {
         this.ship = ship;
-        this.placed = true;
-
-        Point position = ship.origin();
-
-        if (ship.direction == Direction.Up || ship.direction == Direction.Left) {
-            position = ship.tail();
-        }
-
-        dir = ship.direction;
-
-        setPositionBoard(position);
-        selectImage();
+        imageView.setImage(switch (this.ship.size) {
+            case 1 -> ONE;
+            case 2 -> TWO;
+            case 3 -> THREE;
+            case 4 -> FOUR;
+            default -> throw new IllegalStateException("Unexpected value: " + this.ship.size);
+        });
     }
 
-    void selectImage() {
-        switch (shipSize) {
-            case 1 -> setImageToDraw(ONE);
-            case 2 -> setImageToDraw(TWO);
-            case 3 -> setImageToDraw(THREE);
-            case 4 -> setImageToDraw(FOUR);
+    void notifyIsOnBoard(boolean value) {
+        if (!value) {
+            imageView.setOpacity(1.0);
+        } else {
+            imageView.setOpacity(0.1);
         }
-        setImageToDraw(giveImageBasedOnDirection(getImageToDraw()));
+    }
+
+    void notifyIsSelected(boolean value) {
+        setBorder(value ? border : null);
+    }
+
+    boolean isOnBoard() {
+        return imageView.getOpacity() == 0.1;
     }
 
 }

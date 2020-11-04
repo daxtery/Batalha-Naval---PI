@@ -1,7 +1,7 @@
 package Client.FX;
 
 import Common.Direction;
-import Common.ShipPiece;
+import Common.Ship;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,61 +21,45 @@ public class ShipTileResources {
     public final static Image TWO_FOUR = new Image("images/2_4.png");
     public final static Image THREE_FOUR = new Image("images/3_4.png");
     public final static Image FOUR_FOUR = new Image("images/4_4.png");
+
     private ShipTileResources() {
     }
 
-    public static Image giveRightImageToShow(ShipPiece shipPiece) {
-        Image image = switch (shipPiece.getShip().shipType) {
-            case One -> ONE_ONE;
+    public static Image giveRightImageToShow(Ship ship, int index) {
+        Image image = switch (ship.size) {
 
-            case Two -> switch (shipPiece.getIdInsideShip()) {
+            case 1 -> ONE_ONE;
+
+            case 2 -> switch (index) {
                 case 0 -> ONE_TWO;
                 case 1 -> TWO_TWO;
-                default -> {
-                    System.err.println(
-                            "!! Wrong shipPiece! has shipType: "
-                                    + shipPiece.getShip().shipType +
-                                    " but id is " +
-                                    shipPiece.getIdInsideShip()
-                    );
-                    yield null;
-                }
+                default -> null;
             };
 
-            case Three -> switch (shipPiece.getIdInsideShip()) {
+            case 3 -> switch (index) {
                 case 0 -> ONE_THREE;
                 case 1 -> TWO_THREE;
                 case 2 -> THREE_THREE;
-                default -> {
-                    System.err.println(
-                            "!! Wrong shipPiece! has shipType: "
-                                    + shipPiece.getShip().shipType +
-                                    " but id is " +
-                                    shipPiece.getIdInsideShip()
-                    );
-                    yield null;
-                }
+                default -> null;
             };
 
-            case Four -> switch (shipPiece.getIdInsideShip()) {
+            case 4 -> switch (index) {
                 case 0 -> ONE_FOUR;
                 case 1 -> TWO_FOUR;
                 case 2 -> THREE_FOUR;
                 case 3 -> FOUR_FOUR;
-                default -> {
-                    System.err.println(
-                            "!! Wrong shipPiece! has shipType: "
-                                    + shipPiece.getShip().shipType +
-                                    " but id is " +
-                                    shipPiece.getIdInsideShip()
-                    );
-                    yield null;
-                }
+                default -> null;
+
             };
 
+            default -> null;
         };
 
-        return rotateImageByDirection(image, shipPiece.getShip().direction);
+        if (image == null) {
+            System.err.println("ShipTileResources::giveRightImageToShow" + ship.size + "::" + index);
+        }
+
+        return rotateImageByDirection(image, ship.getDirection());
     }
 
     private static Image rotateImageByDirection(Image image, Direction direction) {

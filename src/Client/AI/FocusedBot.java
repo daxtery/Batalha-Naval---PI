@@ -1,25 +1,139 @@
 package Client.AI;
 
-import Common.BotPersonality;
-import Common.Network;
-import Common.PlayerBoard;
-import Common.PlayerBoardTransformer;
+import Common.*;
+import util.Point;
 
-import java.util.Random;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
+//
+//class MoveCandidate {
+//
+//    public final Direction direction;
+//    public final int offset;
+//    public final Point attackedPoint;
+//
+//    public MoveCandidate(Direction direction, int offset, Point origin) {
+//        this.direction = direction;
+//        this.offset = offset;
+//        this.attackedPoint = origin.moved(direction.vector.scaled(offset));
+//    }
+//}
+//
+//class FocusedBotBrain {
+//
+//    Point firstContact;
+//    Map<Direction, List<MoveCandidate>> candidatesByDirection;
+//
+//    public FocusedBotBrain() {
+//    }
+//
+//    private void removeAfterSameDirection(MoveCandidate candidate) {
+//        candidates.removeIf(c -> c.direction == candidate.direction && c.offset > candidate.offset);
+//    }
+//
+//    private void filterCandidatesByShipSize(int shipSize) {
+//        candidates.removeIf(c -> c.offset + 1 > shipSize);
+//    }
+//
+//    public void react(PlayerBoard playerBoard, Point point, AttackResult result) {
+//
+//        switch (result.status) {
+//            case HitWater -> {
+//
+//                Optional<MoveCandidate> maybeCandidate = candidates.stream()
+//                        .filter(mv -> mv.attackedPoint.equals(point))
+//                        .findFirst();
+//
+//                if (maybeCandidate.isPresent()) {
+//                    MoveCandidate candidate = maybeCandidate.get();
+//                    candidate.confirmWater();
+//                    removeAfterSameDirection(candidate);
+//                }
+//
+//            }
+//
+//            case HitShipPiece -> {
+//
+//                final int maxPossibleShipSize = playerBoard.ships.stream()
+//                        .filter(Predicate.not(Ship::isDestroyed))
+//                        .mapToInt(ship -> ship.shipType.value)
+//                        .max()
+//                        .orElseThrow();
+//
+//                if (firstContact == null) {
+//                    if (result.destroyedShip) {
+//                        return;
+//                    }
+//
+//                    firstContact = point;
+//
+//                    for (Direction direction : Direction.values()) {
+//                        Point current = firstContact.moved(direction.vector);
+//                        for (int i = 1; i < maxPossibleShipSize && playerBoard.inBounds(current); ++i) {
+//                            candidates.add(new MoveCandidate(direction, i, firstContact));
+//                        }
+//                    }
+//
+//                    return;
+//                }
+//
+//                if (result.destroyedShip) {
+//                    ShipPiece piece = (ShipPiece) playerBoard.getTileAt(firstContact);
+//                    if (piece.status() == ShipPieceStatus.AttackedShipDestroyed) {
+//                        firstContact = null;
+//                        candidates.clear();
+//                        return;
+//                    }
+//
+//                    filterCandidatesByShipSize(maxPossibleShipSize);
+//                    candidates.removeIf(c -> !playerBoard.canAttackAt(c.attackedPoint));
+//                    return;
+//                }
+//
+//                Optional<MoveCandidate> maybeCandidate = candidates.stream()
+//                        .filter(mv -> mv.attackedPoint.equals(point))
+//                        .findFirst();
+//
+//                if (maybeCandidate.isPresent()) {
+//                    MoveCandidate candidate = maybeCandidate.get();
+//                    candidates.remove(candidate);
+//
+//                }
+//            }
+//        }
+//    }
+//
+//    public AiMove nextMove(PlayerBoard playerBoard) {
+//
+//        if (possibleMoves.size() == 0) {
+//            List<Point> possible = playerBoard.getAvailable();
+//            int index = new Random().nextInt(possible.size());
+//            int directionIndex = new Random().nextInt(Direction.values().length);
+//            return new AiMove(Direction.values()[directionIndex], possible.get(index));
+//        }
+//
+//        int index = new Random().nextInt(possibleMoves.size());
+//        return possibleMoves.get(index);
+//    }
+//
+//    public List<AiMove> getPossibleMoves() {
+//        return possibleMoves;
+//    }
+//}
 
 public class FocusedBot extends Client.AI.AIPersonality {
 
-    private final MyAI brain;
+//    private final FocusedBotBrain brain;
     private String lastMessage;
     private int focusing;
-    private AiMove move;
+//    private AiMove move;
     private PlayerBoard[] playerBoards;
     private Network.ConnectedPlayers connectedPlayers;
 
     public FocusedBot() {
         super(BotPersonality.Focused);
-        this.brain = new MyAI();
+//        this.brain = new FocusedBotBrain();
     }
 
     @Override
@@ -41,7 +155,7 @@ public class FocusedBot extends Client.AI.AIPersonality {
         playerBoards = new PlayerBoard[canStart.boards.length + 1];
 
         for (int i = 0; i < canStart.boards.length; i++) {
-            playerBoards[canStart.indices[i]] = PlayerBoardTransformer.parse(canStart.boards[i]);
+            playerBoards[canStart.indices[i]] = canStart.boards[i].toPlayerBoard();
         }
 
         Network.ChatMessageFromClient message = new Network.ChatMessageFromClient();
@@ -85,43 +199,51 @@ public class FocusedBot extends Client.AI.AIPersonality {
 
     @Override
     public void OnEnemyBoardToPaint(Network.EnemyBoardToPaint object) {
-        playerBoards[object.id] = PlayerBoardTransformer.parse(object.newAttackedBoard);
+        playerBoards[object.id] = object.newAttackedBoard.toPlayerBoard();
     }
 
     @Override
     public void OnAnAttackResponse(Network.AnAttackResponse object) {
-        playerBoards[object.attacked] = PlayerBoardTransformer.parse(object.newAttackedBoard);
-        brain.react(playerBoards[focusing], move, object.attackResult);
+
+        if (object.attacked != connectedPlayers.slot) {
+            playerBoards[object.attacked] = object.newAttackedBoard.toPlayerBoard();
+
+            if (object.attacked == focusing) {
+                //brain.react(playerBoards[focusing], move, object.attackResult);
+            }
+
+        }
+
     }
 
     @Override
     public void OnYourTurn() {
-        move = brain.nextMove(playerBoards[focusing]);
-
-        Network.AnAttackAttempt attack = new Network.AnAttackAttempt();
-        attack.toAttackID = focusing;
-        attack.l = move.point.x;
-        attack.c = move.point.y;
-
-        try {
-            Network.ChatMessageFromClient chatMessageFromClient = new Network.ChatMessageFromClient();
-
-            chatMessageFromClient.text =
-                    "Gonna attack you with " +
-                            move +
-                            " out of: " +
-                            brain.getPossibleMoves().toString() +
-                            "\n";
-
-            chatMessageFromClient.to = focusing;
-
-            ai.gameClient.sendTCP(chatMessageFromClient);
-
-            Thread.sleep(500);
-            ai.gameClient.sendTCP(attack);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        move = brain.nextMove(playerBoards[focusing]);
+//
+//        Network.AnAttackAttempt attack = new Network.AnAttackAttempt();
+//        attack.toAttackID = focusing;
+//        attack.l = move.point.x;
+//        attack.c = move.point.y;
+//
+//        try {
+//            Network.ChatMessageFromClient chatMessageFromClient = new Network.ChatMessageFromClient();
+//
+//            chatMessageFromClient.text =
+//                    "Gonna attacked you with " +
+//                            move +
+//                            " out of: " +
+//                            brain.getPossibleMoves().toString() +
+//                            "\n";
+//
+//            chatMessageFromClient.to = focusing;
+//
+//            ai.gameClient.sendTCP(chatMessageFromClient);
+//
+//            Thread.sleep(500);
+//            ai.gameClient.sendTCP(attack);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override

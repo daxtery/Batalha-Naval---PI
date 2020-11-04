@@ -1,9 +1,8 @@
 package Client.FX;
 
 import Common.BoardTile;
-import Common.ShipPiece;
-import Common.WaterTile;
-import javafx.geometry.Pos;
+import Common.PlayerBoard;
+import Common.Ship;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -11,11 +10,6 @@ import javafx.scene.paint.Color;
 import util.Point;
 
 public class Tile extends Pane {
-
-    private final ImageView fogView;
-    private final ImageView waterBaseView;
-    private final ImageView pieceView;
-    private final ImageView attackedView;
 
     static final Border border = new Border(
             new BorderStroke(
@@ -25,6 +19,11 @@ public class Tile extends Pane {
                     BorderStroke.DEFAULT_WIDTHS
             )
     );
+
+    private final ImageView fogView;
+    private final ImageView waterBaseView;
+    private final ImageView pieceView;
+    private final ImageView attackedView;
 
     public Tile(Point point) {
         super();
@@ -58,58 +57,51 @@ public class Tile extends Pane {
         setBorder(border);
     }
 
-    public void update(boolean forSelf, BoardTile boardTile) {
-        switch (boardTile.tileType) {
-            case Water -> {
-                WaterTile waterTile = (WaterTile) boardTile;
-                switch (waterTile.status()) {
-                    case Visible -> {
-                        waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
-                        fogView.setImage(null);
-                    }
-                    case NotVisible -> {
-                        if (forSelf) {
-                            waterBaseView.setImage(WaterTileResources.IMAGE_TO_SELF);
-                            fogView.setImage(null);
-                        } else {
-                            fogView.setImage(TileResources.imageOthersHidden);
-                            waterBaseView.setImage(null);
-                        }
-                    }
+    public void update(boolean forSelf, Point point, PlayerBoard playerBoard) {
+        BoardTile boardTile = playerBoard.getTileAt(point);
+        if (!boardTile.containsShipPiece()) {
+            pieceView.setImage(null);
+            attackedView.setImage(null);
+            if (!boardTile.isAttackable()) {
+                waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
+                fogView.setImage(null);
+            } else {
+                if (forSelf) {
+                    waterBaseView.setImage(WaterTileResources.IMAGE_TO_SELF);
+                    fogView.setImage(null);
+                } else {
+                    fogView.setImage(TileResources.imageOthersHidden);
+                    waterBaseView.setImage(null);
                 }
-
             }
+        } else {
 
-            case ShipPiece -> {
-                ShipPiece shipPiece = (ShipPiece) boardTile;
+            Ship ship = boardTile.getShip();
+            int index = boardTile.getShipPieceIndex();
 
-                switch (shipPiece.status()) {
-                    case AttackedShipDestroyed -> {
-                        fogView.setImage(null);
-                        waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
-                        pieceView.setImage(ShipTileResources.giveRightImageToShow(shipPiece));
-                        attackedView.setImage(ShipTileResources.DESTROYED);
-                    }
-                    case Attacked -> {
-                        fogView.setImage(null);
-                        waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
-                        pieceView.setImage(forSelf ?
-                                ShipTileResources.giveRightImageToShow(shipPiece) :
-                                ShipTileResources.ATTACKED);
-                        attackedView.setImage(ShipTileResources.ATTACKED);
-                    }
-                    case NotAttacked -> {
-                        if (forSelf) {
-                            fogView.setImage(null);
-                            waterBaseView.setImage(WaterTileResources.IMAGE_TO_SELF);
-                            pieceView.setImage(ShipTileResources.giveRightImageToShow(shipPiece));
-                        } else {
-                            waterBaseView.setImage(null);
-                            fogView.setImage(TileResources.imageOthersHidden);
-                            pieceView.setImage(null);
-                        }
-                    }
+            if (playerBoard.isShipDestroyed(ship)) {
+                fogView.setImage(null);
+                waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
+                pieceView.setImage(ShipTileResources.giveRightImageToShow(ship, index));
+                attackedView.setImage(ShipTileResources.DESTROYED);
+            } else if (!boardTile.isAttackable()) {
+                fogView.setImage(null);
+                waterBaseView.setImage(WaterTileResources.IMAGE_ATTACKED);
+                pieceView.setImage(forSelf ?
+                        ShipTileResources.giveRightImageToShow(ship, index) :
+                        ShipTileResources.ATTACKED);
+                attackedView.setImage(ShipTileResources.ATTACKED);
+            } else {
+                if (forSelf) {
+                    fogView.setImage(null);
+                    waterBaseView.setImage(WaterTileResources.IMAGE_TO_SELF);
+                    pieceView.setImage(ShipTileResources.giveRightImageToShow(ship, index));
+                } else {
+                    waterBaseView.setImage(null);
+                    fogView.setImage(TileResources.imageOthersHidden);
+                    pieceView.setImage(null);
                 }
+                attackedView.setImage(null);
             }
         }
     }

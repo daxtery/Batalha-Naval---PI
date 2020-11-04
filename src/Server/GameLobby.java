@@ -2,6 +2,7 @@ package Server;
 
 import Common.*;
 import com.esotericsoftware.kryonet.Connection;
+import util.Point;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -91,8 +92,9 @@ public class GameLobby implements ILobby, IGameManager, IBoardSetup {
     }
 
     @Override
-    public AttackResult attack(int id, int x, int y) {
-        return playerBoards[id].getAttacked(x, y);
+    public boolean attack(int id, int x, int y) {
+        Optional<Boolean> canGoAgain = playerBoards[id].getAttacked(new Point(x, y));
+        return canGoAgain.isEmpty() || canGoAgain.get();
     }
 
     @Override
@@ -110,8 +112,8 @@ public class GameLobby implements ILobby, IGameManager, IBoardSetup {
         state = GameLobbyState.SettingShips;
     }
 
-    public void setGameBoardOfPlayer(int gameID, String[][] board) {
-        playerBoards[gameID] = PlayerBoardTransformer.parse(board);
+    public void setGameBoardOfPlayer(int gameID, PlayerBoardMessage playerBoardMessage) {
+        playerBoards[gameID] = playerBoardMessage.toPlayerBoard();
     }
 
     @Override

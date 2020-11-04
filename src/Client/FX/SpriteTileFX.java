@@ -89,8 +89,6 @@ abstract class SpriteTileFX {
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(Color.rgb(0,0,0,0));
 
-        Canvas canvas = new Canvas(TileFX.TILE_SIZE, TileFX.TILE_SIZE);
-
         return iv.snapshot(params, null);
     }
 

@@ -2,36 +2,45 @@ package Common;
 
 import util.Point;
 
-import java.io.Serializable;
+public class BoardTile {
 
-public abstract class BoardTile implements Serializable {
+    public final Point point;
+    private boolean attackable;
 
-    public TileType tileType;
-    public boolean visible;
-    public Point point;
+    private Ship ship;
+    private int shipPieceIndex;
 
-    protected BoardTile(Point point, TileType tileType) {
-        this(point, tileType, false);
-    }
-
-    protected BoardTile(Point point, TileType tileType, boolean visible) {
+    public BoardTile(Point point) {
         this.point = point;
-        this.tileType = tileType;
-        this.visible = visible;
+        this.attackable = true;
     }
 
-    public boolean canAttack(){
-        return !visible;
+    public void removeShipPiece() {
+        this.ship = null;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (!(obj instanceof BoardTile))
-            return false;
-        BoardTile other = (BoardTile) obj;
-        return other.point.equals(this.point);
+    public void setShipPiece(Ship ship, int index) {
+        this.ship = ship;
+        this.shipPieceIndex = index;
     }
 
+    public boolean containsShipPiece() {
+        return ship != null;
+    }
+
+    public Ship getShip() {
+        return ship;
+    }
+
+    public int getShipPieceIndex() {
+        return shipPieceIndex;
+    }
+
+    public boolean isAttackable() {
+        return attackable;
+    }
+
+    public void setAttackable(boolean attackable) {
+        this.attackable = attackable;
+    }
 }

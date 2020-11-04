@@ -2,6 +2,7 @@ package Common;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
+import util.Point;
 
 // This class is a convenient place to keep things common to both the client and server.
 public class Network {
@@ -22,16 +23,25 @@ public class Network {
         kryo.register(RemovePlayerFromLobby.class);
         kryo.register(StartLobby.class);
         kryo.register(JoinLobbyResponse.class);
-        kryo.register(AttackResult.class);
-        kryo.register(AttackResultStatus.class);
         //
-        kryo.register(int[][].class);
-        kryo.register(int[].class);
         kryo.register(int.class);
+        kryo.register(int[].class);
+        kryo.register(int[][].class);
+
+        kryo.register(Point.class);
+        kryo.register(Point[].class);
+        kryo.register(Ship.class);
+        kryo.register(Ship[].class);
+
+        kryo.register(Direction.class);
+        kryo.register(Boolean.class);
+        kryo.register(Boolean[].class);
+        kryo.register(Boolean[][].class);
+
         kryo.register(String.class);
         kryo.register(String[].class);
-        kryo.register(String[][].class);
-        kryo.register(String[][][].class);
+        kryo.register(PlayerBoardMessage.class);
+        kryo.register(PlayerBoardMessage[].class);
         //
         kryo.register(IsFull.class);
         kryo.register(ReadyForShips.class);
@@ -48,7 +58,6 @@ public class Network {
         kryo.register(PlayerDied.class);
         kryo.register(YouWon.class);
         kryo.register(PlayerBoard.class);
-        kryo.register(APlayerboard.class);
     }
 
     public static class YouWon {
@@ -61,10 +70,6 @@ public class Network {
         public int who;
     }
 
-    public static class APlayerboard {
-        public String[][] board;
-    }
-
     public static class AnAttackAttempt {
         public int toAttackID;
         public int l;
@@ -72,18 +77,20 @@ public class Network {
     }
 
     public static class EnemyBoardToPaint {
-        public String[][] newAttackedBoard;
+        public PlayerBoardMessage newAttackedBoard;
         public int id;
     }
 
     public static class AnAttackResponse {
-        public String[][] newAttackedBoard;
-        public AttackResult attackResult;
+        public PlayerBoardMessage newAttackedBoard;
+        public boolean valid;
+        public boolean attackedShipPiece;
         public int attacked;
+        public Point point;
     }
 
     public static class YourBoardToPaint {
-        public String[][] board;
+        public PlayerBoardMessage board;
     }
 
     public static class WhoseTurn {
@@ -145,7 +152,7 @@ public class Network {
     }
 
     public static class CanStart {
-        public String[][][] boards;
+        public PlayerBoardMessage[] boards;
         public int[] indices;
     }
 

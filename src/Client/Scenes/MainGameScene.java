@@ -84,7 +84,7 @@ public class MainGameScene extends BaseGameScene {
     }
 
     public void OnYourBoardToPaint(Network.YourBoardToPaint toPaint) {
-        myBoard.setBoard(PlayerBoardTransformer.parse(toPaint.board));
+        myBoard.setBoard(toPaint.board.toPlayerBoard());
     }
 
     public void OnYourTurn() {
@@ -101,10 +101,11 @@ public class MainGameScene extends BaseGameScene {
 
     public void onCanStart(Network.CanStart canStart) {
         Network.ConnectedPlayers connected = app.getPlayers();
-        String[][][] boards = canStart.boards;
+        PlayerBoardMessage[] boards = canStart.boards;
 
         for (int i = 0, boardsLength = boards.length; i < boardsLength; i++) {
-            String[][] boardString = boards[i];
+            PlayerBoardMessage boardMessage = boards[i];
+            PlayerBoard board = boardMessage.toPlayerBoard();
             int index = canStart.indices[i];
 
             Tab tab = new Tab(connected.participants[index].name);
@@ -112,9 +113,9 @@ public class MainGameScene extends BaseGameScene {
 
             HBox tabHBoxContent = new HBox();
 
-            PlayerBoardFX board = new PlayerBoardFX(boardString.length, boardString[0].length, true);
-            board.setBoard(PlayerBoardTransformer.parse(boardString));
-            board.setOnLocationAttacked(p -> {
+            PlayerBoardFX boardFX = new PlayerBoardFX(board.lines(), board.columns(), true);
+            boardFX.setBoard(board);
+            boardFX.setClickedHandler(p -> {
                 if (!allowAttacks) {
                     return;
                 }
@@ -131,33 +132,38 @@ public class MainGameScene extends BaseGameScene {
                 app.CommunicateAttackAttempt(anAttackAttempt);
             });
 
-            tabBoards.put(index, board);
+            tabBoards.put(index, boardFX);
 
             Chat chat = new Chat(this.app, index);
             chats.put(index, chat);
 
             tabHBoxContent.setSpacing(25);
-            tabHBoxContent.getChildren().addAll(board, chat);
+            tabHBoxContent.getChildren().addAll(boardFX, chat);
 
             tab.setContent(tabHBoxContent);
         }
     }
 
     public void onEnemyBoardToPaint(Network.EnemyBoardToPaint board) {
-        PlayerBoard playerBoard = PlayerBoardTransformer.parse(board.newAttackedBoard);
+        PlayerBoard playerBoard = board.newAttackedBoard.toPlayerBoard();
         tabBoards.get(board.id).setBoard(playerBoard);
     }
 
     public void OnAttackResponse(Network.AnAttackResponse attackResponse) {
-        PlayerBoard playerBoard = PlayerBoardTransformer.parse(attackResponse.newAttackedBoard);
-        tabBoards.get(attackResponse.attacked).setBoard(playerBoard);
+        PlayerBoard playerBoard = attackResponse.newAttackedBoard.toPlayerBoard();
+
+        if (attackResponse.attacked == app.getOurId()) {
+            myBoard.setBoard(playerBoard);
+        } else {
+            tabBoards.get(attackResponse.attacked).setBoard(playerBoard);
+        }
     }
 
     public void onPlayerDied(Network.PlayerDied playerDied) {
         turnQueue.playerDied(playerDied.who);
 
         PlayerBoardFX boardFX = tabBoards.get(playerDied.who);
-        boardFX.setOnLocationAttacked(l -> {
+        boardFX.setClickedHandler(l -> {
         });
 
         boardFX.setStyle("-fx-background-color: red");

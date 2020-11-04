@@ -6,6 +6,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import javafx.util.Pair;
+import util.Point;
 
 import java.io.*;
 import java.util.Optional;
@@ -31,6 +32,8 @@ public class GameServer {
 
             public void received(Connection c, Object object) {
 
+                System.out.println("Received message from " + c + " ~ " + object + " ~ ");
+
                 if (object instanceof CreateLobby) {
                     onCreateLobby(c, (CreateLobby) object);
                 } else if (object instanceof AddBotToLobby) {
@@ -41,8 +44,8 @@ public class GameServer {
                     onJoinLobby(c, (JoinLobby) object);
                 } else if (object instanceof StartLobby) {
                     onStartLobby(c, (StartLobby) object);
-                } else if (object instanceof APlayerboard) {
-                    onAPlayerBoard(c, (APlayerboard) object);
+                } else if (object instanceof PlayerBoardMessage) {
+                    onAPlayerBoard(c, (PlayerBoardMessage) object);
                 } else if (object instanceof AnAttackAttempt) {
                     int gameID = lobby.getSlotOf(c).orElseThrow();
                     onAttackAttempt(new Pair<>(c, gameID), (AnAttackAttempt) object);
@@ -159,16 +162,16 @@ public class GameServer {
         chats.saidIt = from;
         chats.message = line.decode(lobby.participants[from].name);
 
-        System.out.println(chats.saidIt + " -> " + to + ": «\n" + chats.message + "\n»");
+        System.out.println(chats.saidIt + " -> " + to + ":\n" + chats.message + "\n");
         lobby.participants[to].connection.sendTCP(chats);
     }
 
-    private void onAPlayerBoard(Connection connection, APlayerboard aPlayerBoard) {
+    private void onAPlayerBoard(Connection connection, PlayerBoardMessage playerBoardMessage) {
         final int gameID = lobby.getSlotOf(connection).orElseThrow();
 
-        lobby.setGameBoardOfPlayer(gameID, aPlayerBoard.board);
+        lobby.setGameBoardOfPlayer(gameID, playerBoardMessage);
 
-        System.out.println("A playerBoard from" + connection + "(" + gameID + ")");
+        System.out.println("A playerBoard from " + connection + "(" + gameID + ")");
 
         IBoardSetup asBoardManager = lobby;
 
@@ -181,20 +184,20 @@ public class GameServer {
             for (int i = 0; i < lobby.playersInLobby(); i++) {
                 final int slot = i;
 
-                IntStream base = IntStream.range(0, lobby.playersInLobby());
-                IntStream otherIndexes = base.filter(n -> n != slot);
+                IntStream allIndexes = IntStream.range(0, lobby.playersInLobby());
+                IntStream otherIndexes = allIndexes.filter(n -> n != slot);
 
-                Stream<String[][]> otherBoards = otherIndexes
+                Stream<PlayerBoardMessage> otherBoards = otherIndexes
                         .mapToObj(n -> lobby.playerBoards[n])
-                        .map(PlayerBoardTransformer::transform);
+                        .map(PlayerBoardMessage::new);
 
                 CanStart canStart = new CanStart();
 
-                canStart.boards = otherBoards.toArray(String[][][]::new);
+                canStart.boards = otherBoards.toArray(PlayerBoardMessage[]::new);
 
                 // REALLY JAVA?
-                base = IntStream.range(0, lobby.playersInLobby());
-                otherIndexes = base.filter(n -> n != slot);
+                allIndexes = IntStream.range(0, lobby.playersInLobby());
+                otherIndexes = allIndexes.filter(n -> n != slot);
 
                 canStart.indices = otherIndexes.toArray();
 
@@ -225,45 +228,32 @@ public class GameServer {
 
     private void onAttackAttempt(Pair<Connection, Integer> connectionAndId, AnAttackAttempt a) {
         final Connection connection = connectionAndId.getKey();
-        final int slot = lobby.getSlotOf(connection).orElseThrow();
         final LobbyParticipant attackedParticipant = lobby.participants[a.toAttackID];
 
         System.out.println(connection + " is attacking " + attackedParticipant.name);
 
         final PlayerBoard attackedBoard = lobby.playerBoards[a.toAttackID];
 
-        AttackResult result = attackedBoard.getAttacked(a.l, a.c);
-
-        String[][] attackedBoardString = PlayerBoardTransformer.transform(attackedBoard);
+        Optional<Boolean> result = attackedBoard.getAttacked(new Point(a.l, a.c));
 
         AnAttackResponse response = new AnAttackResponse();
-        response.attackResult = result;
-        response.newAttackedBoard = attackedBoardString;
+        if (result.isPresent()) {
+            response.valid = true;
+            response.attackedShipPiece = result.get();
+        } else {
+            response.valid = false;
+        }
+        response.newAttackedBoard = new PlayerBoardMessage(attackedBoard);
         response.attacked = a.toAttackID;
-
-        connection.sendTCP(response);
-
-        // TO THE ATTACKED GUY
-        YourBoardToPaint attacked = new YourBoardToPaint();
-        attacked.board = attackedBoardString;
-        attackedParticipant.connection.sendTCP(attacked);
+        response.point = new Point(a.l, a.c);
 
         final int nPlayers = lobby.playersInLobby();
 
         for (int i = 0; i < nPlayers; i++) {
-
-            if (i == a.toAttackID || i == slot) {
-                continue;
-            }
-
-            EnemyBoardToPaint eb = new EnemyBoardToPaint();
-            eb.newAttackedBoard = attackedBoardString;
-            eb.id = a.toAttackID;
-
-            lobby.participants[i].connection.sendTCP(eb);
+            lobby.participants[i].connection.sendTCP(response);
         }
 
-        if (!result.shouldPlayAgain()) {
+        if (!response.attackedShipPiece) {
             currentPlayer = nextTurnId();
         } else {
             if (lobby.gameIsOver()) {
@@ -278,17 +268,14 @@ public class GameServer {
                 sendToAllExcept(a.toAttackID, playerDied);
             }
         }
-
-        final LobbyParticipant nextParticipant = lobby.participants[currentPlayer];
-
         WhoseTurn whoseTurn = new WhoseTurn();
         whoseTurn.index = currentPlayer;
-
         sendToAllExcept(currentPlayer, whoseTurn);
+
+        final LobbyParticipant nextParticipant = lobby.participants[currentPlayer];
         nextParticipant.connection.sendTCP(new YourTurn());
 
         System.out.println("Player is [" + currentPlayer + "]: " + lobby.participants[currentPlayer]);
-
     }
 
     private void sendToAllExcept(int i, Object object) {

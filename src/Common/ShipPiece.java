@@ -1,41 +1,20 @@
 package Common;
 
-import util.Point;
+public class ShipPiece {
 
-public class ShipPiece extends BoardTile {
+    public Ship ship;
+    public int shipPieceIndex;
 
-    //WHAT PART OF THE SHIP
-    private final int sId;
-    Ship ship;
-
-    ShipPiece(int i, Point point, boolean visible) {
-        super(point, TileType.ShipPiece, visible);
-        sId = i;
-    }
-
-    public ShipPieceStatus status() {
-        return visible ?
-                ship.isDestroyed() ?
-                        ShipPieceStatus.AttackedShipDestroyed
-                        : ShipPieceStatus.Attacked
-                : ShipPieceStatus.NotAttacked;
-    }
-
-    public int getIdInsideShip() {
-        return sId;
+    public ShipPiece(Ship ship, int shipPieceIndex) {
+        this.ship = ship;
+        this.shipPieceIndex = shipPieceIndex;
     }
 
     public Ship getShip() {
         return ship;
     }
 
-    @Override
-    public String toString() {
-        return details();
+    public int getShipPieceIndex() {
+        return shipPieceIndex;
     }
-
-    String details() {
-        return "ShipPiece at " + this.point + ", status: " + status() + " dir: " + (ship != null ? getShip().direction : "-");
-    }
-
 }

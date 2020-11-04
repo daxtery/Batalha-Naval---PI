@@ -3,81 +3,42 @@ package Common;
 import util.Point;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Ship implements Serializable {
 
-    public ShipType shipType;
-    public Direction direction;
-    public ShipPiece[] pieces;
+    private Direction direction;
+    public final int size;
 
-    public Ship(ShipPiece[] pieces, Direction direction, ShipType shipType) {
-        this.pieces = pieces;
-        this.shipType = shipType;
+    public Ship() {
+        size = 0;
+    }
+
+    public Ship(Direction direction, int size) {
+        this.direction = direction;
+        this.size = size;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
 
-    public int size() {
-        return shipType.value;
-    }
+    public List<Point> partsWithOrigin(Point origin) {
+        List<Point> parts = new ArrayList<>(size);
 
-    public Point origin() {
-        return pieces[0].point;
-    }
+        Point current = origin;
 
-    public Point tail() {
-        return pieces[this.pieces.length - 1].point;
-    }
-
-    boolean isDestroyed() {
-        for (ShipPiece piece : pieces) {
-            if (piece.canAttack()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
-
-        s.append("Ship at ")
-                .append(origin())
-                .append(" dir: ")
-                .append(direction)
-                .append(", shipType: ")
-                .append(shipType)
-                .append("\n");
-
-        for (ShipPiece sp : pieces) {
-            s.append(" | ")
-                    .append(sp.details())
-                    .append("\n");
+        for (int i = 0; i < size; ++i) {
+            parts.add(i, current);
+            current = current.moved(direction.vector);
         }
 
-        return s.toString();
-    }
-
-    public enum ShipType {
-
-        One,
-        Two,
-        Three,
-        Four;
-
-        static {
-            One.value = 1;
-            Two.value = 2;
-            Three.value = 3;
-            Four.value = 4;
-        }
-
-        public int value;
-
-        public static ShipType getShipType(int value) {
-            return ShipType.values()[value - 1];
-        }
-
+        return parts;
     }
 
 }

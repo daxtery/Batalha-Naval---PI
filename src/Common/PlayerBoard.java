@@ -3,25 +3,27 @@ package Common;
 import util.Point;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PlayerBoard implements Serializable {
 
-    public final static int NUMBER_OF_BOATS = 10;
     public final Point size;
-    public BoardTile[][] boardTiles;
+    public final BoardTile[][] boardTiles;
 
-    public List<Ship> ships;
-    public List<ShipPiece> pieces;
+    public final Map<Ship, Point> ships;
 
     public PlayerBoard(int lines, int columns) {
         size = new Point(lines, columns);
-        boardTiles = new BoardTile[lines][lines];
-        pieces = new ArrayList<>();
-        fillWithWater();
+        boardTiles = new BoardTile[lines][columns];
+
+        for (int j = 0; j < lines; j++) {
+            for (int k = 0; k < columns; k++) {
+                boardTiles[j][k] = new BoardTile(new Point(j, k));
+            }
+        }
+
+        ships = new HashMap<>();
     }
 
     public int lines() {
@@ -30,10 +32,6 @@ public class PlayerBoard implements Serializable {
 
     public int columns() {
         return size.y;
-    }
-
-    public boolean inBounds(int x, int y) {
-        return inBounds(new Point(x, y));
     }
 
     public boolean inBounds(Point point) {
@@ -45,136 +43,58 @@ public class PlayerBoard implements Serializable {
         );
     }
 
-    public List<Ship> getShips() {
-        if (ships == null) {
-            ships = Arrays.stream(boardTiles)
-                    .flatMap(row -> Arrays.stream(row)
-                            .filter(tile -> tile.tileType == TileType.ShipPiece)
-                    )
-                    .map(tile -> ((ShipPiece) tile).ship)
-                    .distinct()
-                    .collect(Collectors.toList());
-        }
-        return ships;
+    public Set<Ship> getShips() {
+        return ships.keySet();
     }
 
-    public List<ShipPiece> getPieces() {
-        if (pieces == null) {
-            pieces = Arrays.stream(boardTiles)
-                    .flatMap(row -> Arrays.stream(row)
-                            .filter(tile -> tile.tileType == TileType.ShipPiece)
-                    )
-                    .map(tile -> (ShipPiece) tile)
-                    .collect(Collectors.toList());
-        }
+    public Optional<Boolean> getAttacked(Point point) {
+        if (!inBounds(point)) return Optional.empty();
 
-        return pieces;
-    }
+        BoardTile tile = getTileAt(point);
 
-    protected void fillWithWater() {
+        if (!tile.isAttackable()) return Optional.empty();
 
-        final int lines = lines();
-        final int columns = columns();
+        tile.setAttackable(false);
 
-        for (int l = 0; l < lines; l++) {
-            for (int c = 0; c < columns; c++) {
-                boardTiles[l][c] = new WaterTile(l, c);
+        if (tile.containsShipPiece()) {
+            Ship ship = tile.getShip();
+            if (isShipDestroyed(ship)) {
+                onShipDestroyed(ship);
             }
-        }
-    }
-
-    public AttackResult getAttacked(Point point) {
-        if (!inBounds(point)) return AttackResult.OutsideBounds();
-
-        BoardTile boardTile = getTileAt(point);
-
-        if (boardTile.visible) return AttackResult.AlreadyVisible();
-
-        boardTile.visible = true;
-
-        return switch (boardTile.tileType) {
-            case Water -> AttackResult.HitWater();
-
-            case ShipPiece -> {
-                ShipPiece shipPiece = (ShipPiece) boardTile;
-                pieces.remove(shipPiece);
-                Ship ship = shipPiece.ship;
-                if (ship.isDestroyed()) {
-                    shipDestroyed(ship);
-                    yield AttackResult.HitShipPiece(true);
-                }
-                yield AttackResult.HitShipPiece(false);
-            }
-        };
-    }
-
-    public AttackResult getAttacked(int x, int y) {
-        return getAttacked(new Point(x, y));
-    }
-
-    public List<Point> getAvailable() {
-        List<Point> points = new ArrayList<>();
-        final int lines = lines();
-        final int columns = columns();
-
-        for (int l = 0; l < lines; l++) {
-            for (int c = 0; c < columns; c++) {
-                if (boardTiles[l][c].canAttack()) {
-                    points.add(new Point(l, c));
-                }
-            }
+            return Optional.of(true);
         }
 
-        return points;
+        return Optional.of(false);
     }
 
     public boolean isGameOver() {
-        return pieces.isEmpty();
+        return getShips().stream().allMatch(this::isShipDestroyed);
     }
 
-    private void shipDestroyed(Ship s) {
-        for (ShipPiece piece : s.pieces) {
-            Point[] points = getSurroundingPoints(piece.point);
+    private void onShipDestroyed(Ship ship) {
+        Point origin = ships.get(ship);
+        List<Point> parts = ship.partsWithOrigin(origin);
+
+        for (Point part : parts) {
+            List<Point> points = getSurroundingPoints(part);
             for (Point point : points) {
-                if (inBounds(point.x, point.y)) {
-                    getTileAt(point.x, point.y).visible = true;
-                }
+                getTileAt(point).setAttackable(false);
             }
         }
     }
 
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
+    public void placeShip(Point at, Ship ship) {
+        ships.put(ship, at);
+        List<Point> parts = ship.partsWithOrigin(at);
 
-        final int lines = lines();
-        final int columns = lines();
-
-        for (int i = 0; i < lines; i++) {
-            for (int c = 0; c < columns; c++) {
-                s.append(boardTiles[i][c])
-                        .append("\n");
-            }
-            s.append("\n");
-        }
-        return s.toString();
-    }
-
-    protected void placeShips(Ship[] toAdd) {
-        for (Ship ship : toAdd) {
-            placeShip(ship);
+        for (int i = 0, partsSize = parts.size(); i < partsSize; i++) {
+            Point part = parts.get(i);
+            getTileAt(part).setShipPiece(ship, i);
         }
     }
 
-    public void placeShip(Ship toAdd) {
-        for (ShipPiece piece : toAdd.pieces) {
-            boardTiles[piece.point.x][piece.point.y] = piece;
-            pieces.add(piece);
-        }
-    }
-
-    protected Point[] getSurroundingPoints(Point point) {
-        return new Point[]{
+    protected List<Point> getSurroundingPoints(Point point) {
+        final Point[] neighbours = new Point[]{
                 point.moved(1, 0),
                 point.moved(1, 1),
                 point.moved(1, -1),
@@ -186,66 +106,56 @@ public class PlayerBoard implements Serializable {
                 point.moved(0, 1),
                 point.moved(0, -1),
         };
+
+        return Arrays.stream(neighbours).filter(this::inBounds).collect(Collectors.toList());
     }
 
-    public boolean canShipBeHere(Ship toAdd) {
-        for (ShipPiece piece : toAdd.pieces) {
-            boolean isInBounds = inBounds(piece.point);
+    public boolean canShipBeHere(Point at, Ship ship) {
+        for (Point part : ship.partsWithOrigin(at)) {
+            boolean isInBounds = inBounds(part);
+
             if (!isInBounds) {
                 return false;
             }
-            boolean isNotAdjacent = checkSurroundings(piece);
-            if (!isNotAdjacent || !freeAt(piece.point)) {
+
+            if (isShipPieceAt(part) || isAdjacentToShipPieceAt(part)) {
                 return false;
             }
+
         }
         return true;
     }
 
-    protected boolean checkSurroundings(BoardTile tile) {
-        return checkSurroundings(tile.point);
-    }
-
-    protected boolean checkSurroundings(Point _point) {
-        Point[] points = getSurroundingPoints(_point);
-        for (Point point : points) {
-            if (inBounds(point.x, point.y)) {
-                if (!freeAt(point.x, point.y)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    protected boolean freeAt(Point point) {
-        if (inBounds(point)) {
-            return getTileAt(point).tileType == TileType.Water;
-        }
-        return true;
-    }
-
-    protected boolean freeAt(int x, int y) {
-        return freeAt(new Point(x, y));
+    protected boolean isAdjacentToShipPieceAt(Point point) {
+        List<Point> points = getSurroundingPoints(point);
+        return points.stream().anyMatch(this::isShipPieceAt);
     }
 
     public BoardTile getTileAt(Point point) {
-        if (inBounds(point)) {
-            return boardTiles[point.x][point.y];
-        }
-        return null;
-    }
-
-    public BoardTile getTileAt(int x, int y) {
-        return getTileAt(new Point(x, y));
+        return boardTiles[point.x][point.y];
     }
 
     public void removeShip(Ship ship) {
-        for (ShipPiece piece : ship.pieces) {
-            //System.out.println("REMOVING " + piece.getClass().getSimpleName() + " AT: " + piece.x + " " + piece.y);
-            boardTiles[piece.point.x][piece.point.y] = new WaterTile(piece.point.x, piece.point.y);
-            pieces.remove(piece);
+        Point origin = ships.remove(ship);
+        List<Point> parts = ship.partsWithOrigin(origin);
+
+        for (Point part : parts) {
+            getTileAt(part).removeShipPiece();
         }
     }
 
+    public boolean containsShip(Ship ship) {
+        return ships.containsKey(ship);
+    }
+
+    public boolean isShipPieceAt(Point point) {
+        return getTileAt(point).containsShipPiece();
+    }
+
+    public boolean isShipDestroyed(Ship ship) {
+        Point origin = ships.get(ship);
+        List<Point> parts = ship.partsWithOrigin(origin);
+
+        return parts.stream().noneMatch(p -> getTileAt(p).isAttackable());
+    }
 }

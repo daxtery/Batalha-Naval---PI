@@ -1,8 +1,9 @@
 package util;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Point {
+public class Point implements Serializable {
     public int x, y;
 
     public Point(int x, int y) {

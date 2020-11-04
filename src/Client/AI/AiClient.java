@@ -5,6 +5,10 @@ import Client.IClient;
 import Common.*;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class AiClient implements IClient, Runnable {
 
@@ -54,15 +58,18 @@ public class AiClient implements IClient, Runnable {
 
     @Override
     public void OnReadyForShips() {
-        PlayerBoard playerBoard = PlayerBoardFactory.getRandomPlayerBoard();
+        GameConfiguration gameConfiguration = new GameConfiguration(
+                PlayerBoardConstants.DEFAULT_LINES,
+                PlayerBoardConstants.DEFAULT_COLUMNS,
+                IntStream.of(PlayerBoardConstants.DEFAULT_SIZES).boxed().collect(Collectors.toList()),
+                Direction.values()
+        );
 
-        Network.APlayerboard p = new Network.APlayerboard();
-        p.board = PlayerBoardTransformer.transform(playerBoard);
+        PlayerBoard playerBoard = PlayerBoardExtensions.constructRandomPlayerBoard(gameConfiguration);
 
-        System.out.println("AI: I sent");
+        PlayerBoardMessage message = new PlayerBoardMessage(playerBoard);
 
-        gameClient.sendTCP(p);
-
+        gameClient.sendTCP(message);
         personality.OnReadyForShips();
     }
 
@@ -143,6 +150,7 @@ public class AiClient implements IClient, Runnable {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("Shutting down");
         OnAbort();
     }
 }

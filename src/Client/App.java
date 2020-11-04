@@ -7,6 +7,7 @@ import Client.Scenes.*;
 import Common.*;
 import Common.Network.*;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.minlog.Log;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -29,6 +30,9 @@ import javafx.stage.StageStyle;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Logger;
+
+import static com.esotericsoftware.minlog.Log.*;
 
 public class App extends Application implements IClient {
 
@@ -78,6 +82,7 @@ public class App extends Application implements IClient {
         client.start();
 
         theStage = primaryStage;
+
         setAllScenes();
 
         theStage.initStyle(StageStyle.UNDECORATED);
@@ -151,10 +156,6 @@ public class App extends Application implements IClient {
         wonScene = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
     }
 
-    private void doSounds(AttackResult result) {
-        doSounds(result.valid(), result.status == AttackResultStatus.HitShipPiece);
-    }
-
     private void doSounds(boolean actualHit, boolean shipHit) {
         aWShipSound.stop();
         aWWaterSound.stop();
@@ -214,7 +215,7 @@ public class App extends Application implements IClient {
     public void OnAnAttackResponse(AnAttackResponse attackResponse) {
         Platform.runLater(() -> {
             mainGame.OnAttackResponse(attackResponse);
-            doSounds(attackResponse.attackResult);
+            doSounds(attackResponse.valid, attackResponse.attackedShipPiece);
         });
     }
 
@@ -312,12 +313,10 @@ public class App extends Application implements IClient {
         new Thread(tryConnectTask).start();
     }
 
-    public void SignalReady(PlayerBoard pb) {
-        mainGame.setPlayerBoard(pb);
-        Network.APlayerboard p = new Network.APlayerboard();
-        p.board = PlayerBoardTransformer.transform(pb);
+    public void SignalReady(PlayerBoard playerBoard) {
+        mainGame.setPlayerBoard(playerBoard);
         System.out.println("I sent myself");
-        client.sendTCP(p);
+        client.sendTCP(new PlayerBoardMessage(playerBoard));
     }
 
     public void OnAttackSceneBackButton() {

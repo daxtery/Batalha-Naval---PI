@@ -8,7 +8,9 @@ public class PlayerBoardFX extends GridPane {
 
     public final Tile[][] tiles;
     public final boolean isEnemy;
-    private LocationAttackerHandler handler;
+    private LocationEnteredHandler enteredHandler;
+    private LocationExitedHandler exitedHandler;
+    private LocationAttackerHandler clickedHandler;
 
     public PlayerBoardFX(int lines, int columns, boolean isEnemy) {
         this.isEnemy = isEnemy;
@@ -20,8 +22,20 @@ public class PlayerBoardFX extends GridPane {
                 Tile tile = new Tile(point);
                 add(tile, k, j);
                 tile.setOnMouseClicked(clicked -> {
-                    if (handler != null) {
-                        handler.handle(point);
+                    if (clickedHandler != null) {
+                        clickedHandler.handle(point);
+                    }
+                });
+
+                tile.setOnMouseEntered(clicked -> {
+                    if (enteredHandler != null) {
+                        enteredHandler.handle(point);
+                    }
+                });
+
+                tile.setOnMouseExited(clicked -> {
+                    if (exitedHandler != null) {
+                        exitedHandler.handle(point);
                     }
                 });
 
@@ -33,12 +47,20 @@ public class PlayerBoardFX extends GridPane {
     public void setBoard(PlayerBoard board) {
         for (int j = 0; j < tiles.length; j++) {
             for (int k = 0; k < tiles[0].length; k++) {
-                tiles[j][k].update(!isEnemy, board.boardTiles[j][k]);
+                tiles[j][k].update(!isEnemy, new Point(j, k), board);
             }
         }
     }
 
-    public void setOnLocationAttacked(LocationAttackerHandler handler) {
-        this.handler = handler;
+    public void setEnteredHandler(LocationEnteredHandler enteredHandler) {
+        this.enteredHandler = enteredHandler;
+    }
+
+    public void setExitedHandler(LocationExitedHandler exitedHandler) {
+        this.exitedHandler = exitedHandler;
+    }
+
+    public void setClickedHandler(LocationAttackerHandler clickedHandler) {
+        this.clickedHandler = clickedHandler;
     }
 }
