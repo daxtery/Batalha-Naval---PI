@@ -7,7 +7,6 @@ import Client.Scenes.*;
 import Common.*;
 import Common.Network.*;
 import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.minlog.Log;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -30,9 +29,6 @@ import javafx.stage.StageStyle;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
-
-import static com.esotericsoftware.minlog.Log.*;
 
 public class App extends Application implements IClient {
 
@@ -68,7 +64,7 @@ public class App extends Application implements IClient {
 
     private Stage theStage;
 
-    private ConnectedPlayers players;
+    private ConnectedPlayersResponse players;
     private int ourId;
 
     public static void main(String[] args) {
@@ -156,14 +152,14 @@ public class App extends Application implements IClient {
         wonScene = new Scene(root, SCREEN_RECTANGLE.getWidth(), SCREEN_RECTANGLE.getHeight());
     }
 
-    private void doSounds(boolean actualHit, boolean shipHit) {
+    private void doSounds(HitResult hitResult) {
         aWShipSound.stop();
         aWWaterSound.stop();
-        if (actualHit) {
-            if (shipHit)
-                aWShipSound.play();
-            else
-                aWWaterSound.play();
+        switch (hitResult) {
+            case Invalid -> {
+            }
+            case HitPiece -> aWShipSound.play();
+            case HitWater -> aWWaterSound.play();
         }
     }
 
@@ -174,24 +170,24 @@ public class App extends Application implements IClient {
     }
 
     @Override
-    public void OnCanStart(CanStart canStart) {
+    public void OnCanStart(StartGameResponse startGameResponse) {
         System.out.println("OnCanStart");
 
         Platform.runLater(() -> {
             ourId = players.slot;
 
             mainGame.setupWithPlayers(players);
-            mainGame.onCanStart(canStart);
+            mainGame.onCanStart(startGameResponse);
 
             transitionTo(mainGame);
         });
     }
 
-    public void OnWhoseTurn(WhoseTurn whoseTurn) {
-        Platform.runLater(() -> mainGame.OnWhoseTurn(whoseTurn));
+    public void OnWhoseTurn(WhoseTurnResponse whoseTurnResponse) {
+        Platform.runLater(() -> mainGame.OnWhoseTurn(whoseTurnResponse));
     }
 
-    public void onConnectedPlayers(ConnectedPlayers players) {
+    public void onConnectedPlayers(ConnectedPlayersResponse players) {
         Platform.runLater(() -> {
             this.players = players;
             lobbyScene.onConnectedPlayers(players);
@@ -202,11 +198,11 @@ public class App extends Application implements IClient {
         Platform.runLater(() -> transitionTo(setShips));
     }
 
-    public void OnYourBoardToPaint(YourBoardToPaint toPaint) {
+    public void OnYourBoardToPaint(YourBoardResponse toPaint) {
         Platform.runLater(() -> mainGame.OnYourBoardToPaint(toPaint));
     }
 
-    public void OnEnemyBoardToPaint(EnemyBoardToPaint board) {
+    public void OnEnemyBoardToPaint(EnemyBoardResponse board) {
         Platform.runLater(() -> {
             mainGame.onEnemyBoardToPaint(board);
         });
@@ -215,7 +211,7 @@ public class App extends Application implements IClient {
     public void OnAnAttackResponse(AnAttackResponse attackResponse) {
         Platform.runLater(() -> {
             mainGame.OnAttackResponse(attackResponse);
-            doSounds(attackResponse.valid, attackResponse.attackedShipPiece);
+            doSounds(attackResponse.hitResult);
         });
     }
 
@@ -253,9 +249,9 @@ public class App extends Application implements IClient {
         });
     }
 
-    public void OnPlayerDied(PlayerDied playerDied) {
+    public void OnPlayerDied(PlayerDiedResponse playerDiedResponse) {
         Platform.runLater(() -> {
-            mainGame.onPlayerDied(playerDied);
+            mainGame.onPlayerDied(playerDiedResponse);
         });
     }
 
@@ -268,8 +264,8 @@ public class App extends Application implements IClient {
         });
     }
 
-    public void OnChatMessage(ChatMessage chatMessage) {
-        Platform.runLater(() -> mainGame.onChatMessage(chatMessage));
+    public void OnChatMessage(ChatMessageResponse chatMessageResponse) {
+        Platform.runLater(() -> mainGame.onChatMessage(chatMessageResponse));
     }
 
     @Override
@@ -313,18 +309,19 @@ public class App extends Application implements IClient {
         new Thread(tryConnectTask).start();
     }
 
-    public void SignalReady(PlayerBoard playerBoard) {
+    public void commitPlayerBoard(PlayerBoard playerBoard) {
         mainGame.setPlayerBoard(playerBoard);
         System.out.println("I sent myself");
-        client.sendTCP(new PlayerBoardMessage(playerBoard));
+        PlayerBoardMessage boardMessage = new PlayerBoardMessage(playerBoard);
+        client.sendTCP(new PlayerCommitBoard(boardMessage));
     }
 
     public void OnAttackSceneBackButton() {
         transitionTo(mainGame);
     }
 
-    public void CommunicateAttackAttempt(AnAttackAttempt anAttackAttempt) {
-        client.sendTCP(anAttackAttempt);
+    public void CommunicateAttackAttempt(AnAttack anAttack) {
+        client.sendTCP(anAttack);
     }
 
     public void OnChatSceneBackButton() {
@@ -361,23 +358,24 @@ public class App extends Application implements IClient {
     }
 
     public void SendMessage(int slot, String message) {
-        Network.ChatMessageFromClient c = new Network.ChatMessageFromClient();
+        ChatMessage c = new ChatMessage();
         c.text = message;
         c.to = slot;
         client.sendTCP(c);
     }
 
     public void onLobbyStartButtonClicked() {
-        client.sendTCP(new StartLobby());
+        client.sendTCP(new StartGame());
     }
 
     public int getOurId() {
         return ourId;
     }
 
-    public ConnectedPlayers getPlayers() {
+    public ConnectedPlayersResponse getPlayers() {
         return players;
     }
+
 }
 
 

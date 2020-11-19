@@ -17,12 +17,12 @@ public class Network {
         kryo.register(Participant.class);
         kryo.register(Participant[].class);
         kryo.register(BotPersonality.class);
+        kryo.register(ChatMessageResponse.class);
         kryo.register(ChatMessage.class);
-        kryo.register(ChatMessageFromClient.class);
         kryo.register(AddBotToLobby.class);
         kryo.register(RemovePlayerFromLobby.class);
-        kryo.register(StartLobby.class);
-        kryo.register(JoinLobbyResponse.class);
+        kryo.register(StartGame.class);
+        kryo.register(PlayerCommitBoard.class);
         //
         kryo.register(int.class);
         kryo.register(int[].class);
@@ -33,7 +33,12 @@ public class Network {
         kryo.register(Ship.class);
         kryo.register(Ship[].class);
 
+        kryo.register(HitResult.class);
+
         kryo.register(Direction.class);
+        kryo.register(boolean.class);
+        kryo.register(boolean[].class);
+        kryo.register(boolean[][].class);
         kryo.register(Boolean.class);
         kryo.register(Boolean[].class);
         kryo.register(Boolean[][].class);
@@ -43,75 +48,98 @@ public class Network {
         kryo.register(PlayerBoardMessage.class);
         kryo.register(PlayerBoardMessage[].class);
         //
-        kryo.register(IsFull.class);
-        kryo.register(ReadyForShips.class);
-        kryo.register(Abort.class);
-        kryo.register(CanStart.class);
-        kryo.register(WhoseTurn.class);
-        kryo.register(ConnectedPlayers.class);
-        kryo.register(YourBoardToPaint.class);
-        kryo.register(AnAttackAttempt.class);
+        kryo.register(ServerIsFullResponse.class);
+        kryo.register(PlayersSetBoardResponse.class);
+        kryo.register(ReadyForShipsResponse.class);
+        kryo.register(AbortResponse.class);
+        kryo.register(StartGameResponse.class);
+        kryo.register(WhoseTurnResponse.class);
+        kryo.register(ConnectedPlayersResponse.class);
+        kryo.register(YourBoardResponse.class);
+        kryo.register(AnAttack.class);
         kryo.register(AnAttackResponse.class);
-        kryo.register(EnemyBoardToPaint.class);
-        kryo.register(YourTurn.class);
-        kryo.register(YouDead.class);
-        kryo.register(PlayerDied.class);
-        kryo.register(YouWon.class);
+        kryo.register(EnemyBoardResponse.class);
+        kryo.register(YourTurnResponse.class);
+        kryo.register(YouDeadResponse.class);
+        kryo.register(PlayerDiedResponse.class);
+        kryo.register(YouWonResponse.class);
         kryo.register(PlayerBoard.class);
     }
 
-    public static class YouWon {
+    public static class YouWonResponse {
     }
 
-    public static class YouDead {
+    public static class YouDeadResponse {
     }
 
-    public static class PlayerDied {
-        public int who;
+    public static class PlayerDiedResponse {
+        public int slot;
+
+        public PlayerDiedResponse(int slot) {
+            this.slot = slot;
+        }
+
+        public PlayerDiedResponse() {
+        }
     }
 
-    public static class AnAttackAttempt {
+    public static class AnAttack {
         public int toAttackID;
-        public int l;
-        public int c;
+        public Point at;
     }
 
-    public static class EnemyBoardToPaint {
+    public static class EnemyBoardResponse {
         public PlayerBoardMessage newAttackedBoard;
         public int id;
     }
 
     public static class AnAttackResponse {
         public PlayerBoardMessage newAttackedBoard;
-        public boolean valid;
-        public boolean attackedShipPiece;
+        public HitResult hitResult;
         public int attacked;
         public Point point;
+
+        public AnAttackResponse(PlayerBoardMessage newAttackedBoard, HitResult hitResult, int attacked, Point point) {
+            this.newAttackedBoard = newAttackedBoard;
+            this.hitResult = hitResult;
+            this.attacked = attacked;
+            this.point = point;
+        }
+
+        public AnAttackResponse() {
+        }
     }
 
-    public static class YourBoardToPaint {
+    public static class YourBoardResponse {
         public PlayerBoardMessage board;
     }
 
-    public static class WhoseTurn {
-        public int index;
+    public static class WhoseTurnResponse {
+        public int slot;
+
+        public WhoseTurnResponse(int slot) {
+            this.slot = slot;
+        }
+
+        public WhoseTurnResponse() {
+        }
     }
 
-    public static class YourTurn {
+    public static class YourTurnResponse {
     }
 
-    public static class Abort {
+    public static class AbortResponse {
     }
 
-    public static class ReadyForShips {
+    public static class ReadyForShipsResponse {
     }
 
-    public static class ChatMessage {
+    public static class ChatMessageResponse {
         public String message;
         public int saidIt;
     }
 
-    public static class ChatMessageFromClient {
+    public static class ChatMessage {
         public String text;
         public int to;
     }
@@ -146,12 +174,17 @@ public class Network {
         }
     }
 
-    public static class ConnectedPlayers {
+    public static class ConnectedPlayersResponse {
         public Participant[] participants;
         public int slot;
     }
 
-    public static class CanStart {
+    public static class PlayersSetBoardResponse {
+        public Participant[] participants;
+        public boolean[] boardSet;
+    }
+
+    public static class StartGameResponse {
         public PlayerBoardMessage[] boards;
         public int[] indices;
     }
@@ -162,6 +195,13 @@ public class Network {
 
     public static class JoinLobbyResponse {
         public int slots;
+
+        public JoinLobbyResponse(int slots) {
+            this.slots = slots;
+        }
+
+        public JoinLobbyResponse() {
+        }
     }
 
     public static class CreateLobby {
@@ -177,7 +217,21 @@ public class Network {
         }
     }
 
-    public static class StartLobby {
+    public static class StartGame {
+    }
+
+    public static class PlayerCommitBoard {
+        public PlayerBoardMessage playerBoardMessage;
+
+        public PlayerCommitBoard(PlayerBoardMessage playerBoardMessage) {
+            this.playerBoardMessage = playerBoardMessage;
+        }
+
+        public PlayerCommitBoard() {
+        }
+    }
+
+    public static class BoardRequest {
     }
 
     public static class AddBotToLobby {
@@ -206,7 +260,7 @@ public class Network {
         }
     }
 
-    public static class IsFull {
+    public static class ServerIsFullResponse {
         @Override
         public String toString() {
             return "Server is full";

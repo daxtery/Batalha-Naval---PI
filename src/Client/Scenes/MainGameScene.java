@@ -78,12 +78,12 @@ public class MainGameScene extends BaseGameScene {
     public void OnSceneUnset() {
     }
 
-    public void OnWhoseTurn(Network.WhoseTurn whoseTurn) {
-        turnQueue.highlightPlayer(whoseTurn.index);
+    public void OnWhoseTurn(Network.WhoseTurnResponse whoseTurnResponse) {
+        turnQueue.highlightPlayer(whoseTurnResponse.slot);
         allowAttacks = false;
     }
 
-    public void OnYourBoardToPaint(Network.YourBoardToPaint toPaint) {
+    public void OnYourBoardToPaint(Network.YourBoardResponse toPaint) {
         myBoard.setBoard(toPaint.board.toPlayerBoard());
     }
 
@@ -92,21 +92,21 @@ public class MainGameScene extends BaseGameScene {
         allowAttacks = true;
     }
 
-    public void setupWithPlayers(Network.ConnectedPlayers players) {
+    public void setupWithPlayers(Network.ConnectedPlayersResponse players) {
         Network.Participant[] participants = players.participants;
         for (int i = 0, participantsLength = participants.length; i < participantsLength; i++) {
             turnQueue.addPlayer(i, participants[i]);
         }
     }
 
-    public void onCanStart(Network.CanStart canStart) {
-        Network.ConnectedPlayers connected = app.getPlayers();
-        PlayerBoardMessage[] boards = canStart.boards;
+    public void onCanStart(Network.StartGameResponse startGameResponse) {
+        Network.ConnectedPlayersResponse connected = app.getPlayers();
+        PlayerBoardMessage[] boards = startGameResponse.boards;
 
         for (int i = 0, boardsLength = boards.length; i < boardsLength; i++) {
             PlayerBoardMessage boardMessage = boards[i];
             PlayerBoard board = boardMessage.toPlayerBoard();
-            int index = canStart.indices[i];
+            int index = startGameResponse.indices[i];
 
             Tab tab = new Tab(connected.participants[index].name);
             tabs.getTabs().add(tab);
@@ -122,14 +122,13 @@ public class MainGameScene extends BaseGameScene {
 
                 allowAttacks = false;
 
-                Network.AnAttackAttempt anAttackAttempt = new Network.AnAttackAttempt();
+                Network.AnAttack anAttack = new Network.AnAttack();
 
-                anAttackAttempt.l = p.x;
-                anAttackAttempt.c = p.y;
+                anAttack.at = p;
 
-                anAttackAttempt.toAttackID = index;
+                anAttack.toAttackID = index;
 
-                app.CommunicateAttackAttempt(anAttackAttempt);
+                app.CommunicateAttackAttempt(anAttack);
             });
 
             tabBoards.put(index, boardFX);
@@ -144,7 +143,7 @@ public class MainGameScene extends BaseGameScene {
         }
     }
 
-    public void onEnemyBoardToPaint(Network.EnemyBoardToPaint board) {
+    public void onEnemyBoardToPaint(Network.EnemyBoardResponse board) {
         PlayerBoard playerBoard = board.newAttackedBoard.toPlayerBoard();
         tabBoards.get(board.id).setBoard(playerBoard);
     }
@@ -159,18 +158,18 @@ public class MainGameScene extends BaseGameScene {
         }
     }
 
-    public void onPlayerDied(Network.PlayerDied playerDied) {
-        turnQueue.playerDied(playerDied.who);
+    public void onPlayerDied(Network.PlayerDiedResponse playerDiedResponse) {
+        turnQueue.playerDied(playerDiedResponse.slot);
 
-        PlayerBoardFX boardFX = tabBoards.get(playerDied.who);
+        PlayerBoardFX boardFX = tabBoards.get(playerDiedResponse.slot);
         boardFX.setClickedHandler(l -> {
         });
 
         boardFX.setStyle("-fx-background-color: red");
     }
 
-    public void onChatMessage(Network.ChatMessage chatMessage) {
-        chats.get(chatMessage.saidIt).appendToConversation(chatMessage.message);
+    public void onChatMessage(Network.ChatMessageResponse chatMessageResponse) {
+        chats.get(chatMessageResponse.saidIt).appendToConversation(chatMessageResponse.message);
     }
 
     private static class TurnQueue extends HBox {

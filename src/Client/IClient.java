@@ -7,17 +7,17 @@ public interface IClient {
 
     void OnAbort();
 
-    void OnCanStart(Network.CanStart canStart);
+    void OnCanStart(Network.StartGameResponse startGameResponse);
 
-    void OnWhoseTurn(Network.WhoseTurn whoseTurn);
+    void OnWhoseTurn(Network.WhoseTurnResponse whoseTurnResponse);
 
-    void onConnectedPlayers(Network.ConnectedPlayers connectedPlayers);
+    void onConnectedPlayers(Network.ConnectedPlayersResponse connectedPlayersResponse);
 
     void OnReadyForShips();
 
-    void OnYourBoardToPaint(Network.YourBoardToPaint object);
+    void OnYourBoardToPaint(Network.YourBoardResponse object);
 
-    void OnEnemyBoardToPaint(Network.EnemyBoardToPaint object);
+    void OnEnemyBoardToPaint(Network.EnemyBoardResponse object);
 
     void OnAnAttackResponse(Network.AnAttackResponse object);
 
@@ -25,11 +25,11 @@ public interface IClient {
 
     void OnYouDead();
 
-    void OnPlayerDied(Network.PlayerDied object);
+    void OnPlayerDied(Network.PlayerDiedResponse object);
 
     void OnYouWon();
 
-    void OnChatMessage(Network.ChatMessage object);
+    void OnChatMessage(Network.ChatMessageResponse object);
 
     void onJoinLobbyResponse(Network.JoinLobbyResponse joinLobbyResponse);
 }

@@ -4,6 +4,7 @@ import util.Point;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class PlayerBoard implements Serializable {
@@ -47,12 +48,12 @@ public class PlayerBoard implements Serializable {
         return ships.keySet();
     }
 
-    public Optional<Boolean> getAttacked(Point point) {
-        if (!inBounds(point)) return Optional.empty();
+    public HitResult getAttacked(Point point) {
+        if (!inBounds(point)) return HitResult.Invalid;
 
         BoardTile tile = getTileAt(point);
 
-        if (!tile.isAttackable()) return Optional.empty();
+        if (!tile.isAttackable()) return HitResult.Invalid;
 
         tile.setAttackable(false);
 
@@ -61,10 +62,10 @@ public class PlayerBoard implements Serializable {
             if (isShipDestroyed(ship)) {
                 onShipDestroyed(ship);
             }
-            return Optional.of(true);
+            return HitResult.HitPiece;
         }
 
-        return Optional.of(false);
+        return HitResult.HitWater;
     }
 
     public boolean isGameOver() {
@@ -81,6 +82,27 @@ public class PlayerBoard implements Serializable {
                 getTileAt(point).setAttackable(false);
             }
         }
+    }
+
+    public List<BoardTile> getAttackableTiles() {
+        return Arrays.stream(boardTiles)
+                .flatMap(Arrays::stream)
+                .filter(BoardTile::isAttackable)
+                .collect(Collectors.toList());
+    }
+
+    public List<BoardTile> getAttackedTiles() {
+        return Arrays.stream(boardTiles)
+                .flatMap(Arrays::stream)
+                .filter(Predicate.not(BoardTile::isAttackable))
+                .collect(Collectors.toList());
+    }
+
+    public List<BoardTile> getTilesWithShipPieces() {
+        return Arrays.stream(boardTiles)
+                .flatMap(Arrays::stream)
+                .filter(BoardTile::containsShipPiece)
+                .collect(Collectors.toList());
     }
 
     public void placeShip(Point at, Ship ship) {

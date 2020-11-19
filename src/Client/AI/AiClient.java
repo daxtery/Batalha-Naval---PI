@@ -5,8 +5,6 @@ import Client.IClient;
 import Common.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,18 +40,18 @@ public class AiClient implements IClient, Runnable {
     }
 
     @Override
-    public void OnCanStart(Network.CanStart canStart) {
-        personality.OnCanStart(canStart);
+    public void OnCanStart(Network.StartGameResponse startGameResponse) {
+        personality.OnCanStart(startGameResponse);
     }
 
     @Override
-    public void OnWhoseTurn(Network.WhoseTurn whoseTurn) {
-        personality.OnWhoseTurn(whoseTurn);
+    public void OnWhoseTurn(Network.WhoseTurnResponse whoseTurnResponse) {
+        personality.OnWhoseTurn(whoseTurnResponse);
     }
 
     @Override
-    public void onConnectedPlayers(Network.ConnectedPlayers connectedPlayers) {
-        personality.onConnectedPlayers(connectedPlayers);
+    public void onConnectedPlayers(Network.ConnectedPlayersResponse connectedPlayersResponse) {
+        personality.onConnectedPlayers(connectedPlayersResponse);
     }
 
     @Override
@@ -66,20 +64,20 @@ public class AiClient implements IClient, Runnable {
         );
 
         PlayerBoard playerBoard = PlayerBoardExtensions.constructRandomPlayerBoard(gameConfiguration);
-
         PlayerBoardMessage message = new PlayerBoardMessage(playerBoard);
+        Network.PlayerCommitBoard playerCommitBoard = new Network.PlayerCommitBoard(message);
 
-        gameClient.sendTCP(message);
+        gameClient.sendTCP(playerCommitBoard);
         personality.OnReadyForShips();
     }
 
     @Override
-    public void OnYourBoardToPaint(Network.YourBoardToPaint object) {
+    public void OnYourBoardToPaint(Network.YourBoardResponse object) {
         personality.OnYourBoardToPaint(object);
     }
 
     @Override
-    public void OnEnemyBoardToPaint(Network.EnemyBoardToPaint object) {
+    public void OnEnemyBoardToPaint(Network.EnemyBoardResponse object) {
         personality.OnEnemyBoardToPaint(object);
     }
 
@@ -99,7 +97,7 @@ public class AiClient implements IClient, Runnable {
     }
 
     @Override
-    public void OnPlayerDied(Network.PlayerDied object) {
+    public void OnPlayerDied(Network.PlayerDiedResponse object) {
         personality.OnPlayerDied(object);
     }
 
@@ -109,7 +107,7 @@ public class AiClient implements IClient, Runnable {
     }
 
     @Override
-    public void OnChatMessage(Network.ChatMessage object) {
+    public void OnChatMessage(Network.ChatMessageResponse object) {
         personality.OnChatMessage(object);
     }
 

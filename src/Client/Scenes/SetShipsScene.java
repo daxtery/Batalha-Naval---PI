@@ -8,7 +8,6 @@ import Client.App;
 import Client.FX.ShipsBoardFX;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -110,7 +109,7 @@ public class SetShipsScene extends BaseGameScene {
                 sSReadyButton.setDisable(true);
                 sSRandomButton.setDisable(true);
 
-                app.SignalReady(pb);
+                app.commitPlayerBoard(pb);
             }
         });
 

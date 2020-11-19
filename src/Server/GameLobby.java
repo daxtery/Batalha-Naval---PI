@@ -4,68 +4,61 @@ import Common.*;
 import com.esotericsoftware.kryonet.Connection;
 import util.Point;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-public class GameLobby implements ILobby, IGameManager, IBoardSetup {
+public class GameLobby {
 
     public final int code;
     public final LobbyParticipant[] participants;
-    public final PlayerBoard[] playerBoards;
+    private final GameServer gameServer;
+    private int currentPlayerSlot;
     private GameLobbyState state;
 
-    public GameLobby(int count) {
-        this(5, count);
-    }
-
-    public GameLobby(int code, int count) {
-        this.code = code;
+    public GameLobby(GameServer gameServer, int count, Connection connection) {
         this.participants = new LobbyParticipant[count];
-        this.playerBoards = new PlayerBoard[count];
         this.state = GameLobbyState.InLobby;
+        this.gameServer = gameServer;
+        this.currentPlayerSlot = 0;
+
+        // FIXME: Do we ever need codes?
+        this.code = 5;
+        addPlayer(0, connection);
     }
 
     public GameLobbyState getState() {
         return state;
     }
 
-    @Override
-    public int playersAlive() {
-        return (int) Arrays.stream(this.playerBoards).filter(p -> !p.isGameOver()).count();
-    }
-
-    @Override
     public int playersInLobby() {
         return (int) Arrays.stream(this.participants).filter(Objects::nonNull).count();
     }
 
-    @Override
     public int slots() {
         return this.participants.length;
     }
 
-    @Override
     public boolean full() {
         return playersInLobby() == slots();
     }
 
-    @Override
     public void addPlayer(int slot, Connection connection) {
         this.participants[slot] = new PlayerLobbyParticipant(connection, connection.toString());
+        notifyPlayersInLobby();
     }
 
-    @Override
     public void addBot(int slot, String name, BotPersonality difficulty, Connection connection) {
         this.participants[slot] = new BotLobbyParticipant(difficulty, name, connection);
+        notifyPlayersInLobby();
     }
 
-    @Override
     public void removeParticipant(int slot) {
         this.participants[slot] = null;
+        notifyPlayersInLobby();
     }
 
-    @Override
     public Optional<Integer> getSlotOf(Connection connection) {
 
         for (int i = 0, participantsLength = participants.length; i < participantsLength; i++) {
@@ -81,43 +74,249 @@ public class GameLobby implements ILobby, IGameManager, IBoardSetup {
         return Optional.empty();
     }
 
-    @Override
-    public void transitionToLobby() {
+    public void resetLobby() {
         state = GameLobbyState.InLobby;
     }
 
-    @Override
-    public void transitionToGame() {
+    public void startGame() {
         state = GameLobbyState.InGame;
+
+        List<Integer> allIndexes = IntStream.range(0, participants.length)
+                .boxed()
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < participants.length; i++) {
+
+            List<Integer> otherIndexes = new ArrayList<>(allIndexes);
+
+            otherIndexes.remove(Integer.valueOf(i));
+
+            Stream<PlayerBoardMessage> otherBoards = otherIndexes
+                    .stream()
+                    .map(n -> participants[n].getPlayerBoard())
+                    .map(PlayerBoardMessage::new);
+
+            Network.StartGameResponse startGameResponse = new Network.StartGameResponse();
+
+            startGameResponse.boards = otherBoards.toArray(PlayerBoardMessage[]::new);
+            startGameResponse.indices = otherIndexes.stream().mapToInt(n -> n).toArray();
+
+            sendTo(startGameResponse, i);
+        }
+
+        currentPlayerSlot = 0;
+        notifyTurn();
     }
 
-    @Override
-    public boolean attack(int id, int x, int y) {
-        Optional<Boolean> canGoAgain = playerBoards[id].getAttacked(new Point(x, y));
-        return canGoAgain.isEmpty() || canGoAgain.get();
+    public void onAnAttack(int attackerSlot, Network.AnAttack anAttack) {
+
+        final int attackedSlot = anAttack.toAttackID;
+        final Point attackedPoint = anAttack.at;
+
+        final LobbyParticipant attackedParticipant = participants[attackedSlot];
+        final PlayerBoard attackedPlayerBoard = attackedParticipant.getPlayerBoard();
+
+        HitResult hitResult = attackedPlayerBoard.getAttacked(attackedPoint);
+
+        final Network.AnAttackResponse response = new Network.AnAttackResponse(
+                new PlayerBoardMessage(attackedPlayerBoard),
+                hitResult,
+                attackedSlot,
+                attackedPoint
+        );
+
+        sendToAll(response, false);
+
+        switch (hitResult) {
+            case HitWater -> {
+                currentPlayerSlot = nextTurnSlot();
+                notifyTurn();
+            }
+            case Invalid -> notifyTurn();
+            case HitPiece -> {
+                if (isGameOverFor(attackedSlot)) {
+                    sendTo(new Network.YouDeadResponse(), attackedSlot);
+                    attackedParticipant.setDefeated(true);
+
+                    sendToAllExcept(new Network.PlayerDiedResponse(attackedSlot), attackedSlot, true);
+
+                    if (gameIsOver()) {
+                        sendTo(new Network.YouWonResponse(), attackerSlot);
+                    }
+                }
+                notifyTurn();
+            }
+        }
+
     }
 
-    @Override
     public boolean gameIsOver() {
-        return Arrays.stream(playerBoards).allMatch(PlayerBoard::isGameOver);
+        return Arrays.stream(participants).allMatch(LobbyParticipant::isDefeated);
     }
 
-    @Override
     public boolean isGameOverFor(int id) {
-        return playerBoards[id].isGameOver();
+        return participants[id].getPlayerBoard().isGameOver();
     }
 
-    @Override
-    public void transitionToShips() {
+    public void readyForBoardCommits() {
         state = GameLobbyState.SettingShips;
+        sendToAll(new Network.ReadyForShipsResponse(), true);
     }
 
-    public void setGameBoardOfPlayer(int gameID, PlayerBoardMessage playerBoardMessage) {
-        playerBoards[gameID] = playerBoardMessage.toPlayerBoard();
+    public void onPlayerCommitBoard(int slot, Network.PlayerCommitBoard playerCommitBoard) {
+        participants[slot].setPlayerBoard(playerCommitBoard.playerBoardMessage.toPlayerBoard());
+        notifyPlayersBoardSet();
+
+        if (allBoardsSet()) {
+            startGame();
+        }
+
     }
 
-    @Override
+    private void notifyTurn() {
+        Network.WhoseTurnResponse whoseTurnResponse = new Network.WhoseTurnResponse(currentPlayerSlot);
+
+        sendToAllExcept(whoseTurnResponse, currentPlayerSlot, false);
+        sendTo(new Network.YourTurnResponse(), currentPlayerSlot);
+    }
+
     public boolean allBoardsSet() {
-        return Arrays.stream(playerBoards).noneMatch(Objects::isNull);
+        return Arrays.stream(participants).map(LobbyParticipant::getPlayerBoard).noneMatch(Objects::isNull);
+    }
+
+    private void onPlayerDefeated(int slot) {
+        participants[slot].setDefeated(true);
+    }
+
+    private <T> void sendToAllExcept(T message, int slot, boolean includeDefeated) {
+        for (int i = 0; i < participants.length; i++) {
+            if (i == slot) {
+                continue;
+            }
+
+            final LobbyParticipant participant = participants[i];
+
+            if (!includeDefeated && participant.isDefeated()) {
+                continue;
+            }
+
+            participants[i].connection.sendTCP(message);
+        }
+    }
+
+    private <T> void sendToAll(T message, boolean includeDefeated) {
+        for (final LobbyParticipant participant : participants) {
+
+            if (!includeDefeated && participant.isDefeated()) {
+                continue;
+            }
+
+            participant.connection.sendTCP(message);
+        }
+    }
+
+    private <T> void sendTo(T message, int slot) {
+        final LobbyParticipant participant = participants[slot];
+        participant.connection.sendTCP(message);
+    }
+
+    private int nextTurnSlot() {
+
+        for (int nextTurnSlot = (currentPlayerSlot + 1) % participants.length;
+             nextTurnSlot != currentPlayerSlot;
+             nextTurnSlot = (nextTurnSlot + 1) % participants.length) {
+
+            final LobbyParticipant participant = participants[nextTurnSlot];
+
+            if (participant.isDefeated()) {
+                continue;
+            }
+
+            return nextTurnSlot;
+        }
+
+        return -1;
+    }
+
+    private void notifyPlayersInLobby() {
+        Network.ConnectedPlayersResponse connectedPlayersResponse = new Network.ConnectedPlayersResponse();
+        connectedPlayersResponse.participants = new Network.Participant[participants.length];
+
+        for (int i = 0; i < participants.length; ++i) {
+            final LobbyParticipant participant = participants[i];
+
+            if (participant == null) {
+                connectedPlayersResponse.participants[i] = null;
+                continue;
+            }
+
+            if (participant.isBot()) {
+                final BotLobbyParticipant asBot = (BotLobbyParticipant) participant;
+                connectedPlayersResponse.participants[i] = new Network.Participant(asBot.difficulty, asBot.name, i);
+            } else {
+                connectedPlayersResponse.participants[i] = new Network.Participant(participant.name, i);
+            }
+
+        }
+
+        for (int i = 0; i < participants.length; ++i) {
+            if (participants[i] != null) {
+                connectedPlayersResponse.slot = i;
+                sendTo(connectedPlayersResponse, i);
+            }
+        }
+    }
+
+    private void notifyPlayersBoardSet() {
+        Network.PlayersSetBoardResponse connectedPlayersResponse = new Network.PlayersSetBoardResponse();
+        connectedPlayersResponse.participants = new Network.Participant[participants.length];
+        connectedPlayersResponse.boardSet = new boolean[participants.length];
+
+        for (int i = 0; i < participants.length; ++i) {
+            final LobbyParticipant participant = participants[i];
+
+            if (participant.isBot()) {
+                final BotLobbyParticipant asBot = (BotLobbyParticipant) participant;
+                connectedPlayersResponse.participants[i] = new Network.Participant(asBot.difficulty, asBot.name, i);
+            } else {
+                connectedPlayersResponse.participants[i] = new Network.Participant(participant.name, i);
+            }
+
+            connectedPlayersResponse.boardSet[i] = participant.getPlayerBoard() != null;
+        }
+
+        sendToAll(connectedPlayersResponse, false);
+    }
+
+    public void onStartLobby() {
+        if (!full()) {
+            System.err.println("Not full and you're starting???????");
+            return;
+        }
+
+        readyForBoardCommits();
+    }
+
+    public void onJoinLobby(Connection connection, Network.JoinLobby joinLobby) {
+        if (full()) {
+            connection.sendTCP(new Network.ServerIsFullResponse());
+            return;
+        }
+
+        final int slot = playersInLobby();
+        addPlayer(slot, connection);
+
+        Network.JoinLobbyResponse response = new Network.JoinLobbyResponse(slots());
+        sendTo(response, slot);
+
+        notifyPlayersInLobby();
+    }
+
+    public String toString() {
+        return "GameLobby{" +
+                "code=" + code +
+                ", participants=" + Arrays.toString(participants) +
+                ", state=" + state +
+                '}';
     }
 }

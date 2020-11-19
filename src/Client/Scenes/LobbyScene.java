@@ -92,7 +92,7 @@ public class LobbyScene extends BaseGameScene {
 
     }
 
-    public void onConnectedPlayers(Network.ConnectedPlayers players) {
+    public void onConnectedPlayers(Network.ConnectedPlayersResponse players) {
         Network.Participant[] playerLobbyParticipants = players.participants;
 
         for (int i = 0, playerLobbyParticipantsLength = playerLobbyParticipants.length; i < playerLobbyParticipantsLength; i++) {

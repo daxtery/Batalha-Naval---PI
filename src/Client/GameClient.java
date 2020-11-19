@@ -21,36 +21,36 @@ public class GameClient {
 
             public void received(Connection connection, Object object) {
 
-                if (object instanceof Network.IsFull) {
+                if (object instanceof Network.ServerIsFullResponse) {
                     GameClient.this.clientApplication.OnIsFull();
-                } else if (object instanceof Network.Abort) {
+                } else if (object instanceof Network.AbortResponse) {
                     GameClient.this.clientApplication.OnAbort();
                 } else if (object instanceof Network.JoinLobbyResponse) {
                     GameClient.this.clientApplication.onJoinLobbyResponse((Network.JoinLobbyResponse) object);
-                } else if (object instanceof Network.CanStart) {
-                    GameClient.this.clientApplication.OnCanStart((Network.CanStart) object);
-                } else if (object instanceof Network.WhoseTurn) {
-                    GameClient.this.clientApplication.OnWhoseTurn((Network.WhoseTurn) object);
-                } else if (object instanceof Network.ConnectedPlayers) {
-                    GameClient.this.clientApplication.onConnectedPlayers((Network.ConnectedPlayers) object);
-                } else if (object instanceof Network.ReadyForShips) {
+                } else if (object instanceof Network.StartGameResponse) {
+                    GameClient.this.clientApplication.OnCanStart((Network.StartGameResponse) object);
+                } else if (object instanceof Network.WhoseTurnResponse) {
+                    GameClient.this.clientApplication.OnWhoseTurn((Network.WhoseTurnResponse) object);
+                } else if (object instanceof Network.ConnectedPlayersResponse) {
+                    GameClient.this.clientApplication.onConnectedPlayers((Network.ConnectedPlayersResponse) object);
+                } else if (object instanceof Network.ReadyForShipsResponse) {
                     GameClient.this.clientApplication.OnReadyForShips();
-                } else if (object instanceof Network.YourBoardToPaint) {
-                    GameClient.this.clientApplication.OnYourBoardToPaint((Network.YourBoardToPaint) object);
-                } else if (object instanceof Network.EnemyBoardToPaint) {
-                    GameClient.this.clientApplication.OnEnemyBoardToPaint((Network.EnemyBoardToPaint) object);
+                } else if (object instanceof Network.YourBoardResponse) {
+                    GameClient.this.clientApplication.OnYourBoardToPaint((Network.YourBoardResponse) object);
+                } else if (object instanceof Network.EnemyBoardResponse) {
+                    GameClient.this.clientApplication.OnEnemyBoardToPaint((Network.EnemyBoardResponse) object);
                 } else if (object instanceof Network.AnAttackResponse) {
                     GameClient.this.clientApplication.OnAnAttackResponse((Network.AnAttackResponse) object);
-                } else if (object instanceof Network.YourTurn) {
+                } else if (object instanceof Network.YourTurnResponse) {
                     GameClient.this.clientApplication.OnYourTurn();
-                } else if (object instanceof Network.YouDead) {
+                } else if (object instanceof Network.YouDeadResponse) {
                     GameClient.this.clientApplication.OnYouDead();
-                } else if (object instanceof Network.PlayerDied) {
-                    GameClient.this.clientApplication.OnPlayerDied((Network.PlayerDied) object);
-                } else if (object instanceof Network.YouWon) {
+                } else if (object instanceof Network.PlayerDiedResponse) {
+                    GameClient.this.clientApplication.OnPlayerDied((Network.PlayerDiedResponse) object);
+                } else if (object instanceof Network.YouWonResponse) {
                     GameClient.this.clientApplication.OnYouWon();
-                } else if (object instanceof Network.ChatMessage) {
-                    GameClient.this.clientApplication.OnChatMessage((Network.ChatMessage) object);
+                } else if (object instanceof Network.ChatMessageResponse) {
+                    GameClient.this.clientApplication.OnChatMessage((Network.ChatMessageResponse) object);
                 }
             }
         });
