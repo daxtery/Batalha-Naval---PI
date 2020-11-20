@@ -1,88 +1,64 @@
 package Common;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Conversations {
 
-    Conversation[] conversations;
+    private final int slotsCount;
+    private final Conversation[] conversations;
 
-    public Conversations(){
-        conversations = new Conversation[3];
-        newConversation(0, 0,1);
-        newConversation(1, 0,2);
-        newConversation(2, 1,2);
-    }
+    public Conversations(int slotsCount) {
+        this.slotsCount = slotsCount;
 
-    public int getConversationIDWithIDs(int id1, int id2){
-        int i = 0;
-        for (Conversation conv: conversations) {
-            if(conv.isInConv(id1) && conv.isInConv(id2)){
-                return i;
+        final int totalPairs = ((slotsCount - 1) * slotsCount) / 2;
+
+        conversations = new Conversation[totalPairs];
+
+        for (int base = 0, i = 0; base < slotsCount; base++) {
+            for (int offset = base + 1; offset < slotsCount; offset++, i++) {
+                conversations[i] = new Conversation();
             }
-            i++;
         }
-        System.out.println("NOT THERE");
-        return -999;
+
     }
 
-    public void appendToConversation(int talking, int idConv, String line){
-        conversations[idConv].add(talking, line);
-    }
+    public Conversation getConversationBetweenSlots(int slot1, int slot2) {
+        final int min = Math.min(slot1, slot2);
+        final int diff = this.slotsCount - 1 - min;
+        final int pairsCount = (diff * (diff + 1)) / 2;
+        final int minBase = conversations.length - pairsCount;
 
-    private void newConversation(int id, int id1, int id2){
-        conversations[id] = new Conversation(id1, id2);
-    }
-
-    public Conversation getConversation(int idc){
-        return conversations[idc];
-    }
-
-    public Line getLastLineFromConversation(int idc){
-        return getConversation(idc).getNewLine();
+        final int offset = Math.abs(slot1 - slot2) - 1;
+        return conversations[minBase + offset];
     }
 
     public static class Conversation {
 
-        ArrayList <Line> conver;
+        List<Line> lines;
 
-        private final int id1;
-        private final int id2;
-
-        Conversation(int _id1, int _id2) {
-            id1 = _id1;
-            id2 = _id2;
-            conver = new ArrayList<>();
+        public Conversation() {
+            lines = new ArrayList<>();
         }
 
-        private boolean isInConv(int id){
-            return id == id1 || id == id2;
+        public Line add(int talking, String s) {
+            Line line = new Line(talking, s);
+            lines.add(line);
+            return line;
         }
 
-        private Line[] getAllAsArray(){
-            return (Line[])conver.toArray();
-        }
-
-        private void add(int talking, String s){
-            Line toAdd = new Line(talking, s);
-            conver.add(toAdd);
-        }
-
-
-
-
-        Line getNewLine(){
-            return conver.get(conver.size() - 1);
-        }
     }
 
-    public static class Line{
+    public static class Line {
         int id;
         String message;
-        public Line(int _id, String _message){
+
+        public Line(int _id, String _message) {
             id = _id;
             message = _message;
         }
-        public String decode(String name){
+
+        public String decode(String name) {
             return name + ": " + message;
         }
     }

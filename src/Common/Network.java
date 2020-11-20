@@ -263,7 +263,7 @@ public class Network {
     public static class ServerIsFullResponse {
         @Override
         public String toString() {
-            return "Server is full";
+            return "Server is isFull";
         }
     }
 }

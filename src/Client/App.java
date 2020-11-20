@@ -3,6 +3,7 @@ package Client;
 import Client.AI.AIPersonality;
 import Client.AI.AiClient;
 import Client.AI.FocusedBot;
+import Client.AI.MinionBot;
 import Client.Scenes.*;
 import Common.*;
 import Common.Network.*;
@@ -224,9 +225,18 @@ public class App extends Application implements IClient {
     public void onAddBotButton(int slot, BotPersonality botPersonality) {
         AIPersonality personality = switch (botPersonality) {
             case Focused -> new FocusedBot();
+            case Minion -> new MinionBot();
         };
 
-        Thread thread = new Thread(new AiClient(slot, personality, "Damien", ADDRESS));
+        final String[] names = {
+                "Damien",
+                "Lux",
+                "David"
+        };
+
+        final Random random = new Random();
+
+        Thread thread = new Thread(new AiClient(slot, personality, names[random.nextInt(names.length)], ADDRESS));
         aiThreads.put(slot, thread);
         thread.start();
     }

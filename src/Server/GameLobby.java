@@ -14,6 +14,7 @@ public class GameLobby {
     public final int code;
     public final LobbyParticipant[] participants;
     private final GameServer gameServer;
+    private final Conversations conversations;
     private int currentPlayerSlot;
     private GameLobbyState state;
 
@@ -21,6 +22,7 @@ public class GameLobby {
         this.participants = new LobbyParticipant[count];
         this.state = GameLobbyState.InLobby;
         this.gameServer = gameServer;
+        this.conversations = new Conversations(count);
         this.currentPlayerSlot = 0;
 
         // FIXME: Do we ever need codes?
@@ -40,7 +42,7 @@ public class GameLobby {
         return this.participants.length;
     }
 
-    public boolean full() {
+    public boolean isFull() {
         return playersInLobby() == slots();
     }
 
@@ -140,7 +142,7 @@ public class GameLobby {
 
                     sendToAllExcept(new Network.PlayerDiedResponse(attackedSlot), attackedSlot, true);
 
-                    if (gameIsOver()) {
+                    if (isGameOver()) {
                         sendTo(new Network.YouWonResponse(), attackerSlot);
                     }
                 }
@@ -150,7 +152,7 @@ public class GameLobby {
 
     }
 
-    public boolean gameIsOver() {
+    public boolean isGameOver() {
         return Arrays.stream(participants).allMatch(LobbyParticipant::isDefeated);
     }
 
@@ -167,7 +169,7 @@ public class GameLobby {
         participants[slot].setPlayerBoard(playerCommitBoard.playerBoardMessage.toPlayerBoard());
         notifyPlayersBoardSet();
 
-        if (allBoardsSet()) {
+        if (areAllBoardsSet()) {
             startGame();
         }
 
@@ -180,12 +182,8 @@ public class GameLobby {
         sendTo(new Network.YourTurnResponse(), currentPlayerSlot);
     }
 
-    public boolean allBoardsSet() {
+    public boolean areAllBoardsSet() {
         return Arrays.stream(participants).map(LobbyParticipant::getPlayerBoard).noneMatch(Objects::isNull);
-    }
-
-    private void onPlayerDefeated(int slot) {
-        participants[slot].setDefeated(true);
     }
 
     private <T> void sendToAllExcept(T message, int slot, boolean includeDefeated) {
@@ -289,8 +287,8 @@ public class GameLobby {
     }
 
     public void onStartLobby() {
-        if (!full()) {
-            System.err.println("Not full and you're starting???????");
+        if (!isFull()) {
+            System.err.println("Not isFull and you're starting???????");
             return;
         }
 
@@ -298,7 +296,7 @@ public class GameLobby {
     }
 
     public void onJoinLobby(Connection connection, Network.JoinLobby joinLobby) {
-        if (full()) {
+        if (isFull()) {
             connection.sendTCP(new Network.ServerIsFullResponse());
             return;
         }
@@ -310,6 +308,21 @@ public class GameLobby {
         sendTo(response, slot);
 
         notifyPlayersInLobby();
+    }
+
+    public void onChatMessageFromClient(Connection connection, Network.ChatMessage message) {
+        final int from = getSlotOf(connection).orElseThrow();
+        final int to = message.to;
+
+        final Conversations.Conversation conversation = conversations.getConversationBetweenSlots(from, to);
+        Conversations.Line line = conversation.add(from, message.text);
+
+        Network.ChatMessageResponse chats = new Network.ChatMessageResponse();
+        chats.saidIt = from;
+        chats.message = line.decode(participants[from].name);
+
+        System.out.println(chats.saidIt + " -> " + to + ":\n" + chats.message + "\n");
+        participants[to].connection.sendTCP(chats);
     }
 
     public String toString() {

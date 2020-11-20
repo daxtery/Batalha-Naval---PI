@@ -19,7 +19,6 @@ public class GameServer {
     //WILL SAVE WHAT CONNECTIONS THE GAME STARTED WITH
     //SO IT'S POSSIBLE TO KNOW IF SOMEBODY WHO DROPPED IS RECONNECTING
     private long currentWaitedTime;
-    private Conversations conversations;
 
     public GameServer(int port) throws IOException {
         server = new Server();
@@ -72,9 +71,6 @@ public class GameServer {
 
     private void onStartLobby() {
         lobby.onStartLobby();
-
-        // TODO: MOVE THIS TO LOBBY
-        conversations = new Conversations();
     }
 
     private void onRemovePlayerFromLobby(RemovePlayerFromLobby removePlayerFromLobby) {
@@ -129,20 +125,7 @@ public class GameServer {
     }
 
     private void onChatMessageFromClient(Connection connection, ChatMessage message) {
-
-        final int from = lobby.getSlotOf(connection).orElseThrow();
-        final int to = message.to;
-
-        final int c = conversations.getConversationIDWithIDs(from, to);
-
-        conversations.appendToConversation(from, c, message.text);
-        Conversations.Line line = conversations.getLastLineFromConversation(c);
-        ChatMessageResponse chats = new ChatMessageResponse();
-        chats.saidIt = from;
-        chats.message = line.decode(lobby.participants[from].name);
-
-        System.out.println(chats.saidIt + " -> " + to + ":\n" + chats.message + "\n");
-        lobby.participants[to].connection.sendTCP(chats);
+        lobby.onChatMessageFromClient(connection, message);
     }
 
     private void onGameOver() {

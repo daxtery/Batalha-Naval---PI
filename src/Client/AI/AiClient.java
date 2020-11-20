@@ -23,7 +23,7 @@ public class AiClient implements IClient, Runnable {
         this.gameClient = new GameClient(this);
 
         this.personality = personality;
-        personality.setAi(this);
+        personality.setClient(this);
     }
 
     @Override

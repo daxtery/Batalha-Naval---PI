@@ -1,115 +1,14 @@
 package Client.AI;
 
 import Common.*;
-import util.Point;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 
-class MoveCandidate {
-
-    public final Point attackedPoint;
-    public final int score;
-
-    public MoveCandidate(Point origin, int score) {
-        this.attackedPoint = origin;
-        this.score = score;
-    }
-
-    @Override
-    public String toString() {
-        return "MoveCandidate{" +
-                "attackedPoint=" + attackedPoint +
-                ", score=" + score +
-                '}';
-    }
-}
-
-class FocusedBotBrain {
-
-    Point firstContact;
-
-    public FocusedBotBrain() {
-    }
-
-    public List<MoveCandidate> calculateMoves(PlayerBoard playerBoard) {
-
-        if (firstContact != null) {
-            BoardTile tile = playerBoard.getTileAt(firstContact);
-
-            firstContact = playerBoard.isShipDestroyed(tile.getShip()) ? null : firstContact;
-        }
-
-        if (firstContact == null) {
-            List<BoardTile> shipPieces = playerBoard.getTilesWithShipPieces();
-
-            Optional<BoardTile> possiblyNewFirstContact = shipPieces.stream()
-                    .filter(Predicate.not(BoardTile::isAttackable))
-                    .filter(tile -> !playerBoard.isShipDestroyed(tile.getShip()))
-                    .findFirst();
-
-            possiblyNewFirstContact.ifPresent(boardTile -> firstContact = boardTile.point);
-        }
-
-        if (firstContact == null) {
-            List<BoardTile> possible = playerBoard.getAttackableTiles();
-            int index = new Random().nextInt(possible.size());
-            BoardTile chosen = possible.get(index);
-            return List.of(new MoveCandidate(chosen.point, 1));
-        }
-
-        final int maxShipSize = playerBoard.getShips()
-                .stream()
-                .map(s -> s.size)
-                .max(Integer::compareTo)
-                .orElseThrow();
-
-        List<MoveCandidate> moveCandidates = new ArrayList<>();
-
-        Direction foundDirection = null;
-
-        for (Direction direction : Direction.values()) {
-
-            if (foundDirection != null && direction != foundDirection.opposite) {
-                continue;
-            }
-
-            int inThisDirection = 1;
-            int inARow = 1;
-            Point current = firstContact.moved(direction.vector);
-            for (int i = 1; i < maxShipSize && playerBoard.inBounds(current); i++) {
-                BoardTile tile = playerBoard.getTileAt(current);
-
-                if (tile.isAttackable()) {
-                    MoveCandidate moveCandidate = new MoveCandidate(current, inARow + inThisDirection);
-                    moveCandidates.add(moveCandidate);
-                    inARow = 0;
-                } else {
-                    if (tile.containsShipPiece()) {
-                        inARow++;
-                        inThisDirection++;
-                        if (inARow > 1) {
-                            foundDirection = direction;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-
-                current = current.moved(direction.vector);
-            }
-        }
-
-        return moveCandidates;
-    }
-
-}
-
 public class FocusedBot extends Client.AI.AIPersonality {
 
-    private final FocusedBotBrain brain;
+    private final BotBrain brain;
     private String lastMessage;
     private int focusing;
     private PlayerBoard[] playerBoards;
@@ -117,7 +16,7 @@ public class FocusedBot extends Client.AI.AIPersonality {
 
     public FocusedBot() {
         super(BotPersonality.Focused);
-        this.brain = new FocusedBotBrain();
+        this.brain = new BotBrain();
     }
 
     @Override
@@ -134,7 +33,6 @@ public class FocusedBot extends Client.AI.AIPersonality {
     public void OnCanStart(Network.StartGameResponse startGameResponse) {
         IntStream slots = new Random().ints(0, connectedPlayersResponse.participants.length);
         focusing = slots.filter(slot -> slot != connectedPlayersResponse.slot).findFirst().orElseThrow();
-        focusing = 0;
 
         playerBoards = new PlayerBoard[startGameResponse.boards.length + 1];
 
@@ -158,7 +56,7 @@ public class FocusedBot extends Client.AI.AIPersonality {
         final int index = new Random().nextInt(taunts.length);
 
         message.text = taunts[index];
-        ai.gameClient.sendTCP(message);
+        client.gameClient.sendTCP(message);
     }
 
     @Override
@@ -198,27 +96,42 @@ public class FocusedBot extends Client.AI.AIPersonality {
     @Override
     public void OnYourTurn() {
         List<MoveCandidate> moves = brain.calculateMoves(playerBoards[focusing]);
-        MoveCandidate move = moves.stream().max(Comparator.comparingInt(m -> m.score)).orElseThrow();
+        moves.sort(Comparator.comparingInt((MoveCandidate m) -> m.score).reversed());
+        MoveCandidate move = moves.get(0);
 
         Network.AnAttack attack = new Network.AnAttack();
         attack.toAttackID = focusing;
         attack.at = move.attackedPoint;
 
+        final boolean debug = true;
+
         try {
             Network.ChatMessage chatMessage = new Network.ChatMessage();
 
-            chatMessage.text =
-                    "Attacked you with " +
-                            move +
-                            "(considered were: " + moves + ")" +
-                            "\n";
+            StringBuilder builder = new StringBuilder()
+                    .append("How do you like that attack @ ")
+                    .append(move.attackedPoint)
+                    .append("\n");
 
+            if (debug) {
+                builder.append("DEBUG: ")
+                        .append("\n")
+                        .append("Selected move was")
+                        .append(move)
+                        .append("\n")
+                        .append("Considered moves were: ")
+                        .append(moves)
+                        .append("\n");
+            }
+
+            chatMessage.text = builder.toString();
             chatMessage.to = focusing;
 
-            ai.gameClient.sendTCP(chatMessage);
-
             Thread.sleep(1000);
-            ai.gameClient.sendTCP(attack);
+
+            client.gameClient.sendTCP(chatMessage);
+            client.gameClient.sendTCP(attack);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -263,7 +176,7 @@ public class FocusedBot extends Client.AI.AIPersonality {
             Network.ChatMessage message = new Network.ChatMessage();
             message.to = focusing;
             message.text = comebacks[index];
-            ai.gameClient.sendTCP(message);
+            client.gameClient.sendTCP(message);
         }
     }
 

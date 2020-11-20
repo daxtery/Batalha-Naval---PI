@@ -18,12 +18,12 @@ import java.util.Objects;
 
 public class LobbyScene extends BaseGameScene {
 
-    private int count;
-    private boolean admin;
     private final List<Label> labels;
-    private final List<Button> addButtons;
+    private final List<MenuButton> addButtons;
     private final List<Button> removeButtons;
     private final Button startButton;
+    private int count;
+    private boolean admin;
 
     public LobbyScene(App app) {
         super(app, new GridPane());
@@ -65,13 +65,18 @@ public class LobbyScene extends BaseGameScene {
 
         if (admin) {
             for (int i = 0; i < count; i++) {
-                Button addBotButton = new Button("+");
-
                 final int slot = i;
-                addBotButton.setOnMouseClicked(event -> app.onAddBotButton(slot, BotPersonality.Focused));
 
-                addButtons.add(addBotButton);
-                grid.add(addBotButton, 0, i + 1);
+                MenuButton addMenuButton = new MenuButton();
+
+                for (BotPersonality personality : BotPersonality.values()) {
+                    MenuItem menuItem = new MenuItem(personality.toString());
+                    menuItem.setOnAction(event -> app.onAddBotButton(slot, personality));
+                    addMenuButton.getItems().add(menuItem);
+                }
+
+                addButtons.add(addMenuButton);
+                grid.add(addMenuButton, 0, i + 1);
 
                 Button removeButton = new Button("x");
                 removeButton.setOnMouseClicked(event -> app.onRemovePlayerButton(slot));

@@ -5,15 +5,17 @@ import Common.BotPersonality;
 
 public abstract class AIPersonality implements IClient {
 
-    public final BotPersonality personality;
-    protected AiClient ai;
+    protected final BotPersonality personality;
+    protected final BotBrain brain;
+    protected AiClient client;
 
     public AIPersonality(BotPersonality personality) {
         this.personality = personality;
+        this.brain = new BotBrain();
     }
 
-    public void setAi(AiClient ai) {
-        this.ai = ai;
+    public void setClient(AiClient client) {
+        this.client = client;
     }
 
     @Override
