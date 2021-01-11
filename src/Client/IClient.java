@@ -3,33 +3,33 @@ package Client;
 import Common.Network;
 
 public interface IClient {
-    void OnIsFull();
+    void onIsFull();
 
-    void OnAbort();
+    void onAbort();
 
-    void OnCanStart(Network.StartGameResponse startGameResponse);
+    void onCanStart(Network.StartGameResponse startGameResponse);
 
-    void OnWhoseTurn(Network.WhoseTurnResponse whoseTurnResponse);
+    void onWhoseTurn(Network.WhoseTurnResponse whoseTurnResponse);
 
     void onConnectedPlayers(Network.ConnectedPlayersResponse connectedPlayersResponse);
 
-    void OnReadyForShips();
+    void onReadyForShips();
 
-    void OnYourBoardToPaint(Network.YourBoardResponse object);
+    void onYourBoardToPaint(Network.YourBoardResponse object);
 
-    void OnEnemyBoardToPaint(Network.EnemyBoardResponse object);
+    void onEnemyBoardToPaint(Network.EnemyBoardResponse object);
 
-    void OnAnAttackResponse(Network.AnAttackResponse object);
+    void onAnAttackResponse(Network.AnAttackResponse object);
 
-    void OnYourTurn();
+    void onYourTurn();
 
-    void OnYouDead();
+    void onYouDead();
 
-    void OnPlayerDied(Network.PlayerDiedResponse object);
+    void onPlayerDied(Network.PlayerDiedResponse object);
 
-    void OnYouWon();
+    void onYouWon();
 
-    void OnChatMessage(Network.ChatMessageResponse object);
+    void onChatMessage(Network.ChatMessageResponse object);
 
     void onJoinLobbyResponse(Network.JoinLobbyResponse joinLobbyResponse);
 }

@@ -21,36 +21,36 @@ public class GameClient {
 
             public void received(Connection connection, Object object) {
 
-                if (object instanceof Network.ServerIsFullResponse) {
-                    GameClient.this.clientApplication.OnIsFull();
+                if (object instanceof Network.LobbyIsFullResponse) {
+                    GameClient.this.clientApplication.onIsFull();
                 } else if (object instanceof Network.AbortResponse) {
-                    GameClient.this.clientApplication.OnAbort();
+                    GameClient.this.clientApplication.onAbort();
                 } else if (object instanceof Network.JoinLobbyResponse) {
                     GameClient.this.clientApplication.onJoinLobbyResponse((Network.JoinLobbyResponse) object);
                 } else if (object instanceof Network.StartGameResponse) {
-                    GameClient.this.clientApplication.OnCanStart((Network.StartGameResponse) object);
+                    GameClient.this.clientApplication.onCanStart((Network.StartGameResponse) object);
                 } else if (object instanceof Network.WhoseTurnResponse) {
-                    GameClient.this.clientApplication.OnWhoseTurn((Network.WhoseTurnResponse) object);
+                    GameClient.this.clientApplication.onWhoseTurn((Network.WhoseTurnResponse) object);
                 } else if (object instanceof Network.ConnectedPlayersResponse) {
                     GameClient.this.clientApplication.onConnectedPlayers((Network.ConnectedPlayersResponse) object);
                 } else if (object instanceof Network.ReadyForShipsResponse) {
-                    GameClient.this.clientApplication.OnReadyForShips();
+                    GameClient.this.clientApplication.onReadyForShips();
                 } else if (object instanceof Network.YourBoardResponse) {
-                    GameClient.this.clientApplication.OnYourBoardToPaint((Network.YourBoardResponse) object);
+                    GameClient.this.clientApplication.onYourBoardToPaint((Network.YourBoardResponse) object);
                 } else if (object instanceof Network.EnemyBoardResponse) {
-                    GameClient.this.clientApplication.OnEnemyBoardToPaint((Network.EnemyBoardResponse) object);
+                    GameClient.this.clientApplication.onEnemyBoardToPaint((Network.EnemyBoardResponse) object);
                 } else if (object instanceof Network.AnAttackResponse) {
-                    GameClient.this.clientApplication.OnAnAttackResponse((Network.AnAttackResponse) object);
+                    GameClient.this.clientApplication.onAnAttackResponse((Network.AnAttackResponse) object);
                 } else if (object instanceof Network.YourTurnResponse) {
-                    GameClient.this.clientApplication.OnYourTurn();
+                    GameClient.this.clientApplication.onYourTurn();
                 } else if (object instanceof Network.YouDeadResponse) {
-                    GameClient.this.clientApplication.OnYouDead();
+                    GameClient.this.clientApplication.onYouDead();
                 } else if (object instanceof Network.PlayerDiedResponse) {
-                    GameClient.this.clientApplication.OnPlayerDied((Network.PlayerDiedResponse) object);
+                    GameClient.this.clientApplication.onPlayerDied((Network.PlayerDiedResponse) object);
                 } else if (object instanceof Network.YouWonResponse) {
-                    GameClient.this.clientApplication.OnYouWon();
+                    GameClient.this.clientApplication.onYouWon();
                 } else if (object instanceof Network.ChatMessageResponse) {
-                    GameClient.this.clientApplication.OnChatMessage((Network.ChatMessageResponse) object);
+                    GameClient.this.clientApplication.onChatMessage((Network.ChatMessageResponse) object);
                 }
             }
         });

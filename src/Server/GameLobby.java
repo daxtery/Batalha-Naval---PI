@@ -5,6 +5,7 @@ import com.esotericsoftware.kryonet.Connection;
 import util.Point;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -13,7 +14,6 @@ public class GameLobby {
 
     public final int code;
     public final LobbyParticipant[] participants;
-    private final GameServer gameServer;
     private final Conversations conversations;
     private int currentPlayerSlot;
     private GameLobbyState state;
@@ -21,7 +21,6 @@ public class GameLobby {
     public GameLobby(GameServer gameServer, int count, Connection connection) {
         this.participants = new LobbyParticipant[count];
         this.state = GameLobbyState.InLobby;
-        this.gameServer = gameServer;
         this.conversations = new Conversations(count);
         this.currentPlayerSlot = 0;
 
@@ -153,7 +152,9 @@ public class GameLobby {
     }
 
     public boolean isGameOver() {
-        return Arrays.stream(participants).allMatch(LobbyParticipant::isDefeated);
+        return Arrays.stream(participants)
+                .filter(Predicate.not(LobbyParticipant::isBot))
+                .allMatch(LobbyParticipant::isDefeated);
     }
 
     public boolean isGameOverFor(int id) {
@@ -297,17 +298,16 @@ public class GameLobby {
 
     public void onJoinLobby(Connection connection, Network.JoinLobby joinLobby) {
         if (isFull()) {
-            connection.sendTCP(new Network.ServerIsFullResponse());
+            connection.sendTCP(new Network.LobbyIsFullResponse());
             return;
         }
 
         final int slot = playersInLobby();
-        addPlayer(slot, connection);
 
         Network.JoinLobbyResponse response = new Network.JoinLobbyResponse(slots());
-        sendTo(response, slot);
+        connection.sendTCP(response);
 
-        notifyPlayersInLobby();
+        addPlayer(slot, connection);
     }
 
     public void onChatMessageFromClient(Connection connection, Network.ChatMessage message) {

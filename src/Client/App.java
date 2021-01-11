@@ -1,9 +1,9 @@
 package Client;
 
-import Client.AI.AIPersonality;
+import Client.AI.Personality.AIPersonality;
 import Client.AI.AiClient;
-import Client.AI.FocusedBot;
-import Client.AI.MinionBot;
+import Client.AI.Personality.FocusedBot;
+import Client.AI.Personality.MinionBot;
 import Client.Scenes.*;
 import Common.*;
 import Common.Network.*;
@@ -129,17 +129,7 @@ public class App extends Application implements IClient {
     }
 
     private void transitionTo(Scene scene) {
-        Scene old = theStage.getScene();
-
-        if (old instanceof BaseGameScene) {
-            ((BaseGameScene) old).OnSceneUnset();
-        }
-
         theStage.setScene(scene);
-
-        if (scene instanceof BaseGameScene) {
-            ((BaseGameScene) scene).OnSceneSet();
-        }
     }
 
     private void setWonScene() {
@@ -164,15 +154,15 @@ public class App extends Application implements IClient {
         }
     }
 
-    public void OnIsFull() {
+    public void onIsFull() {
     }
 
-    public void OnAbort() {
+    public void onAbort() {
     }
 
     @Override
-    public void OnCanStart(StartGameResponse startGameResponse) {
-        System.out.println("OnCanStart");
+    public void onCanStart(StartGameResponse startGameResponse) {
+        System.out.println("onCanStart");
 
         Platform.runLater(() -> {
             ourId = players.slot;
@@ -184,39 +174,40 @@ public class App extends Application implements IClient {
         });
     }
 
-    public void OnWhoseTurn(WhoseTurnResponse whoseTurnResponse) {
+    public void onWhoseTurn(WhoseTurnResponse whoseTurnResponse) {
         Platform.runLater(() -> mainGame.OnWhoseTurn(whoseTurnResponse));
     }
 
     public void onConnectedPlayers(ConnectedPlayersResponse players) {
+        this.players = players;
+
         Platform.runLater(() -> {
-            this.players = players;
             lobbyScene.onConnectedPlayers(players);
         });
     }
 
-    public void OnReadyForShips() {
+    public void onReadyForShips() {
         Platform.runLater(() -> transitionTo(setShips));
     }
 
-    public void OnYourBoardToPaint(YourBoardResponse toPaint) {
+    public void onYourBoardToPaint(YourBoardResponse toPaint) {
         Platform.runLater(() -> mainGame.OnYourBoardToPaint(toPaint));
     }
 
-    public void OnEnemyBoardToPaint(EnemyBoardResponse board) {
+    public void onEnemyBoardToPaint(EnemyBoardResponse board) {
         Platform.runLater(() -> {
             mainGame.onEnemyBoardToPaint(board);
         });
     }
 
-    public void OnAnAttackResponse(AnAttackResponse attackResponse) {
+    public void onAnAttackResponse(AnAttackResponse attackResponse) {
         Platform.runLater(() -> {
             mainGame.OnAttackResponse(attackResponse);
             doSounds(attackResponse.hitResult);
         });
     }
 
-    public void OnYourTurn() {
+    public void onYourTurn() {
         Platform.runLater(() -> {
             mainGame.OnYourTurn();
         });
@@ -252,20 +243,20 @@ public class App extends Application implements IClient {
         client.sendTCP(new RemovePlayerFromLobby(slot));
     }
 
-    public void OnYouDead() {
+    public void onYouDead() {
         Platform.runLater(() -> {
             lost();
             transitionTo(mainMenu);
         });
     }
 
-    public void OnPlayerDied(PlayerDiedResponse playerDiedResponse) {
+    public void onPlayerDied(PlayerDiedResponse playerDiedResponse) {
         Platform.runLater(() -> {
             mainGame.onPlayerDied(playerDiedResponse);
         });
     }
 
-    public void OnYouWon() {
+    public void onYouWon() {
         Platform.runLater(() -> {
             Alert lost = new Alert(Alert.AlertType.CONFIRMATION);
             lost.setContentText("YOU BEAT THEM ALL");
@@ -274,7 +265,7 @@ public class App extends Application implements IClient {
         });
     }
 
-    public void OnChatMessage(ChatMessageResponse chatMessageResponse) {
+    public void onChatMessage(ChatMessageResponse chatMessageResponse) {
         Platform.runLater(() -> mainGame.onChatMessage(chatMessageResponse));
     }
 

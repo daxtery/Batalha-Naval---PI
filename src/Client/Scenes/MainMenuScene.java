@@ -122,13 +122,4 @@ public class MainMenuScene extends BaseGameScene {
         ((BorderPane) getRoot()).setCenter(mMMiddle);
     }
 
-    @Override
-    public void OnSceneSet() {
-
-    }
-
-    @Override
-    public void OnSceneUnset() {
-
-    }
 }

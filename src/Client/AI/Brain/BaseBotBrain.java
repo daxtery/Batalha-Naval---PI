@@ -1,4 +1,4 @@
-package Client.AI;
+package Client.AI.Brain;
 
 import Common.BoardTile;
 import Common.Direction;
@@ -11,11 +11,11 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 
-class BotBrain {
+public class BaseBotBrain {
 
     Point firstContact;
 
-    public BotBrain() {
+    public BaseBotBrain() {
     }
 
     public List<MoveCandidate> calculateMoves(PlayerBoard playerBoard) {

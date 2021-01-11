@@ -13,6 +13,7 @@ public class Network {
     public static void register(EndPoint endPoint) {
         Kryo kryo = endPoint.getKryo();
         kryo.register(JoinLobby.class);
+        kryo.register(JoinLobbyResponse.class);
         kryo.register(CreateLobby.class);
         kryo.register(Participant.class);
         kryo.register(Participant[].class);
@@ -48,7 +49,7 @@ public class Network {
         kryo.register(PlayerBoardMessage.class);
         kryo.register(PlayerBoardMessage[].class);
         //
-        kryo.register(ServerIsFullResponse.class);
+        kryo.register(LobbyIsFullResponse.class);
         kryo.register(PlayersSetBoardResponse.class);
         kryo.register(ReadyForShipsResponse.class);
         kryo.register(AbortResponse.class);
@@ -86,6 +87,14 @@ public class Network {
     public static class AnAttack {
         public int toAttackID;
         public Point at;
+
+        public AnAttack(int toAttackID, Point at) {
+            this.toAttackID = toAttackID;
+            this.at = at;
+        }
+
+        public AnAttack() {
+        }
     }
 
     public static class EnemyBoardResponse {
@@ -142,6 +151,14 @@ public class Network {
     public static class ChatMessage {
         public String text;
         public int to;
+
+        public ChatMessage(String text, int to) {
+            this.text = text;
+            this.to = to;
+        }
+
+        public ChatMessage() {
+        }
     }
 
     public static class Participant {
@@ -163,14 +180,14 @@ public class Network {
         public Participant() {
         }
 
+        public final boolean isBot() {
+            return BotPersonality != null;
+        }
+
         @Override
         public String toString() {
-
-            if (BotPersonality == null) {
-                return name + " #" + slot;
-            }
-
-            return name + "(Bot: " + BotPersonality + ")" + " #" + slot;
+            if (isBot()) return name + "(Bot: " + BotPersonality + ")" + " #" + slot;
+            return name + " #" + slot;
         }
     }
 
@@ -260,10 +277,10 @@ public class Network {
         }
     }
 
-    public static class ServerIsFullResponse {
+    public static class LobbyIsFullResponse {
         @Override
         public String toString() {
-            return "Server is isFull";
+            return "Lobby is full";
         }
     }
 }

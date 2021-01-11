@@ -70,14 +70,6 @@ public class MainGameScene extends BaseGameScene {
         canvasWrapper.getChildren().add(myBoard);
     }
 
-    @Override
-    public void OnSceneSet() {
-    }
-
-    @Override
-    public void OnSceneUnset() {
-    }
-
     public void OnWhoseTurn(Network.WhoseTurnResponse whoseTurnResponse) {
         turnQueue.highlightPlayer(whoseTurnResponse.slot);
         allowAttacks = false;

@@ -88,15 +88,6 @@ public class LobbyScene extends BaseGameScene {
         }
     }
 
-    @Override
-    public void OnSceneSet() {
-    }
-
-    @Override
-    public void OnSceneUnset() {
-
-    }
-
     public void onConnectedPlayers(Network.ConnectedPlayersResponse players) {
         Network.Participant[] playerLobbyParticipants = players.participants;
 

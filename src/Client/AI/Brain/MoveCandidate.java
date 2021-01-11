@@ -1,8 +1,8 @@
-package Client.AI;
+package Client.AI.Brain;
 
 import util.Point;
 
-class MoveCandidate {
+public class MoveCandidate {
 
     public final Point attackedPoint;
     public final int score;

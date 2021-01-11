@@ -15,7 +15,4 @@ public abstract class BaseGameScene extends Scene {
         this.app = app;
     }
 
-    public abstract void OnSceneSet();
-
-    public abstract void OnSceneUnset();
 }

@@ -133,13 +133,4 @@ public class SetShipsScene extends BaseGameScene {
         sSRoot.setSpacing(10);
     }
 
-    @Override
-    public void OnSceneSet() {
-
-    }
-
-    @Override
-    public void OnSceneUnset() {
-
-    }
 }
