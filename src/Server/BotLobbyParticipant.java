@@ -5,20 +5,14 @@ import com.esotericsoftware.kryonet.Connection;
 
 public class BotLobbyParticipant extends LobbyParticipant {
 
-    public final BotPersonality difficulty;
+    private final BotPersonality difficulty;
 
-    public BotLobbyParticipant(BotPersonality difficulty, String name, Connection connection) {
-        super(name, connection);
+    public BotLobbyParticipant(BotPersonality difficulty, Player player) {
+        super(player);
         this.difficulty = difficulty;
     }
 
-    @Override
-    protected boolean isBot() {
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return name + " (Bot: " + difficulty + ")";
+    public BotPersonality getDifficulty() {
+        return difficulty;
     }
 }

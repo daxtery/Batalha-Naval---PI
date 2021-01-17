@@ -19,6 +19,11 @@ public class GameClient {
 
         client.addListener(new Listener() {
 
+            @Override
+            public void disconnected(Connection connection) {
+                GameClient.this.clientApplication.onNetworkDisconnected();
+            }
+
             public void received(Connection connection, Object object) {
 
                 if (object instanceof Network.LobbyIsFullResponse) {
@@ -56,11 +61,22 @@ public class GameClient {
         });
     }
 
-    public void tryConnect(String address, int port) throws IOException {
+    public void tryConnect(String address, int port, PlayerSettings playerSettings) throws IOException {
+        client.addListener(new Listener() {
+            @Override
+            public void connected(Connection connection) {
+                connection.sendTCP(new Network.Register(
+                        playerSettings.getCode(),
+                        playerSettings.getName(),
+                        playerSettings.isBot())
+                );
+            }
+        });
+
         client.connect(5000, address, port);
     }
 
-    public void sendTCP(Object object) {
+    public <T> void sendTCP(T object) {
         client.sendTCP(object);
     }
 

@@ -18,7 +18,7 @@ public class GameLobby {
     private int currentPlayerSlot;
     private GameLobbyState state;
 
-    public GameLobby(GameServer gameServer, int count, Connection connection) {
+    public GameLobby(GameServer gameServer, int count, Player owner) {
         this.participants = new LobbyParticipant[count];
         this.state = GameLobbyState.InLobby;
         this.conversations = new Conversations(count);
@@ -26,7 +26,7 @@ public class GameLobby {
 
         // FIXME: Do we ever need codes?
         this.code = 5;
-        addPlayer(0, connection);
+        addPlayer(0, owner);
     }
 
     public GameLobbyState getState() {
@@ -45,13 +45,13 @@ public class GameLobby {
         return playersInLobby() == slots();
     }
 
-    public void addPlayer(int slot, Connection connection) {
-        this.participants[slot] = new PlayerLobbyParticipant(connection, connection.toString());
+    public void addPlayer(int slot, Player player) {
+        this.participants[slot] = new LobbyParticipant(player);
         notifyPlayersInLobby();
     }
 
-    public void addBot(int slot, String name, BotPersonality difficulty, Connection connection) {
-        this.participants[slot] = new BotLobbyParticipant(difficulty, name, connection);
+    public void addBot(int slot, Player player, BotPersonality difficulty) {
+        this.participants[slot] = new BotLobbyParticipant(difficulty, player);
         notifyPlayersInLobby();
     }
 
@@ -65,7 +65,7 @@ public class GameLobby {
         for (int i = 0, participantsLength = participants.length; i < participantsLength; i++) {
             LobbyParticipant participant = participants[i];
 
-            if (participant.connection == connection) {
+            if (participant.getPlayer().getConnection() == connection) {
                 return Optional.of(i);
             }
         }
@@ -153,7 +153,7 @@ public class GameLobby {
 
     public boolean isGameOver() {
         return Arrays.stream(participants)
-                .filter(Predicate.not(LobbyParticipant::isBot))
+                .filter(Predicate.not(participant -> participant.getPlayer().isBot()))
                 .allMatch(LobbyParticipant::isDefeated);
     }
 
@@ -199,7 +199,7 @@ public class GameLobby {
                 continue;
             }
 
-            participants[i].connection.sendTCP(message);
+            participants[i].getPlayer().getConnection().sendTCP(message);
         }
     }
 
@@ -210,13 +210,13 @@ public class GameLobby {
                 continue;
             }
 
-            participant.connection.sendTCP(message);
+            participant.getPlayer().getConnection().sendTCP(message);
         }
     }
 
     private <T> void sendTo(T message, int slot) {
         final LobbyParticipant participant = participants[slot];
-        participant.connection.sendTCP(message);
+        participant.getPlayer().getConnection().sendTCP(message);
     }
 
     private int nextTurnSlot() {
@@ -249,11 +249,16 @@ public class GameLobby {
                 continue;
             }
 
-            if (participant.isBot()) {
+            if (participant.getPlayer().isBot()) {
                 final BotLobbyParticipant asBot = (BotLobbyParticipant) participant;
-                connectedPlayersResponse.participants[i] = new Network.Participant(asBot.difficulty, asBot.name, i);
+                connectedPlayersResponse.participants[i] = new Network.Participant(
+                        asBot.getDifficulty(),
+                        asBot.getPlayer().getName(),
+                        i
+                );
+
             } else {
-                connectedPlayersResponse.participants[i] = new Network.Participant(participant.name, i);
+                connectedPlayersResponse.participants[i] = new Network.Participant(participant.getPlayer().getName(), i);
             }
 
         }
@@ -274,11 +279,15 @@ public class GameLobby {
         for (int i = 0; i < participants.length; ++i) {
             final LobbyParticipant participant = participants[i];
 
-            if (participant.isBot()) {
+            if (participant.getPlayer().isBot()) {
                 final BotLobbyParticipant asBot = (BotLobbyParticipant) participant;
-                connectedPlayersResponse.participants[i] = new Network.Participant(asBot.difficulty, asBot.name, i);
+                connectedPlayersResponse.participants[i] = new Network.Participant(
+                        asBot.getDifficulty(),
+                        asBot.getPlayer().getName(),
+                        i
+                );
             } else {
-                connectedPlayersResponse.participants[i] = new Network.Participant(participant.name, i);
+                connectedPlayersResponse.participants[i] = new Network.Participant(participant.getPlayer().getName(), i);
             }
 
             connectedPlayersResponse.boardSet[i] = participant.getPlayerBoard() != null;
@@ -296,18 +305,18 @@ public class GameLobby {
         readyForBoardCommits();
     }
 
-    public void onJoinLobby(Connection connection, Network.JoinLobby joinLobby) {
+    public void onJoinLobby(Player player, Network.JoinLobby joinLobby) {
         if (isFull()) {
-            connection.sendTCP(new Network.LobbyIsFullResponse());
+            player.getConnection().sendTCP(new Network.LobbyIsFullResponse());
             return;
         }
 
         final int slot = playersInLobby();
 
         Network.JoinLobbyResponse response = new Network.JoinLobbyResponse(slots());
-        connection.sendTCP(response);
+        player.getConnection().sendTCP(response);
 
-        addPlayer(slot, connection);
+        addPlayer(slot, player);
     }
 
     public void onChatMessageFromClient(Connection connection, Network.ChatMessage message) {
@@ -319,10 +328,10 @@ public class GameLobby {
 
         Network.ChatMessageResponse chats = new Network.ChatMessageResponse();
         chats.saidIt = from;
-        chats.message = line.decode(participants[from].name);
+        chats.message = line.decode(participants[from].getPlayer().getName());
 
         System.out.println(chats.saidIt + " -> " + to + ":\n" + chats.message + "\n");
-        participants[to].connection.sendTCP(chats);
+        sendTo(chats, to);
     }
 
     public String toString() {

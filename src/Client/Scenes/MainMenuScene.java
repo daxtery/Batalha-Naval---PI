@@ -45,8 +45,8 @@ public class MainMenuScene extends BaseGameScene {
                 alert.showAndWait();
                 return;
             }
-
-            app.onJoinButtonPressed(name);
+            app.setName(name);
+            app.onJoinButtonPressed();
         });
 
         multiplayerButton.setStyle("-fx-background-color: transparent;");
@@ -98,7 +98,10 @@ public class MainMenuScene extends BaseGameScene {
             });
 
             Optional<Integer> result = dialog.showAndWait();
-            result.ifPresent(slots -> app.onCreateLobbyButton(name, slots));
+            result.ifPresent(slots -> {
+                app.setName(name);
+                app.onCreateLobbyButton(slots);
+            });
         });
 
         createLobbyButton.setStyle("-fx-background-color: transparent;");

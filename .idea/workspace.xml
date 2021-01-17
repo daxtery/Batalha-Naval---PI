@@ -5,24 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="37b56e5f-9663-4c59-9fe2-fcdf19ec8eed" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Client/AI/Personality/AIPersonality.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Client/PlayerCode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Client/PlayerSettings.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Server/Player.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/AI/AIPersonality.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/AI/AiClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/AI/AiClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/AI/BotBrain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/AI/Brain/BaseBotBrain.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/AI/FocusedBot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/AI/Personality/FocusedBot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/AI/MinionBot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/AI/Personality/MinionBot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/AI/MoveCandidate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/AI/Brain/MoveCandidate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/App.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/GameClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/GameClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/IClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/IClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/BaseGameScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/BaseGameScene.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/LobbyScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/LobbyScene.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/Scenes/MainGameScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/MainGameScene.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/Scenes/MainMenuScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/MainMenuScene.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/Scenes/SetShipsScene.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Scenes/SetShipsScene.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Common/Network.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Common/Network.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/BotLobbyParticipant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/BotLobbyParticipant.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Server/GameLobby.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/GameLobby.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/GameServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/GameServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/LobbyParticipant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/LobbyParticipant.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/PlayerLobbyParticipant.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +40,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.jdks/openjdk-14.0.2/lib/src.zip!/java.base/java/nio/file/Files.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="JupyterTrust" id="0e034977-9992-41dc-9031-5bb8e231fd66" />
   <component name="MavenImportPreferences">
@@ -181,8 +182,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.GameServer" />
-        <item itemvalue="JUnit.PlayerBoardTest" />
         <item itemvalue="JUnit.PlayerBoardTest.place4sized" />
+        <item itemvalue="JUnit.PlayerBoardTest" />
       </list>
     </recent_temporary>
   </component>
@@ -269,118 +270,15 @@
       <workItem from="1606252895509" duration="14000" />
       <workItem from="1606252926224" duration="8939000" />
       <workItem from="1610321784440" duration="96000" />
-      <workItem from="1610322136415" duration="4275000" />
+      <workItem from="1610322136415" duration="7243000" />
+      <workItem from="1610836682764" duration="195000" />
+      <workItem from="1610837219286" duration="109000" />
+      <workItem from="1610837349671" duration="7588000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="414" y="175" width="1092" height="834" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605824762137">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="414" y="175" width="1092" height="834" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1605824762137" />
-    <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser" timestamp="1606257348492">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="765" y="236" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1606257348492" />
-    <state x="640" y="256" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1610321787817">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="640" y="256" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1610321787817" />
-    <state x="664" y="297" key="#com.intellij.refactoring.encapsulateFields.EncalpsulateFieldsDialog" timestamp="1605830186949">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="664" y="297" key="#com.intellij.refactoring.encapsulateFields.EncalpsulateFieldsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1605830186949" />
-    <state x="743" y="389" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1604146212795">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="743" y="389" width="433" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1920.1040@0.0.1920.1040" timestamp="1604146212795" />
-    <state x="713" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1606254671310">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="713" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1606254671310" />
-    <state x="1098" y="290" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1606255203434">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="1098" y="290" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1606255203434" />
-    <state x="461" y="0" key="#org.jetbrains.kotlin.idea.refactoring.safeDelete.KotlinOverridingDialog" timestamp="1610327735393">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="461" y="0" key="#org.jetbrains.kotlin.idea.refactoring.safeDelete.KotlinOverridingDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1610327735393" />
-    <state width="511" height="466" key="DebuggerActiveHint" timestamp="1606260484031">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="511" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1606260484031" />
-    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog" timestamp="1604664709217">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604664709217" />
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1610328039004">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039004" />
-    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1610328039004">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039004" />
-    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1610328039004">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039004" />
-    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1610328039004">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039004" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1610328039004">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039004" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1610328039003">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039003" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1610328039003">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039003" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1610328039003">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1610328039003" />
-    <state x="461" y="165" key="SettingsEditor" timestamp="1603916829466">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1603916829466" />
-    <state width="498" height="537" key="SwitcherDM" timestamp="1604148404075">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="498" height="537" key="SwitcherDM/0.0.1920.1040@0.0.1920.1040" timestamp="1604148404075" />
-    <state x="519" y="268" key="caller.chooser.dialog" timestamp="1605828312281">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="519" y="268" key="caller.chooser.dialog/0.0.1920.1040@0.0.1920.1040" timestamp="1605828312281" />
-    <state x="776" y="298" key="chooseDestDirectoryDialog" timestamp="1604620796074">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="776" y="298" key="chooseDestDirectoryDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604620796074" />
-    <state x="667" y="119" width="585" height="801" key="find.popup" timestamp="1605824430261">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="667" y="119" width="585" height="801" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1605824430261" />
-    <state x="755" y="267" key="refactoring.ChangeSignatureDialog" timestamp="1604663476323">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="755" y="267" key="refactoring.ChangeSignatureDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604663476323" />
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup" timestamp="1605830661616">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="616" y="240" width="672" height="677" key="run.anything.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1605830661616" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1610328030382">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1610328030382" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -389,6 +287,11 @@
           <url>file://$PROJECT_DIR$/src/Client/FX/ShipsBoardFX.java</url>
           <line>54</line>
           <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Server/GameServer.java</url>
+          <line>87</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

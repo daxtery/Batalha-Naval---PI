@@ -32,4 +32,6 @@ public interface IClient {
     void onChatMessage(Network.ChatMessageResponse object);
 
     void onJoinLobbyResponse(Network.JoinLobbyResponse joinLobbyResponse);
+
+    void onNetworkDisconnected();
 }

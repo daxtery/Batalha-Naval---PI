@@ -4,6 +4,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
 import util.Point;
 
+import java.rmi.registry.Registry;
+
 // This class is a convenient place to keep things common to both the client and server.
 public class Network {
 
@@ -12,6 +14,9 @@ public class Network {
     // This registers objects that are going to be sent over the network.
     public static void register(EndPoint endPoint) {
         Kryo kryo = endPoint.getKryo();
+        kryo.register(Register.class);
+        kryo.register(RegisterResponse.class);
+
         kryo.register(JoinLobby.class);
         kryo.register(JoinLobbyResponse.class);
         kryo.register(CreateLobby.class);
@@ -282,5 +287,23 @@ public class Network {
         public String toString() {
             return "Lobby is full";
         }
+    }
+
+    public static class Register {
+        public String code;
+        public String name;
+        public boolean isBot;
+
+        public Register(String code, String name, boolean isBot) {
+            this.code = code;
+            this.name = name;
+            this.isBot = isBot;
+        }
+
+        public Register() {
+        }
+    }
+
+    public static class RegisterResponse {
     }
 }

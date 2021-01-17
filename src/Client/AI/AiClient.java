@@ -3,13 +3,14 @@ package Client.AI;
 import Client.AI.Personality.AIPersonality;
 import Client.GameClient;
 import Client.IClient;
+import Client.PlayerCode;
+import Client.PlayerSettings;
 import Common.*;
 import javafx.util.Pair;
 import util.Point;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -171,6 +172,11 @@ public class AiClient implements IClient, Runnable {
     public void onJoinLobbyResponse(Network.JoinLobbyResponse joinLobbyResponse) {
     }
 
+    @Override
+    public void onNetworkDisconnected() {
+        onAbort();
+    }
+
     public final void sendMessageTo(String text, int to) {
         if (!text.endsWith("\n")) text = text + "\n";
         Network.ChatMessage message = new Network.ChatMessage(text, to);
@@ -192,7 +198,11 @@ public class AiClient implements IClient, Runnable {
     public void run() {
         try {
             gameClient.start();
-            gameClient.tryConnect(this.address, Network.port);
+
+            //TODO: FIX ME
+            PlayerSettings settings = PlayerSettings.botConfiguration(name);
+
+            gameClient.tryConnect(this.address, Network.port, settings);
 
             gameClient.sendTCP(
                     new Network.AddBotToLobby(

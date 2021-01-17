@@ -43,7 +43,6 @@ public class SetShipsScene extends BaseGameScene {
 
         pb = new PlayerBoard(gameConfiguration.lines, gameConfiguration.columns);
 
-        System.out.println("sSboard");
         sSboard = new ShipsBoardFX(gameConfiguration, 700, 500);
 
         sSboard.setPlayerBoard(pb);

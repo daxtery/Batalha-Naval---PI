@@ -66,6 +66,7 @@ public class App extends Application implements IClient {
     private Stage theStage;
 
     private ConnectedPlayersResponse players;
+    private PlayerSettings settings;
     private int ourId;
 
     public static void main(String[] args) {
@@ -73,10 +74,15 @@ public class App extends Application implements IClient {
     }
 
     @Override
-    public void start(Stage primaryStage) {
-
+    public void start(Stage primaryStage) throws IOException {
         client = new GameClient(this);
         client.start();
+
+        try {
+            settings = PlayerSettings.loadOrCreateWithCode();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
         theStage = primaryStage;
 
@@ -102,6 +108,10 @@ public class App extends Application implements IClient {
         super.stop();
         client.stop();
         System.exit(0);
+    }
+
+    public void setName(String name){
+        this.settings.setName(name);
     }
 
     private void reset() {
@@ -277,25 +287,32 @@ public class App extends Application implements IClient {
         });
     }
 
+    @Override
+    public void onNetworkDisconnected() {
+        Platform.runLater(() -> {
+            transitionTo(mainMenu);
+        });
+    }
+
     public void OnConnected(Connection connection) {
 
     }
 
-    public void onJoinButtonPressed(String name) {
+    public void onJoinButtonPressed() {
 
-        System.out.println("I am " + name);
+        System.out.println("I am " + this.settings.getName());
 
         Task<Void> tryConnectTask = new Task<>() {
             @Override
             protected Void call() throws IOException {
-                client.tryConnect(ADDRESS, Network.port);
+                client.tryConnect(ADDRESS, Network.port, settings);
                 return null;
             }
         };
 
         tryConnectTask.setOnSucceeded(t -> {
             JoinLobby join = new JoinLobby();
-            join.name = name;
+            join.name = this.settings.getName();
             client.sendTCP(join);
         });
 
@@ -329,21 +346,21 @@ public class App extends Application implements IClient {
         transitionTo(mainGame);
     }
 
-    public void onCreateLobbyButton(String name, int count) {
-        System.out.println("I am creating a lobby! (" + name + ")");
+    public void onCreateLobbyButton(int count) {
+        System.out.println("I am creating a lobby! (" + settings.getName() + ")");
 
         lobbyScene.setNumber(count, true);
 
         Task<Void> tryConnectTask = new Task<>() {
             @Override
             protected Void call() throws IOException {
-                client.tryConnect(ADDRESS, Network.port);
+                client.tryConnect(ADDRESS, Network.port, settings);
                 return null;
             }
         };
 
         tryConnectTask.setOnSucceeded(t -> {
-            client.sendTCP(new CreateLobby(name, count));
+            client.sendTCP(new CreateLobby(settings.getName(), count));
             transitionTo(lobbyScene);
         });
 

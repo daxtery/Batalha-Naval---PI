@@ -1,27 +1,23 @@
 package Server;
 
 import Common.PlayerBoard;
-import com.esotericsoftware.kryonet.Connection;
 
-public abstract class LobbyParticipant {
+public class LobbyParticipant {
 
-    public final String name;
-    public final Connection connection;
+    private final Player player;
     private boolean defeated;
     private PlayerBoard playerBoard;
 
-    public LobbyParticipant(String name, Connection connection) {
-        this.name = name;
-        this.connection = connection;
-        this.defeated = false;
-    }
-
-    public void setDefeated(boolean defeated) {
-        this.defeated = defeated;
+    public LobbyParticipant(Player player) {
+        this.player = player;
     }
 
     public boolean isDefeated() {
         return defeated;
+    }
+
+    public void setDefeated(boolean defeated) {
+        this.defeated = defeated;
     }
 
     public PlayerBoard getPlayerBoard() {
@@ -32,6 +28,7 @@ public abstract class LobbyParticipant {
         this.playerBoard = playerBoard;
     }
 
-    protected abstract boolean isBot();
-
+    public Player getPlayer() {
+        return player;
+    }
 }
